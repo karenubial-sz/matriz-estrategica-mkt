@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz Estrategica de Comunicacao | Seazone</title>
+    <style>
+        :root {
+            --bg:#0f1117;--surface:#1a1d27;--surface2:#232735;--border:#2d3244;
+            --text:#e4e6ed;--text-muted:#8b90a0;
+            --accent:#6c8cff;--accent-soft:rgba(108,140,255,0.12);
+            --green:#4ade80;--green-soft:rgba(74,222,128,0.12);
+            --amber:#fbbf24;--amber-soft:rgba(251,191,36,0.12);
+            --red:#f87171;--red-soft:rgba(248,113,113,0.12);
+            --purple:#a78bfa;--purple-soft:rgba(167,139,250,0.12);
+            --cyan:#22d3ee;--cyan-soft:rgba(34,211,238,0.12);
+            --orange:#fb923c;--orange-soft:rgba(251,146,60,0.12);
+            --lime:#a3e635;--lime-soft:rgba(163,230,53,0.12);
+            --pink:#f472b6;--pink-soft:rgba(244,114,182,0.12);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+        .hero{background:linear-gradient(135deg,#1a1d27 0%,#1e2538 50%,#1a2235 100%);border-bottom:1px solid var(--border);padding:2.5rem 2rem;text-align:center;}
+        .hero h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#6c8cff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .hero .subtitle{color:var(--text-muted);font-size:1rem;max-width:650px;margin:0.5rem auto 0;}
+        .hero .meta{margin-top:1rem;font-size:0.85rem;color:var(--text-muted);}
+        .nav-bar{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0.75rem 2rem;display:flex;gap:0.5rem;overflow-x:auto;justify-content:center;}
+        .nav-bar a{color:var(--text-muted);text-decoration:none;font-size:0.82rem;font-weight:600;padding:0.5rem 1rem;border-radius:8px;white-space:nowrap;transition:all 0.2s;}
+        .nav-bar a:hover,.nav-bar a.active{color:var(--accent);background:var(--accent-soft);}
+        .container{max-width:1000px;margin:0 auto;padding:2rem;}
+        .section{margin-bottom:3rem;}
+        .section-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+        .section-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;font-weight:700;}
+        .section-header h2{font-size:1.5rem;font-weight:700;}
+        .concept-box{background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:1.5rem;margin-bottom:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+        .concept-box h3{font-size:0.95rem;margin-bottom:0.3rem;}
+        .concept-box p{font-size:0.85rem;color:var(--text-muted);}
+        .concept-box .highlight{color:var(--accent);font-weight:600;}
+        .alert-box{background:var(--surface);border-left:4px solid;border-radius:8px;padding:0.8rem 1.2rem;margin-bottom:1rem;font-size:0.85rem;}
+        .alert-box.green{border-color:var(--green);}
+        .alert-box.amber{border-color:var(--amber);}
+        .alert-box.red{border-color:var(--red);}
+        .alert-box strong{font-size:0.88rem;}
+        .temp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;border-left:4px solid transparent;}
+        .temp-card.hot{border-left-color:var(--red);}
+        .temp-card.warm{border-left-color:var(--amber);}
+        .temp-card.cold{border-left-color:var(--accent);}
+        .temp-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;}
+        .temp-badge{padding:0.3rem 0.9rem;border-radius:20px;font-size:0.8rem;font-weight:700;}
+        .temp-badge.hot{background:var(--red-soft);color:var(--red);}
+        .temp-badge.warm{background:var(--amber-soft);color:var(--amber);}
+        .temp-badge.cold{background:var(--accent-soft);color:var(--accent);}
+        .temp-title{font-size:1.05rem;font-weight:600;}
+        .temp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .temp-block h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.4rem;}
+        .temp-block p,.temp-block li{font-size:0.85rem;color:var(--text);line-height:1.5;}
+        .temp-block ul{padding-left:1.1rem;margin:0;}
+        .temp-block li{margin-bottom:0.2rem;}
+        .channel-tag{display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:600;margin-right:0.3rem;margin-bottom:0.2rem;}
+        .channel-wa{background:var(--green-soft);color:var(--green);}
+        .channel-email{background:var(--purple-soft);color:var(--purple);}
+        .channel-call{background:var(--cyan-soft);color:var(--cyan);}
+        .channel-none{background:var(--red-soft);color:var(--red);}
+        .freq{font-size:0.82rem;color:var(--text);background:var(--surface2);padding:0.4rem 0.75rem;border-radius:6px;display:inline-block;margin-top:0.3rem;}
+        .comms-section{margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);}
+        .comms-section h4{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;}
+        .comm-item{display:flex;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:8px;margin-bottom:0.5rem;align-items:flex-start;}
+        .comm-item.existing{background:var(--surface2);}
+        .comm-item.new{background:var(--lime-soft);border:1px solid rgba(163,230,53,0.15);}
+        .comm-item.teste{background:var(--amber-soft);border:1px solid rgba(251,191,36,0.15);}
+        .comm-status{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:0.15rem 0.4rem;border-radius:3px;white-space:nowrap;margin-top:0.15rem;}
+        .comm-status.exists{background:var(--surface);color:var(--text-muted);}
+        .comm-status.novo{background:var(--lime-soft);color:var(--lime);}
+        .comm-status.teste{background:var(--amber-soft);color:var(--amber);}
+        .comm-content{flex:1;}
+        .comm-name{font-weight:600;font-size:0.88rem;}
+        .comm-desc{font-size:0.8rem;color:var(--text-muted);margin-top:0.15rem;}
+        .data-insight{font-size:0.78rem;color:var(--cyan);margin-top:0.2rem;font-style:italic;}
+        .cross-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0;}
+        .cross-table th{text-align:left;padding:0.7rem 0.75rem;border-bottom:2px solid var(--border);color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;}
+        .cross-table td{padding:0.7rem 0.75rem;border-bottom:1px solid var(--border);}
+        .cross-table tr:hover td{background:var(--surface2);}
+        .cross-arrow{color:var(--accent);font-weight:700;font-size:1rem;}
+        .cross-trigger{font-size:0.78rem;color:var(--amber);display:block;margin-top:0.15rem;}
+        .exclusion-card{background:var(--red-soft);border:1px solid rgba(248,113,113,0.2);border-radius:12px;padding:1.25rem;margin-bottom:0.75rem;display:flex;align-items:flex-start;gap:0.75rem;}
+        .exclusion-icon{font-size:1.2rem;flex-shrink:0;margin-top:0.1rem;}
+        .exclusion-text{font-size:0.88rem;color:var(--text);}
+        .exclusion-text strong{color:var(--red);}
+        .marco-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem;}
+        .marco-vertical{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:0.2rem 0.5rem;border-radius:4px;white-space:nowrap;}
+        .marco-vertical.szi{background:var(--accent-soft);color:var(--accent);}
+        .marco-vertical.szs{background:var(--green-soft);color:var(--green);}
+        .marco-vertical.mkp{background:var(--purple-soft);color:var(--purple);}
+        .marco-vertical.all{background:var(--amber-soft);color:var(--amber);}
+        .marco-vertical.cross{background:var(--orange-soft);color:var(--orange);}
+        .marco-content{flex:1;}
+        .marco-name{font-weight:600;font-size:0.9rem;}
+        .marco-detail{font-size:0.8rem;color:var(--text-muted);margin-top:0.15rem;}
+        .summary-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:1rem 0;}
+        .summary-table th{text-align:left;padding:0.5rem 0.6rem;border-bottom:2px solid var(--border);color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;}
+        .summary-table td{padding:0.5rem 0.6rem;border-bottom:1px solid var(--border);}
+        .summary-table tr:hover td{background:var(--surface2);}
+        .pend-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:1rem;}
+        .pend-card{background:var(--surface);border-left:3px solid var(--amber);border-radius:8px;padding:0.8rem 1rem;}
+        .pend-card h4{font-size:0.82rem;margin-bottom:0.15rem;}
+        .pend-card p{font-size:0.78rem;color:var(--text-muted);}
+        @media(max-width:768px){.temp-grid,.concept-box,.pend-grid{grid-template-columns:1fr;}}
+        .comment-box { margin: 1rem 0; padding: 0.75rem; background: rgba(253,203,110,0.08); border: 1px dashed rgba(253,203,110,0.4); border-radius: 8px; }
+        .comment-box .comment-label { font-size: 0.75rem; color: rgba(253,203,110,0.6); margin-bottom: 0.3rem; font-weight: 600; letter-spacing: 0.05em; display:block; }
+        .comment-box textarea { width: 100%; min-height: 60px; background: transparent; border: none; color: #fdcb6e; font-family: inherit; font-size: 0.85rem; resize: vertical; outline: none; line-height: 1.5; }
+        .comment-box textarea::placeholder { color: rgba(253,203,110,0.4); }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Matriz Estrategica de Comunicacao</h1>
+    <p class="subtitle">Quem sao nossos publicos, o que falamos, quando e por qual canal — por vertical</p>
+    <p class="meta">Motor de Disparos Seazone | Karen Ubial | 09/06/2026 | v2.0 — pra validacao dos gestores</p>
+</div>
+
+<nav class="nav-bar">
+    <a href="#conceito">Conceito</a>
+    <a href="#szi">SZI</a>
+    <a href="#szs">SZS</a>
+    <a href="#mkp">Marketplace</a>
+    <a href="#cross">Cross-Vertical</a>
+    <a href="#exclusoes">Exclusoes</a>
+    <a href="#marcos">Marcos</a>
+    <a href="#resumo">Resumo</a>
+    <a href="#pendencias">Pendencias</a>
+</nav>
+
+<div class="container">
+
+    <!-- ==================== CONCEITO ==================== -->
+    <section class="section" id="conceito">
+        <div class="concept-box">
+            <div>
+                <h3>&#x1F3F7;&#xFE0F; Temperatura = Definicao Fixa</h3>
+                <p>Classifica o lead pelo <span class="highlight">estagio mais avancado que ja alcancou na jornada</span>. Aprovada pelos gestores, vira contrato. Nao muda com o tempo — quem comprou e sempre Quente.</p>
+            </div>
+            <div>
+                <h3>&#x1F4AC; Comunicacao = Acao por Temperatura</h3>
+                <p>Cada temperatura recebe <span class="highlight">comunicacoes especificas</span>. Frios recebem educacao. Mornos recebem reativacao. Quentes recebem cross-sell. O tipo de mensagem segue a temperatura.</p>
+            </div>
+        </div>
+        <div class="alert-box amber">
+            <strong>COM OP vs SEM OP</strong> — eixo que cruza com temperatura em todas as verticais. Lead COM OP (teve reuniao) ja sabe como funciona → abordagem direta. Lead SEM OP precisa de educacao primeiro → conteudo antes de venda.
+        </div>
+    </section>
+
+    <!-- ==================== SZI ==================== -->
+    <section class="section" id="szi">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--accent-soft);color:var(--accent);">SZI</div>
+            <div><h2>SZI — Investimentos</h2><p style="color:var(--text-muted);font-size:0.85rem;">Spots novos (lancamentos). Gestora: Mari. Ciclo 30-120d. Ticket R$250K-600K.</p></div>
+        </div>
+
+        <!-- QUENTE SZI -->
+        <div class="temp-card hot">
+            <div class="temp-header"><span class="temp-badge hot">QUENTE</span><span class="temp-title">Ja comprou spot Seazone</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa)</h4>
+                    <ul><li>Confia no modelo, tem capital, renda passiva</li><li>Top investidores com multiplos spots</li><li>Indicacao de cliente existente</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>won</strong> em pipeline Vendas Spot</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Ate 2 WA/semana + 1 newsletter semanal</div>
+                    <h4 style="margin-top:0.75rem;">Regra</h4>
+                    <p>Cooldown 3 meses pra novo spot. Cross SZS/Decor = imediato.</p>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">OPP da semana</div><div class="comm-desc">Empreendimento diferente do que ja tem. <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></div><div class="data-insight">Morada: 50 templates aprovados, maioria sao OPP por empreendimento</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Parabens + proximos passos</div><div class="comm-desc">Pos-compra: "seu empreendimento esta em fase X". Fortalece relacao pra cross-sell. <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Update de obra periodico</div><div class="comm-desc">Marcos como conteudo, nao so gatilho de venda. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Pedido de indicacao</div><div class="comm-desc">Comprou ha 3+ meses, satisfeito → "conhece alguem que investiria?" <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZI Quente</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- MORNO SZI -->
+        <div class="temp-card warm">
+            <div class="temp-header"><span class="temp-badge warm">MORNO</span><span class="temp-title">Fez reuniao (OP) e deu lost — COM OP</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa)</h4>
+                    <ul><li>Sabe como funciona o modelo</li><li>Entende taxas e rentabilidade</li><li>Nao comprou por timing ou dinheiro</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>lost</strong> + teve atividade de reuniao</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">1 WA/semana + 1 newsletter semanal</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Repescagem por empreendimento</div><div class="comm-desc">Reabordar com novidade: preco, marco, condicao melhor. <span class="channel-tag channel-wa">WA</span></div><div class="data-insight">Morada: 9 templates szi_repescagem_[empreendimento] aprovados (08/06)</div></div></div>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">OPP Imperdivel</div><div class="comm-desc">Unidade com diferencial (vista mar, ROI alto, preco baixo). <span class="channel-tag channel-wa">WA</span></div><div class="data-insight">Morada: templates szi_opp_imperdivel_marista e szi_opp_imperdivel_natal ativos</div></div></div>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Email fechamento rapido</div><div class="comm-desc">Reabordar quando condicao muda. Ja gerou venda real. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Case de investidor similar</div><div class="comm-desc">Prova social: "investidor na mesma situacao comprou Campeche e fatura R$54k/ano". <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Sapron: dados reais de faturamento de 6.2K imoveis disponiveis pra montar cases</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Nurturing quinzenal rentabilidade</div><div class="comm-desc">Dados reais de ocupacao e faturamento do mercado de temporada. Valor sem pedir nada. <span class="channel-tag channel-email">Email</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZI Morno</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- FRIO SZI -->
+        <div class="temp-card cold">
+            <div class="temp-header"><span class="temp-badge cold">FRIO</span><span class="temp-title">Travou antes da OP — SEM OP</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa)</h4>
+                    <ul><li>Lost sem reuniao, travado em SQL</li><li>No-show, nunca respondeu</li><li>NAO sabe como funciona o modelo</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>lost</strong> sem atividade de reuniao</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Max 1x/mes — newsletter ou quinzenal</div>
+                    <h4 style="margin-top:0.75rem;">Regra critica</h4>
+                    <p style="color:var(--red);">NAO disparar WA pra numeros sem historico de interacao — 60% de falha observado (erro 131049). Usar apenas email.</p>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Repescagem fora do SLA</div><div class="comm-desc">Leads que a MIA/SIA nao conseguiu converter nas ultimas 3 semanas. <span class="channel-tag channel-wa">WA</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Conteudo educativo mercado</div><div class="comm-desc">"Curta temporada em Floripa cresceu 12% no trimestre" — valor sem pedir nada. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Trigger comportamental</div><div class="comm-desc">Clicou na newsletter → WA personalizado sobre o empreendimento que clicou. <span class="channel-tag channel-wa">WA auto</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZI Frio</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZI (geral / observações da vertical)</span><textarea placeholder="Escreva aqui..."></textarea></div>
+    </section>
+
+    <!-- ==================== SZS ==================== -->
+    <section class="section" id="szs">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--green-soft);color:var(--green);">SZS</div>
+            <div><h2>SZS — Administracao</h2><p style="color:var(--text-muted);font-size:0.85rem;">Gestao de imoveis por temporada + Hospedes. Gestor: Leo. Admin R$700.</p></div>
+        </div>
+
+        <div class="alert-box green">
+            <strong>SIA substituindo MIA (semana 09/06).</strong> Novo fluxo: form → call coletiva em 30min → individual pra fechar. Roberto Campos + Kelly construindo. Todo disparo SZS direciona pra call coletiva via SIA.
+        </div>
+        <div class="alert-box amber">
+            <strong>Temperatura SZS = posse de imovel</strong>, diferente de SZI/MKP que usam estagio no funil. E <strong>"venda de transacao, nao consultiva"</strong> — decisao simples, nao colocar barreiras (Leo).
+        </div>
+
+        <!-- QUENTE SZS -->
+        <div class="temp-card hot">
+            <div class="temp-header"><span class="temp-badge hot">QUENTE</span><span class="temp-title">Ja tem imovel Seazone (comprou via SZI)</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa — posse)</h4>
+                    <ul><li>Ja confia na Seazone, ja investiu</li><li>Decisao simples (R$700 admin)</li><li>"Metade da venda e tirar pedido" (Leo)</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Won em Vendas Spot + <strong>sem</strong> contrato SZS ativo</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">1 WA + convite call semanal</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Convite call coletiva (SIA)</div><div class="comm-desc">WA direto: "agende sua call de 20min". Sem ultra-qualificacao. <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-call">Call</span></div><div class="data-insight">Morada: bot 1526 (SZS Gestao) ativo mas ZERO templates proprios — usa fluxo SIA</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Resultado do imovel mensal</div><div class="comm-desc">Resumo de ocupacao e faturamento pro proprietario que JA tem gestao → fortalece pra indicacoes. <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Sapron: faturamento real por imovel disponivel (6.2K props)</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Pesquisa de satisfacao pos-checkout</div><div class="comm-desc">Hospede fez checkout do imovel do proprietario → avisar dono + pedir NPS. <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Reservas: 50K reservas com checkout rastreavel, 89K avaliacoes de hospedes</div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZS Quente</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- MORNO SZS -->
+        <div class="temp-card warm">
+            <div class="temp-header"><span class="temp-badge warm">MORNO</span><span class="temp-title">Tem imovel de temporada, nao e Seazone</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa — posse)</h4>
+                    <ul><li>Ja aluga por temporada</li><li>Outra administradora ou autogestao</li><li>Pode migrar pra gestao Seazone</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Lead em Comercial SZS, sem spot Seazone</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">1 WA/semana + newsletter quinzenal</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Convite call coletiva</div><div class="comm-desc">Mesmo fluxo do quente, frequencia menor. <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-call">Call</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Comparativo gestao propria vs Seazone</div><div class="comm-desc">Dados reais: quanto ganharia a mais com gestao profissional. <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Sapron: benchmark de ocupacao e faturamento por regiao disponivel</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Depoimento de proprietario</div><div class="comm-desc">Prova social: proprietario que migrou e viu a diferenca. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Newsletter resultados gestao</div><div class="comm-desc">Dados de ocupacao e faturamento da regiao. Mostra valor antes de pedir reuniao. <span class="channel-tag channel-email">Email</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZS Morno</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- FRIO SZS -->
+        <div class="temp-card cold">
+            <div class="temp-header"><span class="temp-badge cold">FRIO</span><span class="temp-title">Fora do poligono OU aluguel anual</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa — posse)</h4>
+                    <ul><li>Regiao inativa / fora do poligono</li><li>OU contrato anual ativo</li><li>OU timing: imovel nao pronto</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Motivo de perda = "Regiao Inativa" ou "Aluguel anual"</p>
+                    <h4 style="margin-top:0.75rem;">Motivos de perda (Leo, por prioridade)</h4>
+                    <ul><li>1. Fora do poligono → EXCLUSAO</li><li>2. Nao atende → melhor alvo pra reativacao</li><li>3. Timing → reativar quando imovel pronto</li><li>4. Enxoval → menos ICP</li></ul>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXCLUSAO</span><div class="comm-content"><div class="comm-name">Fora do poligono = NUNCA dispara</div><div class="comm-desc">API/SLP ja filtra novos. Base historica tem motivo "Regiao Inativa". Bill configura. <span class="channel-tag channel-none">Exclusao</span></div></div></div>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Newsletter leve (aluguel anual)</div><div class="comm-desc">Manter contato ate contrato vencer. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Reativacao por timing</div><div class="comm-desc">Imovel ficou pronto / contrato anual venceu → convite call coletiva SIA. <span class="channel-tag channel-wa">WA</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZS Frio</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- HOSPEDES dentro de SZS -->
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:2px solid var(--green);">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+                <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;background:var(--pink-soft);color:var(--pink);">HSP</div>
+                <div><h3 style="font-size:1.1rem;">Hospedes (dentro de SZS)</h3><p style="color:var(--text-muted);font-size:0.82rem;">31K usuarios | 28K com telefone | 36% repeat guests | Ticket medio R$1.600</p></div>
+            </div>
+        </div>
+
+        <div class="alert-box amber">
+            <strong>Duplo papel:</strong> Hospedes sao publico SZS (podem virar proprietarios) E tambem SZI Frio (podem virar investidores). Mari ja trata hospedes como SZI Frio com cadencia educacional. Base nunca foi trabalhada antes (vem do Andy/dados).
+        </div>
+
+        <div class="temp-card warm" style="border-left-color:var(--pink);">
+            <div class="temp-header"><span class="temp-badge warm" style="background:var(--pink-soft);color:var(--pink);">UNICO</span><span class="temp-title">1 reserva, 1-6 meses atras, sem futura</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e</h4>
+                    <ul><li>Apenas 1 reserva no historico</li><li>Sem reserva futura no sistema</li></ul>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Mensal — nao saturar</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Sugestao sazonal</div><div class="comm-desc">"Ferias chegando, ja pensou em voltar?" Destino relacionado. Pico set-jan. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item teste"><span class="comm-status teste">EM TESTE</span><div class="comm-content"><div class="comm-name">Cadencia educacional SZI</div><div class="comm-desc">4 emails em 4 semanas: "voce sabia que pode ser DONO de um imovel como esse?" Mari comecou teste. <span class="channel-tag channel-email">Email</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — Hospedes Unico</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <div class="temp-card cold" style="border-left-color:var(--pink);">
+            <div class="temp-header"><span class="temp-badge cold" style="background:var(--pink-soft);color:var(--pink);">INATIVO</span><span class="temp-title">6+ meses sem reserva OU cancelou</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e</h4>
+                    <ul><li>Ultima reserva > 6 meses atras</li><li>15.581 expirados + cancelados na base</li></ul>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Trimestral MAX — baixa expectativa</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Reativacao "volte a se hospedar"</div><div class="comm-desc">Novos imoveis/destinos + desconto progressivo. <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Reservas: 15.581 expirados + cancelados = maior pool de reativacao</div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — Hospedes Inativo</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — SZS (geral / observações da vertical)</span><textarea placeholder="Escreva aqui..."></textarea></div>
+    </section>
+
+    <!-- ==================== MARKETPLACE ==================== -->
+    <section class="section" id="mkp">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--purple-soft);color:var(--purple);">MKP</div>
+            <div><h2>Marketplace — Cotas Secundarias</h2><p style="color:var(--text-muted);font-size:0.85rem;">Revenda de cotas. Gestor: Roberto. Ciclo 15-120d. Multiplos stakeholders (comprador+cedente+SPE).</p></div>
+        </div>
+
+        <!-- QUENTE MKP -->
+        <div class="temp-card hot">
+            <div class="temp-header"><span class="temp-badge hot">QUENTE</span><span class="temp-title">Responde rapido, capital 150k+</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa)</h4>
+                    <ul><li>Investidor senior, entende ROI/SPE</li><li>Pergunta proativamente</li><li>Capital 150k+ disponivel</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>open</strong> + atividades recentes + historico OPs</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Ate 2 WA/semana + 1 newsletter semanal</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">OPP da semana</div><div class="comm-desc">Cotas com melhor ROI/preco. <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></div><div class="data-insight">Morada: templates mkp_opp_da_semana_[empreendimento] por destino</div></div></div>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Template inicial por empreendimento</div><div class="comm-desc">Primeiro contato com info do imovel/destino. <span class="channel-tag channel-wa">WA</span></div><div class="data-insight">Morada: 6 templates mktp_[empreendimento]_template_marketingv[N] (Barra Grande, Foz, Rosa Norte, Canas Beach, Santinho, Cachoeira Beach)</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Alerta de opp personalizada</div><div class="comm-desc">Match com interesse: interagiu com Campeche → avisa quando surge distrato. <span class="channel-tag channel-wa">WA</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — MKP Quente</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- MORNO MKP -->
+        <div class="temp-card warm">
+            <div class="temp-header"><span class="temp-badge warm">MORNO</span><span class="temp-title">Engajado mas indeciso</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa)</h4>
+                    <ul><li>Troca mensagens, cheio de duvidas</li><li>Timing = "nao tem dinheiro AINDA" (4-6 meses)</li><li>Ciclo longo (comprador + cedente + SPE)</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>open</strong> ou <strong>lost recente</strong> + multiplas atividades</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">1 WA/semana + 1 newsletter semanal</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Email fechamento</div><div class="comm-desc">Reabordar quando condicao muda. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Serie educativa "como investir em cota"</div><div class="comm-desc">4 emails em 4 semanas: SPE, ROI, processo. Roberto: "nunca tivemos nurturing, sempre so disparo de venda". <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Morada: 0 templates educativos MKP existem — 100% sao primeiro contato ou OPP</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Simulacao de retorno</div><div class="comm-desc">"Quanto R$200k renderiam no Bonito Spot em 3 anos". CTA informativo. <span class="channel-tag channel-email">Email</span></div><div class="data-insight">Sapron + Nekt: dados reais de rentabilidade por empreendimento disponiveis</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Case de investidor similar</div><div class="comm-desc">Prova social com dados reais de retorno. <span class="channel-tag channel-email">Email</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — MKP Morno</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <!-- FRIO MKP -->
+        <div class="temp-card cold">
+            <div class="temp-header"><span class="temp-badge cold">FRIO</span><span class="temp-title">Nao responde, 2-3 msgs pra dar alo</span></div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e (definicao fixa)</h4>
+                    <ul><li>Impactado por midia paga, nunca respondeu</li><li>Sem atividade 60+ dias</li><li>ICP MKP ainda indefinido (Roberto)</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>lost</strong> + sem atividade 60+ dias</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Max 1x/mes — newsletter</div>
+                    <p style="margin-top:0.5rem;color:var(--red);font-size:0.82rem;font-weight:600;">Exclusao: desinscritos de email = fora pra sempre (Roberto)</p>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Repescagem</div><div class="comm-desc">Leads fora do SLA. <span class="channel-tag channel-wa">WA</span></div><div class="data-insight">Morada: MKP NAO tem template de repescagem — diferente de SZI que tem 9. Gap critico.</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Radar do mercado</div><div class="comm-desc">Newsletter quinzenal: ocupacao, valorizacao, tendencias. Valor sem pedir nada. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Repescagem MKP por empreendimento</div><div class="comm-desc">Igual SZI: "vimos que voce se interessou por [destino], temos novidade". <span class="channel-tag channel-wa">WA</span></div><div class="data-insight">Template precisa ser criado e aprovado no Meta — SZI ja tem 9, MKP tem zero</div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Trigger comportamental</div><div class="comm-desc">Clicou na newsletter → WA personalizado. <span class="channel-tag channel-wa">WA auto</span></div></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — MKP Frio</span><textarea placeholder="Escreva aqui..."></textarea></div>
+
+        <div class="comment-box"><span class="comment-label">💬 Comentário Mari — MKP (geral / observações da vertical)</span><textarea placeholder="Escreva aqui..."></textarea></div>
+    </section>
+
+    <!-- ==================== CROSS ==================== -->
+    <section class="section" id="cross">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--orange-soft);color:var(--orange);">&#8644;</div>
+            <div><h2>Comunicacao Cross-Vertical</h2><p style="color:var(--text-muted);font-size:0.85rem;">Quando um lead de uma vertical recebe comunicacao de outra — com gatilho e momento explicitos</p></div>
+        </div>
+
+        <table class="cross-table">
+            <thead><tr><th>Origem</th><th></th><th>Destino</th><th>Quando</th><th>Comunicacao</th><th></th></tr></thead>
+            <tbody>
+                <tr><td><strong>SZI won</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">comprou spot</span></td><td class="cross-arrow">&rarr;</td><td><strong>SZS Quente</strong></td><td>Imediato</td><td><span class="channel-tag channel-wa">WA</span> Convite call coletiva SIA<br><span class="cross-trigger">Gatilho: deal SZI muda pra Won no Pipedrive</span></td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td><strong>SZI won</strong></td><td class="cross-arrow">&rarr;</td><td><strong>Decor</strong></td><td>Imediato</td><td><span class="channel-tag channel-wa">WA</span> Catalogo + agendamento DECOR<br><span class="cross-trigger">Gatilho: mesmo que SZS — deal Won</span></td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td><strong>SZI won</strong></td><td class="cross-arrow">&rarr;</td><td><strong>MKP Quente</strong></td><td>3 meses</td><td><span class="channel-tag channel-email">Newsletter</span> + OPP se interagir<br><span class="cross-trigger">Gatilho: 3 meses apos Won SZI (cooling pra nao sufocar)</span></td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr style="border-top:2px solid var(--border);"><td><strong>MKP won</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">comprou cota</span></td><td class="cross-arrow">&rarr;</td><td><strong>SZS Quente</strong></td><td>Imediato</td><td><span class="channel-tag channel-wa">WA</span> Convite call coletiva SIA<br><span class="cross-trigger">Gatilho: deal MKP muda pra Won</span></td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td><strong>MKP won</strong></td><td class="cross-arrow">&rarr;</td><td><strong>SZI</strong></td><td>3 meses</td><td><span class="channel-tag channel-email">Newsletter</span> lancamentos<br><span class="cross-trigger">Gatilho: 3 meses apos Won MKP</span></td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr style="border-top:2px solid var(--border);"><td><strong>SZS ativo</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">tem gestao</span></td><td class="cross-arrow">&rarr;</td><td><strong>SZI Quente</strong></td><td>Sempre</td><td><span class="channel-tag channel-email">Newsletter</span> + OPP se interagir<br><span class="cross-trigger">Gatilho: proprietario satisfeito, ja confia → sempre elegivel</span></td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr style="border-top:2px solid var(--border);"><td><strong>Hospede</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">pos-checkout</span></td><td class="cross-arrow">&rarr;</td><td><strong>SZI Frio</strong></td><td>Pos-checkout</td><td><span class="channel-tag channel-email">Email</span> cadencia educativa 4 semanas<br><span class="cross-trigger">Gatilho: checkout realizado (dados Reservas) → entra na cadencia SZI Frio</span></td><td><span class="comm-status teste">EM TESTE</span></td></tr>
+                <tr><td><strong>Hospede</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">tem imovel</span></td><td class="cross-arrow">&rarr;</td><td><strong>SZS Morno</strong></td><td>Se tem imovel temporada</td><td><span class="channel-tag channel-email">Email</span> comparativo gestao<br><span class="cross-trigger">Gatilho: hospede identificado como dono de imovel (cruzamento de dados)</span></td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr style="border-top:2px solid var(--border);"><td><strong>Won (qualquer)</strong></td><td class="cross-arrow">&rarr;</td><td><strong>Cross</strong></td><td>1 ano apos compra</td><td><span class="channel-tag channel-email">Email</span> "Ha 1 ano voce investiu. Veja quanto rendeu"<br><span class="cross-trigger">Gatilho: data de Won + 365 dias</span></td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td><strong>Won Quente</strong></td><td class="cross-arrow">&rarr;</td><td><strong>Cross</strong></td><td>3+ meses apos compra</td><td><span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span> "Indique um amigo investidor"<br><span class="cross-trigger">Gatilho: 3 meses apos Won + sem reclamacao aberta</span></td><td><span class="comm-status novo">NOVO</span></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== EXCLUSOES ==================== -->
+    <section class="section" id="exclusoes">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--red-soft);color:var(--red);">&#10007;</div>
+            <h2>Exclusoes Globais — NUNCA abordar</h2>
+        </div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#9888;</div><div class="exclusion-text"><strong>Expansao / Condominios</strong> — proibicao contratual. Ja houve incidente grave com multa (Claudio nao limpou base).</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128274;</div><div class="exclusion-text"><strong>Leads de parceiros</strong> — contrato garante exclusividade do lead. Roubo de leads entre canais ja e problema real.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128683;</div><div class="exclusion-text"><strong>Deal em aberto</strong> — nao disparar pra quem tem deal ativo nos funis de vendas. Nao pisar no vendedor.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#9201;</div><div class="exclusion-text"><strong>Comprador recente</strong> — cooldown ~3 meses antes de novo empreendimento. SZS/Decor podem ser imediatos.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128683;</div><div class="exclusion-text"><strong>Mesmo spot pro dono</strong> — nunca oferecer o empreendimento que a pessoa ja possui.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128205;</div><div class="exclusion-text"><strong>Fora do poligono SZS</strong> — regiao inativa. API ja filtra novos. Base historica: Bill configura.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128231;</div><div class="exclusion-text"><strong>Desinscritos de email MKP</strong> — Roberto: "esse cara nunca vai converter". Fora pra sempre.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128246;</div><div class="exclusion-text"><strong>Numeros sem historico WA</strong> — NAO disparar WhatsApp pra numeros que nunca interagiram com o numero da empresa. 60% de falha observado (erro 131049 em 09/06). Usar apenas email pra esses.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#128100;</div><div class="exclusion-text"><strong>Motivo "duplicado/erro"</strong> — SEMPRE excluir de todas as bases e metricas. Usado pra testes e duplicatas.</div></div>
+        <div class="exclusion-card"><div class="exclusion-icon">&#9888;</div><div class="exclusion-text"><strong>Limite operacional</strong> — ~1000 pessoas/dia por saude do numero WA. 2 numeros por vertical. Imagem melhora conversao mas degrada saude do numero.</div></div>
+    </section>
+
+    <!-- ==================== MARCOS ==================== -->
+    <section class="section" id="marcos">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--amber-soft);color:var(--amber);">&#9873;</div>
+            <h2>Marcos que Disparam Comunicacao</h2>
+        </div>
+        <div class="marco-card"><span class="marco-vertical szi">SZI</span><div class="marco-content"><div class="marco-name">Lancamento novo spot</div><div class="marco-detail">Quente + Morno &rarr; <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span> template inaugural</div></div></div>
+        <div class="marco-card"><span class="marco-vertical szi">SZI</span><div class="marco-content"><div class="marco-name">Alvara aprovado</div><div class="marco-detail">Morno (do empreendimento) &rarr; <span class="channel-tag channel-wa">WA</span> "agora ja saiu alvara"</div></div></div>
+        <div class="marco-card"><span class="marco-vertical szi">SZI</span><div class="marco-content"><div class="marco-name">Inicio das obras</div><div class="marco-detail">Quente + Morno &rarr; <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span> update de obra</div></div></div>
+        <div class="marco-card"><span class="marco-vertical all">SZI + MKP</span><div class="marco-content"><div class="marco-name">OPP da semana</div><div class="marco-detail">Quente WA + todos newsletter &rarr; <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></div></div></div>
+        <div class="marco-card"><span class="marco-vertical mkp">MKP</span><div class="marco-content"><div class="marco-name">Distrato disponivel</div><div class="marco-detail">Quente + Morno (do destino) &rarr; <span class="channel-tag channel-wa">WA</span></div></div></div>
+        <div class="marco-card"><span class="marco-vertical szs">SZS</span><div class="marco-content"><div class="marco-name">Entrega de empreendimento</div><div class="marco-detail">Quente SZS (donos) &rarr; <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-call">Call</span> onboarding + DECOR</div></div></div>
+        <div class="marco-card"><span class="marco-vertical szs">SZS</span><div class="marco-content"><div class="marco-name">Expansao do poligono</div><div class="marco-detail">Frios "regiao inativa" → <span class="channel-tag channel-wa">WA</span> reativacao</div></div></div>
+        <div class="marco-card"><span class="marco-vertical szs">SZS</span><div class="marco-content"><div class="marco-name">Alta temporada (set-jan)</div><div class="marco-detail">Hospedes Morno + Frio &rarr; <span class="channel-tag channel-email">Email</span> reativacao sazonal</div></div></div>
+        <div class="marco-card"><span class="marco-vertical cross">CROSS</span><div class="marco-content"><div class="marco-name">Aniversario de compra (1 ano)</div><div class="marco-detail">Won (qualquer) &rarr; <span class="channel-tag channel-email">Email</span> "veja quanto rendeu"</div></div></div>
+    </section>
+
+    <!-- ==================== RESUMO ==================== -->
+    <section class="section" id="resumo">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--surface2);color:var(--text);">&#9776;</div>
+            <h2>Resumo — Todos os Tipos de Comunicacao</h2>
+        </div>
+        <table class="summary-table">
+            <thead><tr><th>Comunicacao</th><th>Canal</th><th>Temperatura</th><th>Vertical</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr><td>OPP da semana</td><td><span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></td><td>Quente</td><td>SZI / MKP</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>OPP Imperdivel</td><td><span class="channel-tag channel-wa">WA</span></td><td>Morno</td><td>SZI</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Repescagem SZI</td><td><span class="channel-tag channel-wa">WA</span></td><td>Morno / Frio</td><td>SZI</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Template inicial MKP</td><td><span class="channel-tag channel-wa">WA</span></td><td>Quente</td><td>MKP</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Email fechamento</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>SZI / MKP</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Call coletiva SIA</td><td><span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-call">Call</span></td><td>Quente / Morno</td><td>SZS</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Newsletter leve SZS</td><td><span class="channel-tag channel-email">Email</span></td><td>Frio (anual)</td><td>SZS</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Decor pos-compra</td><td><span class="channel-tag channel-wa">WA</span></td><td>Quente (cross)</td><td>SZI→Decor</td><td><span class="comm-status exists">EXISTE</span></td></tr>
+                <tr><td>Cadencia hospedes 4 sem</td><td><span class="channel-tag channel-email">Email</span></td><td>Frio (cross)</td><td>HSP→SZI</td><td><span class="comm-status teste">EM TESTE</span></td></tr>
+                <tr style="border-top:2px solid var(--lime);"><td>Parabens pos-compra</td><td><span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></td><td>Quente (won)</td><td>Todas</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Update de obra</td><td><span class="channel-tag channel-email">Email</span></td><td>Quente</td><td>SZI</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Pedido de indicacao</td><td><span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></td><td>Quente</td><td>Todas</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Nurturing rentabilidade</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>SZI</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Case investidor</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>SZI / MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Conteudo educativo mercado</td><td><span class="channel-tag channel-email">Email</span></td><td>Frio</td><td>SZI</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Trigger comportamental</td><td><span class="channel-tag channel-wa">WA auto</span></td><td>Frio→Morno</td><td>SZI / MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Resultado imovel mensal</td><td><span class="channel-tag channel-email">Email</span></td><td>Quente</td><td>SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Pesquisa satisfacao pos-checkout</td><td><span class="channel-tag channel-email">Email</span></td><td>Quente</td><td>SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Comparativo gestao</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Depoimento proprietario</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Newsletter resultados gestao</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Reativacao timing SZS</td><td><span class="channel-tag channel-wa">WA</span></td><td>Frio</td><td>SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Serie educativa cotas</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Simulacao de retorno</td><td><span class="channel-tag channel-email">Email</span></td><td>Morno</td><td>MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Alerta opp personalizada</td><td><span class="channel-tag channel-wa">WA</span></td><td>Quente</td><td>MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Repescagem MKP</td><td><span class="channel-tag channel-wa">WA</span></td><td>Frio</td><td>MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Radar do mercado</td><td><span class="channel-tag channel-email">Email</span></td><td>Frio</td><td>MKP</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Pre-checkin</td><td><span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></td><td>Repeat</td><td>SZS (HSP)</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Pos-estadia NPS</td><td><span class="channel-tag channel-email">Email</span></td><td>Repeat</td><td>SZS (HSP)</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Early access + PIX</td><td><span class="channel-tag channel-email">Email</span></td><td>Repeat</td><td>SZS (HSP)</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Cupom aniversario</td><td><span class="channel-tag channel-email">Email</span></td><td>Unico / Repeat</td><td>SZS (HSP)</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Sugestao sazonal</td><td><span class="channel-tag channel-email">Email</span></td><td>Unico</td><td>SZS (HSP)</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Reativacao hospede</td><td><span class="channel-tag channel-email">Email</span></td><td>Inativo</td><td>SZS (HSP)</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Aniversario de compra</td><td><span class="channel-tag channel-email">Email</span></td><td>Quente (cross)</td><td>Cross</td><td><span class="comm-status novo">NOVO</span></td></tr>
+                <tr><td>Hospede→SZS Morno</td><td><span class="channel-tag channel-email">Email</span></td><td>Cross</td><td>HSP→SZS</td><td><span class="comm-status novo">NOVO</span></td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem;text-align:center;">
+            <span style="color:var(--text);">8 existentes</span> + <span style="color:var(--lime);">26 novas sugeridas</span> + <span style="color:var(--amber);">1 em teste</span> = <strong style="color:var(--text);">35 comunicacoes mapeadas</strong>
+        </p>
+    </section>
+
+    <!-- ==================== PENDENCIAS ==================== -->
+    <section class="section" id="pendencias">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--amber-soft);color:var(--amber);">?</div>
+            <h2>Pendencias pra Validacao</h2>
+        </div>
+        <div class="pend-grid">
+            <div class="pend-card"><h4>Matriz unificada (PDA 1.4 — 13/06)</h4><p>Consolidar tudo numa tabela: temp x vertical x criterio x acao. Contrato entre verticais.</p></div>
+            <div class="pend-card"><h4>Cooling period por vertical</h4><p>Gaby usa ~3 meses. Pode variar (SZI longo vs MKP agil)?</p></div>
+            <div class="pend-card"><h4>ICP MKP indefinido</h4><p>Roberto reconhece que marketing nao achou o perfil ainda.</p></div>
+            <div class="pend-card"><h4>Deduplicacao cross-vertical</h4><p>Mesmo lead em 2+ verticais: priorizar qual? Nunca 2 no mesmo dia.</p></div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    document.querySelectorAll('.nav-bar a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'});});});
+    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.nav-bar a').forEach(a=>a.classList.remove('active'));document.querySelector(`.nav-bar a[href="#${e.target.id}"]`)?.classList.add('active');}});},{threshold:0.3});
+    document.querySelectorAll('.section').forEach(s=>obs.observe(s));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(async () => {
+  const sb = supabase.createClient(
+    'https://whaqhotbkccnszpnvers.supabase.co',
+    'sb_publishable_O7ihhUUiQXN3pMn7m6qx5g_TNO--FU9'
+  );
+  const areas = document.querySelectorAll('.comment-box textarea');
+  // Carregar comentários existentes
+  const { data } = await sb.from('matriz_comments').select('field_key, content');
+  const saved = Object.fromEntries((data || []).map(r => [r.field_key, r.content]));
+  areas.forEach((ta, i) => {
+    const key = 'field_' + i;
+    if (saved[key]) ta.value = saved[key];
+  });
+  // Salvar com debounce ao digitar
+  let timers = {};
+  areas.forEach((ta, i) => {
+    const key = 'field_' + i;
+    ta.addEventListener('input', () => {
+      clearTimeout(timers[key]);
+      timers[key] = setTimeout(async () => {
+        await sb.from('matriz_comments').upsert(
+          { field_key: key, content: ta.value, updated_at: new Date().toISOString() },
+          { onConflict: 'field_key' }
+        );
+      }, 800);
+    });
+  });
+})();
+</script>
+</body>
+</html>
