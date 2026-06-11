@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatorio de Cobertura de Dados | Motor de Disparos Seazone</title>
+    <style>
+        :root {
+            --bg:#0f1117;--surface:#1a1d27;--surface2:#232735;--border:#2d3244;
+            --text:#e4e6ed;--text-muted:#8b90a0;
+            --accent:#6c8cff;--accent-soft:rgba(108,140,255,0.12);
+            --green:#4ade80;--green-soft:rgba(74,222,128,0.12);
+            --amber:#fbbf24;--amber-soft:rgba(251,191,36,0.12);
+            --red:#f87171;--red-soft:rgba(248,113,113,0.12);
+            --purple:#a78bfa;--purple-soft:rgba(167,139,250,0.12);
+            --cyan:#22d3ee;--cyan-soft:rgba(34,211,238,0.12);
+            --orange:#fb923c;--orange-soft:rgba(251,146,60,0.12);
+            --lime:#a3e635;--lime-soft:rgba(163,230,53,0.12);
+            --pink:#f472b6;--pink-soft:rgba(244,114,182,0.12);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+        .hero{background:linear-gradient(135deg,#1a1d27 0%,#1e2538 50%,#1a2235 100%);border-bottom:1px solid var(--border);padding:2.5rem 2rem;text-align:center;}
+        .hero h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#6c8cff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .hero .subtitle{color:var(--text-muted);font-size:1rem;max-width:700px;margin:0.5rem auto 0;}
+        .hero .meta{margin-top:1rem;font-size:0.85rem;color:var(--text-muted);}
+        .container{max-width:1200px;margin:0 auto;padding:1.5rem;}
+        .nav-bar{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0.75rem 2rem;display:flex;gap:0.5rem;overflow-x:auto;justify-content:center;}
+        .nav-bar a{color:var(--text-muted);text-decoration:none;padding:0.4rem 0.8rem;border-radius:6px;font-size:0.85rem;white-space:nowrap;transition:all 0.2s;}
+        .nav-bar a:hover,.nav-bar a.active{color:var(--text);background:var(--surface2);}
+        .section{margin-bottom:2.5rem;}
+        .section h2{font-size:1.3rem;margin-bottom:1rem;}
+        .section h3{font-size:1.1rem;margin:1.5rem 0 0.75rem;color:var(--text-muted);}
+
+        /* Score cards */
+        .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1.5rem 0;}
+        .score-card{background:var(--surface);border-radius:10px;padding:1.2rem;text-align:center;border:1px solid var(--border);}
+        .score-number{font-size:2.2rem;font-weight:800;line-height:1;}
+        .score-label{font-size:0.78rem;color:var(--text-muted);margin-top:0.3rem;}
+        .score-bar{height:6px;border-radius:3px;background:var(--surface2);margin-top:0.6rem;overflow:hidden;}
+        .score-fill{height:100%;border-radius:3px;}
+
+        /* Tables */
+        .data-table{width:100%;border-collapse:collapse;font-size:0.82rem;background:var(--surface);border-radius:10px;overflow:hidden;}
+        .data-table th{text-align:left;padding:0.6rem 0.8rem;border-bottom:2px solid var(--border);color:var(--text-muted);font-weight:600;font-size:0.72rem;text-transform:uppercase;background:var(--surface2);}
+        .data-table td{padding:0.55rem 0.8rem;border-bottom:1px solid var(--border);}
+        .data-table tr:hover td{background:rgba(108,140,255,0.04);}
+        .data-table tr:last-child td{border-bottom:none;}
+
+        /* Status badges */
+        .status{display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.72rem;font-weight:700;text-transform:uppercase;}
+        .status-ok{background:var(--green-soft);color:var(--green);}
+        .status-partial{background:var(--amber-soft);color:var(--amber);}
+        .status-gap{background:var(--red-soft);color:var(--red);}
+        .status-join{background:var(--cyan-soft);color:var(--cyan);}
+
+        /* Source tags */
+        .src{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.68rem;font-weight:600;margin-right:0.25rem;}
+        .src-nekt{background:var(--accent-soft);color:var(--accent);}
+        .src-reservas{background:var(--pink-soft);color:var(--pink);}
+        .src-sapron{background:var(--orange-soft);color:var(--orange);}
+        .src-morada{background:var(--purple-soft);color:var(--purple);}
+        .src-externo{background:var(--red-soft);color:var(--red);}
+
+        /* Channel tags */
+        .ch{display:inline-block;padding:0.1rem 0.35rem;border-radius:3px;font-size:0.65rem;font-weight:600;}
+        .ch-wa{background:var(--green-soft);color:var(--green);}
+        .ch-email{background:var(--accent-soft);color:var(--accent);}
+
+        /* Alert boxes */
+        .alert{padding:0.8rem 1rem;border-radius:8px;margin:1rem 0;font-size:0.85rem;border-left:3px solid;}
+        .alert-red{background:var(--red-soft);border-color:var(--red);}
+        .alert-amber{background:var(--amber-soft);border-color:var(--amber);}
+        .alert-green{background:var(--green-soft);border-color:var(--green);}
+        .alert-cyan{background:var(--cyan-soft);border-color:var(--cyan);}
+
+        /* Gap cards */
+        .gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0;}
+        .gap-card{background:var(--surface);border-radius:8px;padding:1rem;border-left:3px solid var(--red);}
+        .gap-card h4{font-size:0.88rem;margin-bottom:0.3rem;}
+        .gap-card p{font-size:0.8rem;color:var(--text-muted);}
+        .gap-card .fix{font-size:0.78rem;color:var(--cyan);margin-top:0.4rem;}
+
+        /* Vertical header */
+        .vert-header{display:flex;align-items:center;gap:0.75rem;margin:1.5rem 0 1rem;}
+        .vert-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;}
+
+        @media(max-width:768px){.score-grid{grid-template-columns:1fr 1fr;}.gap-grid{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Relatorio de Cobertura de Dados</h1>
+    <p class="subtitle">Cruzamento das 35 comunicacoes da Matriz Estrategica com os dados reais disponiveis nos MCPs — Nekt, Reservas e Sapron</p>
+    <p class="meta">Motor de Disparos Seazone | Karen Ubial | 10/06/2026 | Auditoria automatizada</p>
+</div>
+
+<nav class="nav-bar">
+    <a href="#resumo">Resumo</a>
+    <a href="#fontes">Fontes</a>
+    <a href="#szi">SZI</a>
+    <a href="#szs">SZS</a>
+    <a href="#mkp">MKP</a>
+    <a href="#hsp">Hospedes</a>
+    <a href="#cross">Cross</a>
+    <a href="#gaps">Gaps</a>
+    <a href="#acoes">Acoes</a>
+</nav>
+
+<div class="container">
+
+    <!-- ==================== RESUMO ==================== -->
+    <section class="section" id="resumo">
+        <h2>Resumo Executivo</h2>
+
+        <div class="score-grid">
+            <div class="score-card">
+                <div class="score-number" style="color:var(--green);">27</div>
+                <div class="score-label">Dados completos</div>
+                <div class="score-bar"><div class="score-fill" style="width:77%;background:var(--green);"></div></div>
+            </div>
+            <div class="score-card">
+                <div class="score-number" style="color:var(--amber);">4</div>
+                <div class="score-label">Parcial (precisa JOIN)</div>
+                <div class="score-bar"><div class="score-fill" style="width:11%;background:var(--amber);"></div></div>
+            </div>
+            <div class="score-card">
+                <div class="score-number" style="color:var(--red);">4</div>
+                <div class="score-label">Gap critico</div>
+                <div class="score-bar"><div class="score-fill" style="width:11%;background:var(--red);"></div></div>
+            </div>
+            <div class="score-card">
+                <div class="score-number" style="color:var(--text);">35</div>
+                <div class="score-label">Total comunicacoes</div>
+                <div class="score-bar"><div class="score-fill" style="width:100%;background:var(--accent);"></div></div>
+            </div>
+        </div>
+
+        <div class="alert alert-green">
+            <strong>77% das comunicacoes tem dados completos.</strong> A maioria das segmentacoes de leads (won/lost, temperatura, vertical, motivo de perda) esta disponivel na tabela <code>pipedrive_deals_kpi_base</code>. Hospedes tem boa cobertura via Reservas.
+        </div>
+        <div class="alert alert-amber">
+            <strong>Telefone/email requer JOIN.</strong> A tabela principal de deals NAO tem contato direto. Precisa de <code>pipedrive_persons_expanded</code> (169K pessoas, 100% email+phone). Link via <code>person_id</code>.
+        </div>
+        <div class="alert alert-red">
+            <strong>4 gaps criticos:</strong> (1) Owner de propriedade ausente no Reservas, (2) Metricas de email (abertura/clique) inexistentes, (3) Interacoes MIA/Blip fora do data lake, (4) Trigger comportamental sem infraestrutura.
+        </div>
+    </section>
+
+    <!-- ==================== FONTES ==================== -->
+    <section class="section" id="fontes">
+        <h2>Fontes de Dados Auditadas</h2>
+        <table class="data-table">
+            <thead><tr><th>Fonte</th><th>Tabela</th><th>Registros</th><th>Layer</th><th>Campos-chave</th></tr></thead>
+            <tbody>
+                <tr><td><span class="src src-nekt">NEKT</span></td><td>pipedrive_deals_kpi_base</td><td>222K</td><td>Silver</td><td>deal_id, vertical_comercial, is_ganho/perda, won_at, lost_at, motivo_da_perda, meeting_at, empreendimento</td></tr>
+                <tr><td><span class="src src-nekt">NEKT</span></td><td>pipedrive_persons_expanded</td><td>169K</td><td>Silver</td><td>id, name, emails, phones, org_id + 60 campos custom</td></tr>
+                <tr><td><span class="src src-nekt">NEKT</span></td><td>pipedrive_activities (bronze)</td><td>1.67M</td><td>Bronze</td><td>type, deal_id, person_id, done, due_date, subject — 37 tipos distintos</td></tr>
+                <tr><td><span class="src src-nekt">NEKT</span></td><td>tabela_mission_control</td><td>196K</td><td>Silver</td><td>Funil pivotizado, timestamps por etapa, subfunil</td></tr>
+                <tr><td><span class="src src-nekt">NEKT</span></td><td>pipedrive_marketing_deals_disparos_mia</td><td>10K</td><td>Silver</td><td>pipeline_name, stage_name legiveis, rd_campanha</td></tr>
+                <tr><td><span class="src src-sapron">SAPRON</span></td><td>sapron_public_account_owner (bronze)</td><td>4.1K</td><td>Bronze</td><td>user_id, email_for_operation, properties_owned, properties_to_rent, income, source</td></tr>
+                <tr><td><span class="src src-sapron">SAPRON</span></td><td>sapron_public_property_property</td><td>6.2K</td><td>Bronze</td><td>Faturamento, ocupacao por imovel</td></tr>
+                <tr><td><span class="src src-reservas">RESERVAS</span></td><td>reservations</td><td>50K</td><td>Prod</td><td>check_in_date, check_out_date, user_id, property_id, status, total_price</td></tr>
+                <tr><td><span class="src src-reservas">RESERVAS</span></td><td>users</td><td>31K</td><td>Prod</td><td>email, phone_number, birthdate, first_name, last_name</td></tr>
+                <tr><td><span class="src src-reservas">RESERVAS</span></td><td>properties</td><td>var.</td><td>Prod</td><td>code, listing_title, type, address_city — <strong style="color:var(--red);">SEM owner_id</strong></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== SZI ==================== -->
+    <section class="section" id="szi">
+        <div class="vert-header">
+            <div class="vert-icon" style="background:var(--accent-soft);color:var(--accent);">SZI</div>
+            <div><h2>SZI — Investimentos (12 comunicacoes)</h2></div>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Comunicacao</th><th>Canal</th><th>Temp</th><th>Criterio de Segmentacao</th><th>Fonte</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>OPP da semana</strong></td>
+                    <td><span class="ch ch-wa">WA</span> <span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>is_ganho=true + vertical=SZI + empreendimento diferente do que ja tem</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-morada">Morada</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Parabens + proximos passos</strong></td>
+                    <td><span class="ch ch-wa">WA</span> <span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>is_ganho=true + won_at recente</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Update de obra periodico</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>is_ganho=true + empreendimento (marco de obra = input manual)</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-externo">Manual</span></td>
+                    <td><span class="status status-partial">PARCIAL</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Pedido de indicacao</strong></td>
+                    <td><span class="ch ch-wa">WA</span> <span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>is_ganho=true + won_at <= NOW()-3meses</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Repescagem por empreendimento</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Morno</td>
+                    <td>is_perda=true + meeting_at IS NOT NULL + empreendimento</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-morada">Morada 9 tpl</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>OPP Imperdivel</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Morno</td>
+                    <td>is_perda=true + meeting_at IS NOT NULL</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-morada">Morada 2 tpl</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Email fechamento rapido</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>is_perda=true + meeting_at IS NOT NULL</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Case de investidor similar</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno SZI. Conteudo = faturamento real por empreendimento</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-sapron">Sapron fatur.</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Nurturing quinzenal rentabilidade</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno SZI. Conteudo = dados ocupacao/faturamento</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-sapron">Sapron</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Repescagem fora do SLA</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Frio</td>
+                    <td>is_perda=true + meeting_at IS NULL + lost_at <= NOW()-21d</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Conteudo educativo mercado</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Frio</td>
+                    <td>is_perda=true + meeting_at IS NULL</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Trigger comportamental</strong></td>
+                    <td><span class="ch ch-wa">WA auto</span></td>
+                    <td>Frio</td>
+                    <td>Clicou na newsletter (evento de email) + empreendimento do clique</td>
+                    <td><span class="src src-externo">RD/SIA</span></td>
+                    <td><span class="status status-gap">GAP</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== SZS ==================== -->
+    <section class="section" id="szs">
+        <div class="vert-header">
+            <div class="vert-icon" style="background:var(--green-soft);color:var(--green);">SZS</div>
+            <div><h2>SZS — Administracao (10 comunicacoes)</h2></div>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Comunicacao</th><th>Canal</th><th>Temp</th><th>Criterio de Segmentacao</th><th>Fonte</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Convite call coletiva (SIA)</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Quente</td>
+                    <td>is_ganho=true em pipeline 28 (SZI) + SEM deal ativo em pipeline 14 (SZS)</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Resultado imovel mensal</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>Proprietario com contrato SZS ativo + dados faturamento/ocupacao</td>
+                    <td><span class="src src-sapron">Sapron owner</span> <span class="src src-sapron">Sapron prop</span></td>
+                    <td><span class="status status-join">JOIN</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Pesquisa satisfacao pos-checkout</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>checkout recente + link ao proprietario do imovel</td>
+                    <td><span class="src src-reservas">Reservas</span> <span class="src src-sapron">Sapron</span></td>
+                    <td><span class="status status-gap">GAP</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Convite call coletiva (Morno)</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Morno</td>
+                    <td>Lead em pipeline 14 (SZS) + sem spot Seazone (is_ganho=false em SZI)</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Comparativo gestao propria vs Seazone</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno SZS. Conteudo = benchmark Sapron por regiao</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-sapron">Sapron</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Depoimento proprietario</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno SZS. Conteudo = curado manualmente</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-externo">Manual</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Newsletter resultados gestao</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno SZS. Conteudo = Sapron ocupacao/faturamento</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-sapron">Sapron</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Fora do poligono = EXCLUSAO</strong></td>
+                    <td>Nenhum</td>
+                    <td>Frio</td>
+                    <td>motivo_da_perda = "Regiao Inativa"</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Newsletter leve (aluguel anual)</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Frio</td>
+                    <td>motivo_da_perda contendo "anual" ou similar</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Reativacao por timing</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Frio</td>
+                    <td>motivo_da_perda = "Timing" + lost_at antigo (imovel pode estar pronto)</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== MKP ==================== -->
+    <section class="section" id="mkp">
+        <div class="vert-header">
+            <div class="vert-icon" style="background:var(--purple-soft);color:var(--purple);">MKP</div>
+            <div><h2>Marketplace — Cotas (11 comunicacoes)</h2></div>
+        </div>
+        <div class="alert alert-amber">
+            <strong>Atencao:</strong> Nos dados, a vertical aparece como "MKT" (nao "MKP"). Confirmar nomenclatura com Roberto antes de implementar queries.
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Comunicacao</th><th>Canal</th><th>Temp</th><th>Criterio de Segmentacao</th><th>Fonte</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>OPP da semana</strong></td>
+                    <td><span class="ch ch-wa">WA</span> <span class="ch ch-email">Email</span></td>
+                    <td>Quente</td>
+                    <td>status=open + atividades recentes + vertical=MKT</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-morada">Morada tpl</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Template inicial por empreendimento</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Quente</td>
+                    <td>Deal novo + empreendimento</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-morada">Morada 6 tpl</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Alerta opp personalizada</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Quente</td>
+                    <td>Historico de interesse (empreendimento interagido) + nova opp disponivel</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-externo">Manual OPP</span></td>
+                    <td><span class="status status-partial">PARCIAL</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Email fechamento</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>status=open ou lost recente + multiplas atividades</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-nekt">activities</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Serie educativa "como investir em cota"</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno MKP. Conteudo = template novo (nao existe no Morada)</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Simulacao de retorno</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno MKP. Conteudo = rentabilidade por empreendimento</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-sapron">Sapron</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Case de investidor similar</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Morno</td>
+                    <td>Segmentacao = Morno MKP. Conteudo = curado manualmente</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Repescagem MKP existente</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Frio</td>
+                    <td>is_perda=true + sem atividade 60+ dias</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-partial">PARCIAL</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Radar do mercado</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Frio</td>
+                    <td>Segmentacao = Frio MKP. Conteudo = tendencias (manual)</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Repescagem MKP por empreendimento</strong></td>
+                    <td><span class="ch ch-wa">WA</span></td>
+                    <td>Frio</td>
+                    <td>is_perda=true + empreendimento. Template Meta PRECISA SER CRIADO</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-externo">Meta (criar)</span></td>
+                    <td><span class="status status-partial">PARCIAL</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Trigger comportamental</strong></td>
+                    <td><span class="ch ch-wa">WA auto</span></td>
+                    <td>Frio</td>
+                    <td>Clicou na newsletter (evento de email)</td>
+                    <td><span class="src src-externo">RD/SIA</span></td>
+                    <td><span class="status status-gap">GAP</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== HOSPEDES ==================== -->
+    <section class="section" id="hsp">
+        <div class="vert-header">
+            <div class="vert-icon" style="background:var(--pink-soft);color:var(--pink);">HSP</div>
+            <div><h2>Hospedes (6 comunicacoes)</h2></div>
+        </div>
+
+        <div class="score-grid" style="grid-template-columns:repeat(5,1fr);">
+            <div class="score-card"><div class="score-number" style="color:var(--pink);">31K</div><div class="score-label">Users totais</div></div>
+            <div class="score-card"><div class="score-number" style="color:var(--green);">2.197</div><div class="score-label">Repeat (2+)</div></div>
+            <div class="score-card"><div class="score-number" style="color:var(--amber);">14.570</div><div class="score-label">Unico (1 reserva)</div></div>
+            <div class="score-card"><div class="score-number" style="color:var(--red);">11.463</div><div class="score-label">Inativos (6m+)</div></div>
+            <div class="score-card"><div class="score-number" style="color:var(--cyan);">452</div><div class="score-label">Reservas futuras</div></div>
+        </div>
+
+        <table class="data-table">
+            <thead><tr><th>Comunicacao</th><th>Canal</th><th>Segmento</th><th>Criterio + Dados</th><th>Fonte</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Pre-checkin</strong></td>
+                    <td><span class="ch ch-wa">WA</span> <span class="ch ch-email">Email</span></td>
+                    <td>Repeat</td>
+                    <td>check_in_date > NOW() + property_id JOIN properties + user email/phone. <strong>452 reservas futuras</strong></td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Pos-estadia NPS</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Repeat</td>
+                    <td>check_out_date entre NOW()-30d e NOW() + status=Paid. <strong>971 checkouts/mes</strong></td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Early access + PIX</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Repeat</td>
+                    <td>COUNT(reservas) >= 2 por user_id. <strong>2.197 repeat guests</strong></td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Cupom aniversario</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Unico/Repeat</td>
+                    <td>users.birthdate IS NOT NULL. <strong>18.359 (59%)</strong> — gap de 41%</td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-partial">PARCIAL</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Sugestao sazonal</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Unico</td>
+                    <td>1 reserva + destino via properties.address_city. <strong>14.570 candidatos</strong></td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Reativacao hospede</strong></td>
+                    <td><span class="ch ch-email">Email</span></td>
+                    <td>Inativo</td>
+                    <td>Sem checkout pago nos ultimos 6 meses. <strong>11.463 inativos</strong></td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ==================== CROSS ==================== -->
+    <section class="section" id="cross">
+        <div class="vert-header">
+            <div class="vert-icon" style="background:var(--orange-soft);color:var(--orange);">X</div>
+            <div><h2>Cross-Vertical (6 comunicacoes — incluindo cadencia em teste)</h2></div>
+        </div>
+        <table class="data-table">
+            <thead><tr><th>Comunicacao</th><th>Gatilho</th><th>Dados Necessarios</th><th>Fonte</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>SZI Won -> SZS Quente</strong></td>
+                    <td>Deal SZI muda pra Won</td>
+                    <td>is_ganho=true + vertical=SZI + won_at</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>SZI Won -> Decor</strong></td>
+                    <td>Mesmo gatilho (Won SZI)</td>
+                    <td>is_ganho=true + vertical=SZI</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>SZI Won -> MKP Quente (3m)</strong></td>
+                    <td>won_at + 3 meses</td>
+                    <td>is_ganho=true + won_at <= NOW()-90d</td>
+                    <td><span class="src src-nekt">deals_kpi</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Hospede -> SZI Frio cadencia</strong></td>
+                    <td>Checkout realizado</td>
+                    <td>check_out_date + user email</td>
+                    <td><span class="src src-reservas">Reservas</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Hospede -> SZS Morno (proprietario)</strong></td>
+                    <td>Hospede identificado como dono de imovel</td>
+                    <td>Cruzamento hospede x proprietario — <strong>SEM link owner no Reservas</strong></td>
+                    <td><span class="src src-externo">???</span></td>
+                    <td><span class="status status-gap">GAP</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Won (qualquer) -> Aniversario 1 ano</strong></td>
+                    <td>won_at + 365 dias</td>
+                    <td>is_ganho=true + won_at <= NOW()-365d + faturamento real</td>
+                    <td><span class="src src-nekt">deals_kpi</span> <span class="src src-sapron">Sapron</span></td>
+                    <td><span class="status status-ok">OK</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);">Nota: "Indique amigo" e "MKP Won -> SZS/SZI" usam mesma logica de won_at + delay. Dados OK.</p>
+    </section>
+
+    <!-- ==================== GAPS ==================== -->
+    <section class="section" id="gaps">
+        <h2>Gaps Criticos — Dados Faltantes</h2>
+
+        <div class="gap-grid">
+            <div class="gap-card">
+                <h4 style="color:var(--red);">1. Owner de propriedade no Reservas</h4>
+                <p>A tabela <code>properties</code> do Reservas NAO tem <code>owner_id</code>. Impossivel vincular checkout de hospede ao proprietario do imovel.</p>
+                <p>Afeta: <strong>Pesquisa satisfacao pos-checkout</strong> (SZS Quente) e <strong>Hospede->SZS Morno</strong> (cross)</p>
+                <p class="fix">Solucao: Cruzar via Sapron <code>account_owner.properties_owned</code> + <code>property_property</code>. Ou buscar o link no Pipedrive (deal SZI Won contem person_id do proprietario + empreendimento).</p>
+            </div>
+            <div class="gap-card">
+                <h4 style="color:var(--red);">2. Metricas de email (abertura/clique)</h4>
+                <p>Nenhum MCP tem dados de abertura ou clique de email. Impossivel implementar triggers comportamentais.</p>
+                <p>Afeta: <strong>Trigger comportamental SZI</strong> e <strong>Trigger comportamental MKP</strong> (2 comunicacoes)</p>
+                <p class="fix">Solucao: Implementar via SIA (Resend tem webhooks de open/click) ou integrar RD Station se for adotado. Precisa de pipeline de eventos.</p>
+            </div>
+            <div class="gap-card">
+                <h4 style="color:var(--red);">3. Interacoes MIA/Blip</h4>
+                <p>Conversas do chatbot (MIA/Morada via Blip) nao estao no data lake Nekt. Nao e possivel segmentar por comportamento no bot.</p>
+                <p>Afeta: Nenhuma comunicacao diretamente, mas limita refinamento futuro de temperatura</p>
+                <p class="fix">Solucao: Nao bloqueia MVP. Considerar ingestao futura via API Blip/Morada.</p>
+            </div>
+            <div class="gap-card">
+                <h4 style="color:var(--red);">4. Template MKP Repescagem no Meta</h4>
+                <p>SZI tem 9 templates de repescagem aprovados. MKP tem ZERO. Precisam ser criados e aprovados no Meta antes de implementar.</p>
+                <p>Afeta: <strong>Repescagem MKP por empreendimento</strong></p>
+                <p class="fix">Solucao: Roberto criar templates no Morada/Meta. Processo leva ~48h de aprovacao.</p>
+            </div>
+        </div>
+
+        <h3 style="margin-top:1.5rem;">Alertas Operacionais</h3>
+        <div class="alert alert-amber">
+            <strong>Telefone/email via JOIN obrigatorio:</strong> <code>deals_kpi_base</code> nao tem contato. Toda query de disparo precisa fazer JOIN com <code>pipedrive_persons_expanded</code> (169K, 100% email+phone) via <code>person_id</code> das activities ou <code>pipedrive_deals_readable</code>.
+        </div>
+        <div class="alert alert-amber">
+            <strong>Activities em Bronze:</strong> A tabela de atividades esta em <code>nekt_operacional_bronze</code> (nao silver). Dados nao curados — pode haver duplicatas ou inconsistencias. 92K de 112K reunioes tem deal_id linkado.
+        </div>
+        <div class="alert alert-amber">
+            <strong>Nomenclatura MKT vs MKP:</strong> Nos dados Pipedrive a vertical aparece como "MKT", nao "MKP". Confirmar com Roberto qual e o correto antes de implementar.
+        </div>
+        <div class="alert alert-cyan">
+            <strong>Colunas de data no Reservas:</strong> Sao <code>check_in_date</code> e <code>check_out_date</code> (tipo date), nao <code>check_in</code>/<code>check_out</code>. Spec deve usar os nomes corretos.
+        </div>
+    </section>
+
+    <!-- ==================== ACOES ==================== -->
+    <section class="section" id="acoes">
+        <h2>Plano de Acao — Proximos Passos</h2>
+
+        <table class="data-table">
+            <thead><tr><th>#</th><th>Acao</th><th>Responsavel</th><th>Prioridade</th><th>Impacto</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td><strong>Resolver link proprietario-imovel</strong> — cruzar Sapron owner com property via Nekt OU criar view no data lake</td><td>Karen + Dados</td><td style="color:var(--red);font-weight:700;">ALTA</td><td>Desbloqueia 2 comunicacoes</td></tr>
+                <tr><td>2</td><td><strong>Criar templates MKP repescagem no Meta</strong> — copiar modelo dos 9 templates SZI</td><td>Roberto (MKP)</td><td style="color:var(--red);font-weight:700;">ALTA</td><td>Desbloqueia 1 comunicacao</td></tr>
+                <tr><td>3</td><td><strong>Confirmar nomenclatura MKT vs MKP</strong> nos dados Pipedrive</td><td>Karen</td><td style="color:var(--amber);font-weight:700;">MEDIA</td><td>Previne bugs nas queries</td></tr>
+                <tr><td>4</td><td><strong>Mapear JOIN path deals->persons</strong> — definir query padrao para extrair telefone/email de qualquer segmento</td><td>Karen</td><td style="color:var(--amber);font-weight:700;">MEDIA</td><td>Prerequisito tecnico pra TODAS as comunicacoes WA</td></tr>
+                <tr><td>5</td><td><strong>Pipeline de eventos email</strong> (open/click via SIA/Resend webhooks) — para triggers comportamentais</td><td>Roberto Campos (SIA)</td><td style="color:var(--text-muted);font-weight:700;">BAIXA</td><td>2 comunicacoes, pode ser v2</td></tr>
+                <tr><td>6</td><td><strong>Enriquecer birthdate</strong> — 41% sem data de nascimento. Considerar pedir no proximo contato</td><td>Gestores</td><td style="color:var(--text-muted);font-weight:700;">BAIXA</td><td>Melhora cupom aniversario (18K -> 31K)</td></tr>
+            </tbody>
+        </table>
+
+        <div class="alert alert-green" style="margin-top:1.5rem;">
+            <strong>Conclusao:</strong> 27 de 35 comunicacoes (77%) podem ser implementadas AGORA com dados existentes. As 4 com gap critico tem solucao mapeada. O MVP do motor pode comecar com as 27 comunicacoes viaveis enquanto os gaps sao resolvidos em paralelo.
+        </div>
+    </section>
+
+</div>
+
+<script>
+    document.querySelectorAll('.nav-bar a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'});});});
+    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.nav-bar a').forEach(a=>a.classList.remove('active'));document.querySelector(`.nav-bar a[href="#${e.target.id}"]`)?.classList.add('active');}});},{threshold:0.3});
+    document.querySelectorAll('.section').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>

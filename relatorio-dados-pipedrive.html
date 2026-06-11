@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motor de Disparos — Análise de Dados Pipedrive | Seazone</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232733;
+    --border: #2e3345;
+    --text: #e4e7ef;
+    --text2: #9ba3b8;
+    --accent: #6c5ce7;
+    --accent2: #a29bfe;
+    --green: #00b894;
+    --green-bg: rgba(0,184,148,.12);
+    --orange: #fdcb6e;
+    --orange-bg: rgba(253,203,110,.12);
+    --red: #ff6b6b;
+    --red-bg: rgba(255,107,107,.12);
+    --blue: #74b9ff;
+    --blue-bg: rgba(116,185,255,.12);
+    --cyan: #81ecec;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #1a1d27 0%, #2d1b69 50%, #1a1d27 100%);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: .5rem; }
+  .header .subtitle { color: var(--text2); font-size: 1.1rem; }
+  .header .date { color: var(--accent2); font-size: .9rem; margin-top: .5rem; }
+  .header .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: .3rem .8rem;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1rem 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav a {
+    color: var(--text2);
+    text-decoration: none;
+    padding: .5rem 1rem;
+    border-radius: 8px;
+    font-size: .85rem;
+    transition: all .2s;
+  }
+  .nav a:hover, .nav a.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Sections */
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  section h2 {
+    font-size: 1.5rem;
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  section h2 .icon { font-size: 1.3rem; }
+  section .section-desc {
+    color: var(--text2);
+    margin-bottom: 1.5rem;
+    font-size: .95rem;
+  }
+  h3 {
+    font-size: 1.15rem;
+    margin: 1.5rem 0 .75rem;
+    color: var(--accent2);
+  }
+
+  /* KPI Row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .kpi .value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .kpi .label {
+    color: var(--text2);
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-top: .25rem;
+  }
+  .kpi.green .value { color: var(--green); }
+  .kpi.orange .value { color: var(--orange); }
+  .kpi.red .value { color: var(--red); }
+  .kpi.blue .value { color: var(--blue); }
+  .kpi.accent .value { color: var(--accent2); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: .9rem;
+  }
+  th, td {
+    padding: .75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    color: var(--text2);
+    font-weight: 600;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  tr:hover td { background: rgba(108,92,231,.05); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pct { color: var(--accent2); font-weight: 600; }
+  .highlight-row td { background: rgba(0,184,148,.08); }
+
+  /* Bars */
+  .bar-container {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+  .bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width .3s;
+  }
+  .bar.green { background: var(--green); }
+  .bar.orange { background: var(--orange); }
+  .bar.red { background: var(--red); }
+
+  /* Decision cards */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1rem;
+  }
+  .decision-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border-left: 4px solid var(--accent);
+  }
+  .decision-card.green-border { border-left-color: var(--green); }
+  .decision-card.orange-border { border-left-color: var(--orange); }
+  .decision-card.red-border { border-left-color: var(--red); }
+  .decision-card .d-title {
+    font-weight: 700;
+    font-size: .95rem;
+    margin-bottom: .5rem;
+  }
+  .decision-card .d-choice {
+    color: var(--green);
+    font-weight: 600;
+    font-size: .9rem;
+    margin-bottom: .5rem;
+  }
+  .decision-card .d-detail {
+    color: var(--text2);
+    font-size: .85rem;
+    line-height: 1.5;
+  }
+
+  /* Action items */
+  .action-list {
+    list-style: none;
+    margin: 1rem 0;
+  }
+  .action-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .75rem 1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: .5rem;
+  }
+  .action-list .a-num {
+    background: var(--accent);
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .action-list .a-text { font-size: .9rem; }
+  .action-list .a-text strong { color: var(--accent2); }
+
+  /* Callout */
+  .callout {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .callout.warning {
+    border-color: var(--red);
+    background: var(--red-bg);
+  }
+  .callout.success {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    margin-bottom: .25rem;
+    font-size: .95rem;
+  }
+  .callout.warning .callout-title { color: var(--red); }
+  .callout.success .callout-title { color: var(--green); }
+  .callout p { font-size: .9rem; color: var(--text2); }
+
+  /* Playbook table */
+  .playbook-table td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  .temp-badge {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .temp-badge.quente { background: var(--red-bg); color: var(--red); }
+  .temp-badge.morno { background: var(--orange-bg); color: var(--orange); }
+  .temp-badge.frio { background: var(--blue-bg); color: var(--blue); }
+  .temp-badge.exclusao { background: rgba(255,255,255,.08); color: var(--text2); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text2);
+    font-size: .8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container { padding: 1rem; }
+    section { padding: 1.25rem; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .decision-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.5rem; }
+    table { font-size: .8rem; }
+    th, td { padding: .5rem; }
+  }
+
+  /* Vertical colors */
+  .v-szi { color: #6c5ce7; }
+  .v-szs { color: #00b894; }
+  .v-mkt { color: #fdcb6e; }
+
+  /* Channel conversion chart */
+  .channel-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .5rem;
+    font-size: .85rem;
+  }
+  .channel-name {
+    width: 220px;
+    flex-shrink: 0;
+    text-align: right;
+    color: var(--text2);
+  }
+  .channel-bar {
+    flex: 1;
+    height: 24px;
+    background: var(--surface2);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .channel-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: .5rem;
+    font-size: .75rem;
+    font-weight: 600;
+    color: #fff;
+    min-width: 40px;
+  }
+
+  /* Tabbed content */
+  .tabs {
+    display: flex;
+    gap: .25rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab {
+    padding: .5rem 1rem;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: .85rem;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all .2s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent2); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Part divider */
+  .part-divider {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    margin: 2rem 0;
+    background: linear-gradient(135deg, #1a1d27 0%, #1b3a2a 50%, #1a1d27 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .part-divider h2 { font-size: 1.6rem; font-weight: 700; justify-content: center; margin-bottom: .25rem; }
+  .part-divider p { color: var(--text2); font-size: .95rem; }
+
+  /* Nav separators */
+  .nav .nav-sep {
+    color: var(--border);
+    padding: .5rem .25rem;
+    font-size: .85rem;
+    user-select: none;
+  }
+
+  /* Badges operacionais */
+  .badge { display:inline-block; padding:.15rem .5rem; border-radius:4px; font-size:.7rem; font-weight:700; text-transform:uppercase; }
+  .b-wa { background:rgba(37,211,102,.15); color:#25d366; }
+  .b-email { background:rgba(116,185,255,.15); color:var(--blue); }
+  .b-closer { background:rgba(253,203,110,.15); color:var(--orange); }
+
+  /* Flow boxes */
+  .flow-box { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:1.25rem; margin:.75rem 0; }
+  .flow-box .flow-title { font-weight:700; font-size:.9rem; margin-bottom:.5rem; }
+  .flow-step { display:flex; align-items:flex-start; gap:.5rem; margin:.4rem 0; font-size:.85rem; }
+  .flow-step .step-num { background:var(--accent); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; flex-shrink:0; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+  @media (max-width:900px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
+
+  /* Calendar */
+  .calendar { display:grid; grid-template-columns:repeat(5,1fr); gap:.5rem; margin:1rem 0; }
+  .cal-day { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:.75rem; font-size:.8rem; }
+  .cal-day .day-label { font-weight:700; color:var(--accent2); font-size:.75rem; margin-bottom:.5rem; }
+  .cal-item { margin:.25rem 0; padding:.2rem .4rem; border-radius:4px; font-size:.7rem; }
+  .cal-szi { background:rgba(108,92,231,.15); border-left:3px solid var(--accent); }
+  .cal-szs { background:rgba(0,184,148,.15); border-left:3px solid var(--green); }
+  .cal-mkt { background:rgba(253,203,110,.15); border-left:3px solid var(--orange); }
+  @media (max-width:768px) { .calendar { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Motor de Disparos de Marketing</h1>
+  <div class="subtitle">Análise de Dados Pipedrive — Base para Decisões Estratégicas</div>
+  <div class="date">Seazone | 08 de junho de 2026 | Preparado por Karen</div>
+  <div class="badge">VALIDAÇÃO COM MARI — 09/06</div>
+</div>
+
+<nav class="nav">
+  <a href="#visao-geral">Visão Geral</a>
+  <a href="#contexto-verticais">Verticais</a>
+  <a href="#com-sem-op">COM vs SEM OP</a>
+  <a href="#temperatura">Temperatura</a>
+  <a href="#reativacao">Reativação</a>
+  <a href="#canais">Canais</a>
+  <a href="#motivos">Motivos de Perda</a>
+  <span class="nav-sep">|</span>
+  <a href="#volumes">Volumes</a>
+  <a href="#matriz">Matriz Cadências</a>
+  <a href="#cross-sell">Cross-sell</a>
+  <a href="#fluxo">Fluxo do Lead</a>
+  <a href="#calendario">Calendário</a>
+  <a href="#exclusoes">Exclusões</a>
+  <a href="#decisoes">Decisões</a>
+  <a href="#proximos">Próximos Passos</a>
+</nav>
+
+<div class="container">
+
+  <!-- VISÃO GERAL -->
+  <section id="visao-geral">
+    <h2><span class="icon">📊</span> Visão Geral da Base</h2>
+    <p class="section-desc">Dados extraídos do Pipedrive via data lake Nekt em 08/06/2026. Base completa de deals por vertical.</p>
+
+    <div class="kpi-row">
+      <div class="kpi accent">
+        <div class="value">175.965</div>
+        <div class="label">Total de Deals (3 verticais)</div>
+      </div>
+      <div class="kpi blue">
+        <div class="value">20.877</div>
+        <div class="label">Pessoas Únicas (por email)</div>
+      </div>
+      <div class="kpi green">
+        <div class="value">9.733</div>
+        <div class="label">Deals Ganhos</div>
+      </div>
+      <div class="kpi orange">
+        <div class="value">19.041</div>
+        <div class="label">Mornos (COM OP + Perda)</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th class="num">Total Deals</th>
+          <th class="num">Pessoas Únicas</th>
+          <th class="num">Deals/Pessoa</th>
+          <th class="num">Ganhos</th>
+          <th class="num">Taxa Geral</th>
+          <th class="num">Mornos</th>
+          <th class="num">Frios</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong class="v-szi">SZI — Seazone Invest</strong></td>
+          <td class="num">79.389</td>
+          <td class="num" style="color:var(--accent2)">11.136</td>
+          <td class="num">6,6</td>
+          <td class="num">3.101</td>
+          <td class="num pct">3,9%</td>
+          <td class="num" style="color:var(--orange)">8.047</td>
+          <td class="num" style="color:var(--blue)">66.110</td>
+        </tr>
+        <tr>
+          <td><strong class="v-szs">SZS — Seazone Stays</strong></td>
+          <td class="num">69.024</td>
+          <td class="num" style="color:var(--accent2)">4.896</td>
+          <td class="num">11,5</td>
+          <td class="num">6.304</td>
+          <td class="num pct">9,1%</td>
+          <td class="num" style="color:var(--orange)">8.186</td>
+          <td class="num" style="color:var(--blue)">54.045</td>
+        </tr>
+        <tr>
+          <td><strong class="v-mkt">MKT — Marketplace</strong></td>
+          <td class="num">27.552</td>
+          <td class="num" style="color:var(--accent2)">4.845</td>
+          <td class="num">5,4</td>
+          <td class="num">328</td>
+          <td class="num pct">1,2%</td>
+          <td class="num" style="color:var(--orange)">2.808</td>
+          <td class="num" style="color:var(--blue)">23.674</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title" style="color:var(--accent2)">Deals ≠ Pessoas</div>
+      <p>Cada pessoa tem em média <strong>5-11 deals</strong> no Pipedrive (tentativas de contato/negociação). SZS tem 11,5 deals/pessoa — o lead é abordado muitas vezes antes de fechar ou desistir. Para disparos, o que importa é o número de <strong>pessoas únicas</strong>, não deals.</p>
+    </div>
+
+    <h3>Clientes Únicos que Fecharam (WON)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th class="num">Deals Ganhos</th>
+          <th class="num">Clientes Únicos</th>
+          <th class="num">Deals/Cliente</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong class="v-szi">SZI</strong></td>
+          <td class="num">2.567</td>
+          <td class="num" style="color:var(--green)">589</td>
+          <td class="num">4,4</td>
+        </tr>
+        <tr>
+          <td><strong class="v-szs">SZS</strong></td>
+          <td class="num">5.542</td>
+          <td class="num" style="color:var(--green)">149*</td>
+          <td class="num">37,2</td>
+        </tr>
+        <tr>
+          <td><strong class="v-mkt">MKT</strong></td>
+          <td class="num">324</td>
+          <td class="num" style="color:var(--green)">19</td>
+          <td class="num">17,1</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:.8rem;color:var(--text2)">* SZS: 149 emails únicos com won — campo email possivelmente subpreenchido nesta vertical. Cada franqueado/proprietário pode ter múltiplos imóveis (deals) sob o mesmo email.</p>
+
+    <h3>Empreendimentos por Pessoa — Toda a Base</h3>
+    <table>
+      <thead><tr><th>Qtd Empreendimentos</th><th class="num">SZI</th><th class="num">%</th><th class="num">MKT</th><th class="num">%</th></tr></thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td><strong>1 empreendimento</strong></td>
+          <td class="num">10.707</td><td class="num pct">96,1%</td>
+          <td class="num">4.804</td><td class="num pct">99,2%</td>
+        </tr>
+        <tr>
+          <td>2 empreendimentos</td>
+          <td class="num">381</td><td class="num">3,4%</td>
+          <td class="num">36</td><td class="num">0,7%</td>
+        </tr>
+        <tr>
+          <td>3+ empreendimentos</td>
+          <td class="num">29</td><td class="num">0,3%</td>
+          <td class="num">—</td><td class="num">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:.8rem;color:var(--text2)">SZS não tem campo "empreendimento" preenchido (é gestão de imóvel, não venda de empreendimento).</p>
+
+    <h3>Clientes SZI que compraram em mais de 1 empreendimento</h3>
+    <table>
+      <thead><tr><th>Qtd Empreendimentos</th><th class="num">Clientes WON</th><th class="num">%</th></tr></thead>
+      <tbody>
+        <tr><td>1 empreendimento</td><td class="num">549</td><td class="num">93,2%</td></tr>
+        <tr class="highlight-row"><td><strong>2 empreendimentos</strong></td><td class="num">31</td><td class="num pct">5,3%</td></tr>
+        <tr class="highlight-row"><td><strong>3+ empreendimentos</strong></td><td class="num">9</td><td class="num pct">1,5%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title" style="color:var(--orange)">O que isso significa pra disparos</div>
+      <p>
+        <strong>96% das pessoas só interagiram com 1 empreendimento.</strong> Os múltiplos deals por pessoa são reabordagens/tentativas de contato, não interesse em vários empreendimentos. O lead já foi bombardeado — cadência respeitosa é essencial.<br><br>
+        <strong>6,8% dos clientes SZI compraram em 2+ empreendimentos</strong> — são os repeat buyers. Cross-sell de novo spot (3-4 meses pós-compra) mira exatamente esse perfil.
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTEXTO POR VERTICAL -->
+  <section id="contexto-verticais">
+    <h2><span class="icon">🏢</span> Contexto por Vertical — Reuniões com Lideranças</h2>
+    <p class="section-desc">Insights das reuniões com Mari (SZI), Leo (SZS) e Roberto (MKT) em 08/06. Cada vertical tem dinâmicas próprias que afetam a estratégia de disparos.</p>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(event, 'ctx-szi')">SZI — Mari</div>
+      <div class="tab" onclick="switchTab(event, 'ctx-szs')">SZS — Leo</div>
+      <div class="tab" onclick="switchTab(event, 'ctx-mkt')">MKT — Roberto</div>
+    </div>
+
+    <div id="ctx-szi" class="tab-content active">
+      <h3>SZI — Seazone Invest (Liderança: Mari)</h3>
+      <table>
+        <tbody>
+          <tr><td style="width:180px;font-weight:600;color:var(--accent2)">Tipo de venda</td><td>Venda consultiva — investimento de R$300-500k, decisão complexa</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent2)">ICP</td><td>Investidor imobiliário, pode ser marinheiro de primeira viagem ou experiente</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent2)">Ciclo de venda</td><td>Médio-longo — envolve avaliação de ROI, condições de pagamento, reunião</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent2)">Processo atual</td><td>MIA qualifica → SDR agenda → Closer faz OP individual</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent2)">Insight-chave</td><td>Marcos de empreendimento (alvará, lançamento) são gatilhos de reativação</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent2)">Cross-sell</td><td>Hóspede → investidor (cadência de 4 semanas já ativa pela Mari)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="ctx-szs" class="tab-content">
+      <h3>SZS — Seazone Stays (Liderança: Leo)</h3>
+      <table>
+        <tbody>
+          <tr><td style="width:180px;font-weight:600;color:var(--green)">Tipo de venda</td><td><strong>Venda de transação</strong>, não consultiva — admin custa R$700, decisão simples</td></tr>
+          <tr><td style="font-weight:600;color:var(--green)">ICP</td><td>Proprietário de imóvel em região atendida, sem aluguel anual vigente</td></tr>
+          <tr><td style="font-weight:600;color:var(--green)">Ciclo de venda</td><td>Curto — pode fechar na mesma call</td></tr>
+          <tr><td style="font-weight:600;color:var(--green)">Processo NOVO</td><td><strong style="color:var(--orange)">Call coletiva substituindo reunião individual</strong> — Lead preenche form → agenda imediatamente (até 30min depois) → call coletiva de 20min → se interessar, individual e fecha na hora</td></tr>
+          <tr><td style="font-weight:600;color:var(--green)">MIA → CIA</td><td><strong style="color:var(--red)">MIA sendo desativada para SZS.</strong> Das 400 reuniões/mês, apenas 57 vinham da MIA. CIA substitui com fluxo simplificado (5 mensagens de confirmação, sem ultra-qualificação)</td></tr>
+          <tr><td style="font-weight:600;color:var(--green)">Insight-chave</td><td>"Metade da venda é tirar pedido" — o lead já comprou o imóvel, só precisa decidir a admin. Barreiras no funil atrapalham mais do que ajudam</td></tr>
+          <tr><td style="font-weight:600;color:var(--green)">Exclusão específica</td><td><strong style="color:var(--red)">Fora do polígono</strong> = maior motivo de perda, não serve disparar. Região inativa/descartada no Pipedrive</td></tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top:1rem">
+        <div class="callout-title" style="color:var(--orange)">Impacto no motor de disparos</div>
+        <p>O novo processo de call coletiva muda o funil SZS completamente. Disparos de reativação para SZS devem direcionar o lead para <strong>agendar uma call coletiva</strong> (não uma reunião individual). O fluxo de confirmação será via CIA, não MIA.</p>
+      </div>
+    </div>
+
+    <div id="ctx-mkt" class="tab-content">
+      <h3>MKT — Marketplace (Liderança: Roberto)</h3>
+      <table>
+        <tbody>
+          <tr><td style="width:180px;font-weight:600;color:var(--orange)">Tipo de venda</td><td>Venda complexa — múltiplos stakeholders (comprador + cedente + SPE)</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">ICP</td><td><strong style="color:var(--red)">Diferente de SZI</strong> — investidor mais qualificado, capital alto (entrada 100-200k), entende ROI/SPE em profundidade. ICP ainda não definido com clareza</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Ciclo de venda</td><td><strong>Muito mais longo</strong> — negociação com cedente (dono da cota), possível renegociação com SPE, vai e volta de propostas</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Processo atual</td><td>Mídia paga não roda bem (ICP indefinido). Base interna funciona muito bem. Pré-venda sendo reestruturada em junho</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Nurturing</td><td><strong style="color:var(--red)">Nunca existiu.</strong> Só fazem disparo de venda direto. Roberto quer conteúdo educativo sobre o setor/modelo de negócio</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Timing = capital</td><td>"Não era o momento" frequentemente significa "não tem dinheiro ainda". Retomam em 4-6 meses quando vendem terreno/juntam capital</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Exclusão específica</td><td>Quem se <strong>desinscreveu da cadência</strong> de email — "esse cara nunca vai converter"</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Contato sugerido</td><td>William Miranda — closer sênior, 3 anos de casa, conhece o produto a fundo</td></tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top:1rem">
+        <div class="callout-title" style="color:var(--orange)">Implicação: MKT precisa de nurturing antes de venda</div>
+        <p>Com ICP indefinido e 0,4% de conversão por marketing, disparar oferta direta não funciona. Prioridade: criar <strong>conteúdo educativo</strong> sobre modelo SPE, rentabilidade, cases — nutrir antes de vender. Roberto confirmou que base interna (clientes existentes) é o melhor canal.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COM OP vs SEM OP -->
+  <section id="com-sem-op">
+    <h2><span class="icon">🎯</span> COM OP vs SEM OP — O Insight Decisivo</h2>
+    <p class="section-desc">A divisão mais importante da base: leads que chegaram na reunião de oportunidade vs. os que não chegaram.</p>
+
+    <div class="callout success">
+      <div class="callout-title">O dado mais importante deste relatório</div>
+      <p>Leads COM OP convertem entre 10-43%. Leads SEM OP convertem <strong>0%</strong>. O funil inteiro depende de uma coisa: levar o lead até a reunião.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th class="num">COM OP — Deals</th>
+          <th class="num">COM OP — Ganhos</th>
+          <th class="num">COM OP — Taxa</th>
+          <th class="num">SEM OP — Deals</th>
+          <th class="num">SEM OP — Taxa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td><strong class="v-szi">SZI</strong></td>
+          <td class="num">11.220</td>
+          <td class="num" style="color:var(--green)">3.101</td>
+          <td class="num pct" style="font-size:1.1rem">27,6%</td>
+          <td class="num">68.169</td>
+          <td class="num" style="color:var(--red)">0%</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong class="v-szs">SZS</strong></td>
+          <td class="num">14.600</td>
+          <td class="num" style="color:var(--green)">6.304</td>
+          <td class="num pct" style="font-size:1.1rem">43,2%</td>
+          <td class="num">54.424</td>
+          <td class="num" style="color:var(--red)">0%</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong class="v-mkt">MKT</strong></td>
+          <td class="num">3.161</td>
+          <td class="num" style="color:var(--green)">328</td>
+          <td class="num pct" style="font-size:1.1rem">10,4%</td>
+          <td class="num">24.391</td>
+          <td class="num" style="color:var(--red)">0%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="kpi-row" style="margin-top:1.5rem">
+      <div class="kpi green">
+        <div class="value">43,2%</div>
+        <div class="label">Melhor conversão COM OP (SZS)</div>
+      </div>
+      <div class="kpi red">
+        <div class="value">0%</div>
+        <div class="label">Conversão SEM OP (todas)</div>
+      </div>
+      <div class="kpi orange">
+        <div class="value">86%</div>
+        <div class="label">dos deals nunca chegam na OP</div>
+      </div>
+    </div>
+
+    <h3>Implicação estratégica</h3>
+    <p style="color:var(--text2); font-size:.9rem;">
+      <strong style="color:var(--text)">Para MORNOS (COM OP + perdidos):</strong> Já conhecem a Seazone, já tiveram reunião. Reativação com mensagem personalizada pode resgatar uma parcela significativa.<br><br>
+      <strong style="color:var(--text)">Para FRIOS (SEM OP):</strong> Nunca entenderam o modelo. Precisam de nurturing educativo antes de qualquer abordagem comercial. Objetivo: levar até a OP.
+    </p>
+  </section>
+
+  <!-- TEMPERATURA -->
+  <section id="temperatura">
+    <h2><span class="icon">🌡️</span> Classificação de Temperatura — Por Vertical</h2>
+    <p class="section-desc">Cada vertical tem sua própria definição de temperatura. Validado com Mari (SZI), Leo (SZS) e Roberto (MKT).</p>
+
+    <div class="callout warning" style="margin-bottom:1.5rem">
+      <div class="callout-title">Temperatura NÃO é universal entre verticais</div>
+      <p>SZI e MKT usam o funil (COM/SEM OP) como base. SZS usa <strong>posse de imóvel</strong> como critério principal — um lead "quente" em SZS é quem já tem imóvel Seazone, independente do estágio no funil.</p>
+    </div>
+
+    <h3>Definições de Temperatura por Vertical</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th><span class="temp-badge quente">Quente</span></th>
+          <th><span class="temp-badge morno">Morno</span></th>
+          <th><span class="temp-badge frio">Frio</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong class="v-szi">SZI</strong><br><span style="font-size:.8rem;color:var(--text2)">Mari</span></td>
+          <td style="font-size:.85rem">Já comprou spot da Seazone — confia, tem dinheiro, tem renda passiva</td>
+          <td style="font-size:.85rem">Teve OP (reunião) e deu Lost — timing, dinheiro, exploratório</td>
+          <td style="font-size:.85rem">Travou ANTES da OP — lost sem OP, travado em SQL, no-show, hóspedes</td>
+        </tr>
+        <tr>
+          <td><strong class="v-szs">SZS</strong><br><span style="font-size:.8rem;color:var(--text2)">Leo</span></td>
+          <td style="font-size:.85rem"><strong>Já tem imóvel Seazone</strong> — comprou via SZI, só precisa decidir a admin</td>
+          <td style="font-size:.85rem">Tem imóvel de temporada mas <strong>não é Seazone</strong> — já aluga, quer trocar de gestora</td>
+          <td style="font-size:.85rem"><strong>Fora do polígono</strong> (região não atendida) OU tem <strong>aluguel anual</strong> vigente</td>
+        </tr>
+        <tr>
+          <td><strong class="v-mkt">MKT</strong><br><span style="font-size:.8rem;color:var(--text2)">Roberto</span></td>
+          <td style="font-size:.85rem">Responde rápido, pergunta proativamente, <strong>tem capital</strong> (entrada 150k+)</td>
+          <td style="font-size:.85rem">Teve OP, cheio de dúvidas, troca mensagens — engajado mas indeciso</td>
+          <td style="font-size:.85rem">Não responde, precisa 2-3 mensagens pra dar alô. Ou sem capital</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Números por Temperatura (base Pipedrive)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th class="num"><span class="temp-badge quente">Quente</span></th>
+          <th class="num"><span class="temp-badge morno">Morno</span></th>
+          <th class="num"><span class="temp-badge frio">Frio</span></th>
+          <th class="num">Em OP Ativa</th>
+          <th class="num">Open Pré-OP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong class="v-szi">SZI</strong></td>
+          <td class="num" style="color:var(--red)">3.101</td>
+          <td class="num" style="color:var(--orange)">8.047</td>
+          <td class="num" style="color:var(--blue)">66.110</td>
+          <td class="num">72</td>
+          <td class="num">2.059</td>
+        </tr>
+        <tr>
+          <td><strong class="v-szs">SZS</strong></td>
+          <td class="num" style="color:var(--red)">6.304</td>
+          <td class="num" style="color:var(--orange)">8.186</td>
+          <td class="num" style="color:var(--blue)">54.045</td>
+          <td class="num">110</td>
+          <td class="num">379</td>
+        </tr>
+        <tr>
+          <td><strong class="v-mkt">MKT</strong></td>
+          <td class="num" style="color:var(--red)">328</td>
+          <td class="num" style="color:var(--orange)">2.808</td>
+          <td class="num" style="color:var(--blue)">23.674</td>
+          <td class="num">25</td>
+          <td class="num">717</td>
+        </tr>
+        <tr style="border-top:2px solid var(--border)">
+          <td><strong>TOTAL</strong></td>
+          <td class="num" style="color:var(--red);font-weight:700">9.733</td>
+          <td class="num" style="color:var(--orange);font-weight:700">19.041</td>
+          <td class="num" style="color:var(--blue);font-weight:700">143.829</td>
+          <td class="num" style="font-weight:700">207</td>
+          <td class="num" style="font-weight:700">3.155</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-title" style="color:var(--orange)">19 mil leads mornos = audiência premium</div>
+      <p>Essas pessoas já tiveram reunião com a Seazone. Já sabem como funciona, já viram proposta. Perderam por timing, preço, ou simplesmente sumiram. Uma mensagem na hora certa pode resgatar parte deles.</p>
+    </div>
+  </section>
+
+  <!-- REATIVAÇÃO -->
+  <section id="reativacao">
+    <h2><span class="icon">🔄</span> Potencial de Reativação dos Mornos</h2>
+    <p class="section-desc">Análise dos 19k mornos por motivo de perda e recência — priorizando quem tem mais chance de voltar.</p>
+
+    <h3>Por Categoria de Motivo</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Categoria</th>
+          <th class="num">SZI</th>
+          <th class="num">%</th>
+          <th class="num">SZS</th>
+          <th class="num">%</th>
+          <th class="num">MKT</th>
+          <th class="num">%</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td><strong style="color:var(--green)">Timing</strong><br><span style="color:var(--text2);font-size:.8rem">"não era o momento"</span></td>
+          <td class="num">1.559</td>
+          <td class="num pct">19%</td>
+          <td class="num">2.228</td>
+          <td class="num pct">27%</td>
+          <td class="num">531</td>
+          <td class="num pct">19%</td>
+          <td style="font-size:.8rem;color:var(--green)">Reativar com gatilho de marco ou novo lançamento</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong style="color:var(--orange)">Contato perdido</strong><br><span style="color:var(--text2);font-size:.8rem">parou de responder / sem conexão</span></td>
+          <td class="num">1.979</td>
+          <td class="num pct">25%</td>
+          <td class="num">1.519</td>
+          <td class="num pct">19%</td>
+          <td class="num">899</td>
+          <td class="num pct">32%</td>
+          <td style="font-size:.8rem;color:var(--orange)">Cadência leve: email D1, WhatsApp D7</td>
+        </tr>
+        <tr>
+          <td><strong>Comercial</strong><br><span style="color:var(--text2);font-size:.8rem">preço / forma de pagamento</span></td>
+          <td class="num">765</td>
+          <td class="num pct">10%</td>
+          <td class="num">146</td>
+          <td class="num pct">2%</td>
+          <td class="num">226</td>
+          <td class="num pct">8%</td>
+          <td style="font-size:.8rem;color:var(--text2)">Reabordar quando mudar condição</td>
+        </tr>
+        <tr>
+          <td><strong>Concorrência</strong></td>
+          <td class="num">168</td>
+          <td class="num pct">2%</td>
+          <td class="num">255</td>
+          <td class="num pct">3%</td>
+          <td class="num">82</td>
+          <td class="num pct">3%</td>
+          <td style="font-size:.8rem;color:var(--text2)">Email educativo após 6+ meses</td>
+        </tr>
+        <tr>
+          <td><strong>Sem interesse</strong></td>
+          <td class="num">1.101</td>
+          <td class="num pct">14%</td>
+          <td class="num">581</td>
+          <td class="num pct">7%</td>
+          <td class="num">360</td>
+          <td class="num pct">13%</td>
+          <td style="font-size:.8rem;color:var(--text2)">Esperar 6 meses, depois 1 disparo/mês</td>
+        </tr>
+        <tr>
+          <td><strong>Descartável</strong><br><span style="color:var(--text2);font-size:.8rem">duplicado / inválido / sem imóvel</span></td>
+          <td class="num">252</td>
+          <td class="num pct">3%</td>
+          <td class="num">176</td>
+          <td class="num pct">2%</td>
+          <td class="num">22</td>
+          <td class="num pct">1%</td>
+          <td style="font-size:.8rem;color:var(--red)">Excluir da base</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Recência dos Mornos — Quando foram perdidos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Faixa</th>
+          <th class="num">SZI</th>
+          <th class="num">%</th>
+          <th class="num">SZS</th>
+          <th class="num">%</th>
+          <th class="num">MKT</th>
+          <th class="num">%</th>
+          <th>Prioridade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td><strong style="color:var(--green)">2026 (0-6 meses)</strong></td>
+          <td class="num">1.391</td>
+          <td class="num">17%</td>
+          <td class="num">1.518</td>
+          <td class="num">19%</td>
+          <td class="num">500</td>
+          <td class="num">18%</td>
+          <td style="font-size:.85rem;color:var(--green);font-weight:600">PRIORIDADE 1 — Cadência 7-14-30</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong style="color:var(--orange)">2025 S2 (6-12m)</strong></td>
+          <td class="num">1.535</td>
+          <td class="num">19%</td>
+          <td class="num">1.156</td>
+          <td class="num">14%</td>
+          <td class="num">525</td>
+          <td class="num">19%</td>
+          <td style="font-size:.85rem;color:var(--orange);font-weight:600">PRIORIDADE 2 — Cadência 7-14-30</td>
+        </tr>
+        <tr>
+          <td>2025 S1 (12-18m)</td>
+          <td class="num">1.333</td>
+          <td class="num">17%</td>
+          <td class="num">914</td>
+          <td class="num">11%</td>
+          <td class="num">492</td>
+          <td class="num">18%</td>
+          <td style="font-size:.85rem;color:var(--text2)">Onda 2 — após validar prioridade 1</td>
+        </tr>
+        <tr>
+          <td>2024 (18-30m)</td>
+          <td class="num">1.358</td>
+          <td class="num">17%</td>
+          <td class="num">1.592</td>
+          <td class="num">19%</td>
+          <td class="num">1.212</td>
+          <td class="num">43%</td>
+          <td style="font-size:.85rem;color:var(--text2)">Onda 3</td>
+        </tr>
+        <tr>
+          <td>Antes de 2024 (30m+)</td>
+          <td class="num">2.430</td>
+          <td class="num">30%</td>
+          <td class="num">3.006</td>
+          <td class="num">37%</td>
+          <td class="num">79</td>
+          <td class="num">3%</td>
+          <td style="font-size:.85rem;color:var(--text2)">Avaliar se contato ainda é válido</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout success">
+      <div class="callout-title">Primeira onda: ~6.600 leads mornos recentes</div>
+      <p>Somando 2026 + 2025 S2 das três verticais. Esses leads foram perdidos há menos de 12 meses — contato provavelmente ainda é válido, memória da Seazone ainda fresca. Com 1.000 disparos/dia, cobre a primeira onda em ~7 dias úteis.</p>
+    </div>
+  </section>
+
+  <!-- CANAIS -->
+  <section id="canais">
+    <h2><span class="icon">📡</span> Canais de Origem — Conversão Real</h2>
+    <p class="section-desc">De onde vêm os leads que realmente convertem? Volume vs. qualidade.</p>
+
+    <h3 class="v-szi">SZI — Seazone Invest</h3>
+    <div style="margin-bottom:1.5rem">
+      <div class="channel-row">
+        <div class="channel-name">Spot Seazone</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:97.7%;background:var(--green)">48,9%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Colaborador</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:89.2%;background:var(--green)">44,6%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Clientes</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:54.9%;background:var(--accent)">27,4%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Outros Parceiros</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:48.9%;background:var(--accent)">24,4%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Cliente SZN</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:47.4%;background:var(--accent)">23,7%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Corretor</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:35.6%;background:var(--orange)">17,8%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name" style="color:var(--red)">Marketing (61.781 deals)</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:1.8%;background:var(--red)">0,9%</div></div>
+      </div>
+    </div>
+
+    <h3 class="v-szs">SZS — Seazone Stays</h3>
+    <div style="margin-bottom:1.5rem">
+      <div class="channel-row">
+        <div class="channel-name">Cliente SZN</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:97.4%;background:var(--green)">48,7%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Spot Seazone</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:95.8%;background:var(--green)">47,9%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Franquia</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:65.1%;background:var(--accent)">32,6%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Clientes</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:63.6%;background:var(--accent)">31,8%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Colaborador</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:35.7%;background:var(--orange)">17,9%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name">Indicação Corretor</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:29.2%;background:var(--orange)">14,6%</div></div>
+      </div>
+      <div class="channel-row">
+        <div class="channel-name" style="color:var(--red)">Marketing (40.843 deals)</div>
+        <div class="channel-bar"><div class="channel-fill" style="width:9.6%;background:var(--red)">4,8%</div></div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title">Marketing gera volume, mas não converte</div>
+      <p>Marketing é responsável por 78% dos deals SZI e 59% dos SZS, mas converte menos de 5%. Os canais que convertem 25-50% são todos baseados em <strong>relacionamento</strong>: cliente existente, indicação, parceiro. Isso reforça a tese do motor de disparos: nutrir o lead até a OP é mais importante que gerar mais leads.</p>
+    </div>
+  </section>
+
+  <!-- MOTIVOS DE PERDA DETALHADO -->
+  <section id="motivos">
+    <h2><span class="icon">📉</span> Top Motivos de Perda COM OP — Detalhado por Vertical</h2>
+    <p class="section-desc">Os motivos mais frequentes entre os mornos. Cada motivo sugere uma abordagem de reativação diferente.</p>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(event, 'tab-szi')">SZI</div>
+      <div class="tab" onclick="switchTab(event, 'tab-szs')">SZS</div>
+      <div class="tab" onclick="switchTab(event, 'tab-mkt')">MKT</div>
+    </div>
+
+    <div id="tab-szi" class="tab-content active">
+      <table>
+        <thead><tr><th>Motivo</th><th class="num">Qtd</th><th class="num">%</th><th>Tipo</th></tr></thead>
+        <tbody>
+          <tr><td>Timing</td><td class="num">1.079</td><td class="num pct">14,0%</td><td style="color:var(--green)">Reativável</td></tr>
+          <tr><td>Não atende/Não responde</td><td class="num">1.094</td><td class="num pct">14,2%</td><td style="color:var(--orange)">Contato</td></tr>
+          <tr><td>Não tem interesse</td><td class="num">930</td><td class="num pct">12,1%</td><td style="color:var(--text2)">Baixa prior.</td></tr>
+          <tr><td>[Spot] Timing - contato posterior</td><td class="num">382</td><td class="num pct">5,0%</td><td style="color:var(--green)">Reativável</td></tr>
+          <tr><td>[Spot] Parou de responder</td><td class="num">335</td><td class="num pct">4,4%</td><td style="color:var(--orange)">Contato</td></tr>
+          <tr><td>Perfil proprietário (valor, pagamento, etc.)</td><td class="num">~800</td><td class="num pct">~10%</td><td style="color:var(--orange)">Comercial</td></tr>
+          <tr><td>[Spot] Preço</td><td class="num">206</td><td class="num pct">2,7%</td><td style="color:var(--orange)">Comercial</td></tr>
+          <tr><td>Concorrência</td><td class="num">167</td><td class="num pct">2,2%</td><td>Concorrência</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="tab-szs" class="tab-content">
+      <table>
+        <thead><tr><th>Motivo</th><th class="num">Qtd</th><th class="num">%</th><th>Tipo</th></tr></thead>
+        <tbody>
+          <tr><td>Timing</td><td class="num">1.648</td><td class="num pct">20,9%</td><td style="color:var(--green)">Reativável</td></tr>
+          <tr><td>Não atende/Não responde</td><td class="num">697</td><td class="num pct">8,9%</td><td style="color:var(--orange)">Contato</td></tr>
+          <tr><td>Não tem interesse</td><td class="num">576</td><td class="num pct">7,3%</td><td style="color:var(--text2)">Baixa prior.</td></tr>
+          <tr><td>Prefere Administrar Sozinho</td><td class="num">487</td><td class="num pct">6,2%</td><td>Objeção específica</td></tr>
+          <tr><td>Timing - não quer resolver agora</td><td class="num">363</td><td class="num pct">4,6%</td><td style="color:var(--green)">Reativável</td></tr>
+          <tr><td>Concorrência</td><td class="num">255</td><td class="num pct">3,2%</td><td>Concorrência</td></tr>
+          <tr><td>Prefere Aluguel Anual</td><td class="num">209</td><td class="num pct">2,7%</td><td>Objeção específica</td></tr>
+          <tr><td>Taxa (implantação/admin/enxoval)</td><td class="num">~500</td><td class="num pct">~6%</td><td style="color:var(--orange)">Comercial</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="tab-mkt" class="tab-content">
+      <table>
+        <thead><tr><th>Motivo</th><th class="num">Qtd</th><th class="num">%</th><th>Tipo</th></tr></thead>
+        <tbody>
+          <tr><td>Timing</td><td class="num">398</td><td class="num pct">15,7%</td><td style="color:var(--green)">Reativável</td></tr>
+          <tr><td>Não tem interesse</td><td class="num">328</td><td class="num pct">13,0%</td><td style="color:var(--text2)">Baixa prior.</td></tr>
+          <tr><td>Não atende/Não responde</td><td class="num">325</td><td class="num pct">12,9%</td><td style="color:var(--orange)">Contato</td></tr>
+          <tr><td>Perfil proprietário</td><td class="num">~500</td><td class="num pct">~20%</td><td style="color:var(--orange)">Comercial</td></tr>
+          <tr><td>[Parc] Parou de responder</td><td class="num">132</td><td class="num pct">5,2%</td><td style="color:var(--orange)">Contato</td></tr>
+          <tr><td>Concorrência</td><td class="num">66</td><td class="num pct">2,6%</td><td>Concorrência</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================== DIVISOR ==================== -->
+  <div class="part-divider">
+    <h2>PARTE 2 — PLANO OPERACIONAL</h2>
+    <p>Das análises acima, derivamos o plano de execução abaixo. Cada cenário com vertical, canal, cadência e fluxo definidos.</p>
+  </div>
+
+  <!-- VOLUMES -->
+  <section id="volumes">
+    <h2><span class="icon">📦</span> Volumes por Onda</h2>
+    <p class="section-desc">Distribuição dos 19k mornos em ondas operacionais. Com 1.000 WA/dia + emails em paralelo.</p>
+    <div class="grid-3">
+      <div class="kpi green"><div class="value">6.625</div><div class="label">Onda 1 — Recentes (0-12m)<br>~7 dias úteis</div></div>
+      <div class="kpi orange"><div class="value">5.531</div><div class="label">Onda 2 — Médios (12-30m)<br>~6 dias úteis</div></div>
+      <div class="kpi blue"><div class="value">5.515</div><div class="label">Onda 3 — Antigos (30m+)<br>avaliar validade</div></div>
+    </div>
+    <h3>Onda 1 — Detalhamento por Vertical</h3>
+    <table>
+      <thead><tr><th>Vertical</th><th>Timing</th><th>Contato</th><th>Comercial</th><th>Concorrência</th><th>Total Onda 1</th><th>Dias a 1.000/dia</th></tr></thead>
+      <tbody>
+        <tr><td><strong class="v-szi">SZI</strong></td><td>~560</td><td>~720</td><td>~280</td><td>~60</td><td style="font-weight:700">~2.926</td><td>3 dias</td></tr>
+        <tr><td><strong class="v-szs">SZS</strong></td><td>~720</td><td>~510</td><td>~50</td><td>~85</td><td style="font-weight:700">~2.674</td><td>3 dias</td></tr>
+        <tr><td><strong class="v-mkt">MKT</strong></td><td>~195</td><td>~340</td><td>~85</td><td>~30</td><td style="font-weight:700">~1.025</td><td>1 dia</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- MATRIZ DE CADÊNCIAS -->
+  <section id="matriz">
+    <h2><span class="icon">📋</span> Matriz de Cadências — Vertical × Etapa × Canal</h2>
+    <p class="section-desc">Cada linha é um cenário específico. Cadência varia por vertical (tipo de venda), canal (WA vs Email), e etapa (motivo de perda).</p>
+
+    <h3 class="v-szi">SZI — Seazone Invest (venda consultiva, ciclo longo)</h3>
+    <table>
+      <thead><tr><th style="width:150px">Segmento</th><th>Volume</th><th>1o Contato</th><th>2o Contato</th><th>3o Contato</th><th>Se não responder</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Morno — Timing</strong><br><span style="color:var(--text2);font-size:.75rem">não era o momento / capital</span></td>
+          <td>1.559</td>
+          <td><span class="badge b-email">Email</span> D0<br><span style="font-size:.75rem;color:var(--text2)">Novidade empreendimento ou marco</span></td>
+          <td><span class="badge b-wa">WA</span> D+7<br><span style="font-size:.75rem;color:var(--text2)">Só se abriu o email</span></td>
+          <td><span class="badge b-email">Email</span> D+21<br><span style="font-size:.75rem;color:var(--text2)">Case de sucesso / rentabilidade</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">Pausa 90 dias. Retoma no próximo marco.</td>
+        </tr>
+        <tr>
+          <td><strong>Morno — Contato</strong><br><span style="color:var(--text2);font-size:.75rem">parou de responder</span></td>
+          <td>1.979</td>
+          <td><span class="badge b-email">Email</span> D0<br><span style="font-size:.75rem;color:var(--text2)">"Oi [nome], vi que você conheceu a Seazone"</span></td>
+          <td><span class="badge b-wa">WA</span> D+10<br><span style="font-size:.75rem;color:var(--text2)">Mensagem curta, pergunta aberta</span></td>
+          <td><span class="badge b-email">Email</span> D+25<br><span style="font-size:.75rem;color:var(--text2)">Último contato, conteúdo de valor</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">Encerra. Vai pra base fria.</td>
+        </tr>
+        <tr>
+          <td><strong>Morno — Comercial</strong><br><span style="color:var(--text2);font-size:.75rem">preço / pagamento</span></td>
+          <td>765</td>
+          <td><span class="badge b-wa">WA</span> Gatilho<br><span style="font-size:.75rem;color:var(--text2)">Quando mudar tabela/condição</span></td>
+          <td><span class="badge b-email">Email</span> D+7<br><span style="font-size:.75rem;color:var(--text2)">Detalhamento das novas condições</span></td>
+          <td>—</td>
+          <td style="font-size:.8rem;color:var(--text2)">Espera próxima mudança de condição.</td>
+        </tr>
+        <tr>
+          <td><strong>Quente → SZS</strong><br><span style="color:var(--text2);font-size:.75rem">cross-sell admin</span></td>
+          <td>3.101</td>
+          <td><span class="badge b-wa">WA</span> D+3 pós-compra<br><span style="font-size:.75rem;color:var(--text2)">"Parabéns! Sabia que a Seazone administra?"</span></td>
+          <td><span class="badge b-email">Email</span> D+10<br><span style="font-size:.75rem;color:var(--text2)">Como funciona a gestão</span></td>
+          <td><span class="badge b-wa">WA</span> D+20<br><span style="font-size:.75rem;color:var(--text2)">Link pra call coletiva SZS</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">Entrega pro time SZS.</td>
+        </tr>
+        <tr>
+          <td><strong>Quente → Novo Spot</strong><br><span style="color:var(--text2);font-size:.75rem">cross-sell SZI</span></td>
+          <td>3.101</td>
+          <td><span class="badge b-email">Email</span> 3-4 meses pós-compra<br><span style="font-size:.75rem;color:var(--text2)">"Novos empreendimentos disponíveis"</span></td>
+          <td><span class="badge b-wa">WA</span> D+7 só se abriu<br><span style="font-size:.75rem;color:var(--text2)">Closer com oportunidade</span></td>
+          <td>—</td>
+          <td style="font-size:.8rem;color:var(--text2)">Gatilho por marco/lançamento.</td>
+        </tr>
+        <tr>
+          <td><strong>Frio</strong></td>
+          <td>66.110</td>
+          <td colspan="3"><span class="badge b-email">Email</span> Nurturing quinzenal — 8 emails educativos sobre modelo Seazone, investimento, rentabilidade</td>
+          <td style="font-size:.8rem;color:var(--text2)">Se abrir 3+ → sobe pra morno. Não abrir nenhum → remove.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="v-szs">SZS — Seazone Stays (venda de transação, ciclo curto, call coletiva)</h3>
+    <table>
+      <thead><tr><th style="width:150px">Segmento</th><th>Volume</th><th>1o Contato</th><th>2o Contato</th><th>3o Contato</th><th>Se não responder</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Morno — Timing</strong><br><span style="color:var(--text2);font-size:.75rem">imóvel não pronto</span></td>
+          <td>2.228</td>
+          <td><span class="badge b-wa">WA</span> D0<br><span style="font-size:.75rem;color:var(--text2)">"Seu imóvel já ficou pronto?"</span></td>
+          <td><span class="badge b-wa">WA</span> D+5<br><span style="font-size:.75rem;color:var(--text2)">Link pra call coletiva</span></td>
+          <td><span class="badge b-email">Email</span> D+15<br><span style="font-size:.75rem;color:var(--text2)">Benefícios da gestão</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">Pausa 60 dias. Reaborda 1x.</td>
+        </tr>
+        <tr>
+          <td><strong>Morno — Contato</strong><br><span style="color:var(--text2);font-size:.75rem">parou de responder</span></td>
+          <td>1.519</td>
+          <td><span class="badge b-wa">WA</span> D0<br><span style="font-size:.75rem;color:var(--text2)">Msg curta + link call coletiva</span></td>
+          <td><span class="badge b-email">Email</span> D+5<br><span style="font-size:.75rem;color:var(--text2)">Como funciona a admin</span></td>
+          <td><span class="badge b-wa">WA</span> D+12<br><span style="font-size:.75rem;color:var(--text2)">Último contato</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">Encerra. Base fria.</td>
+        </tr>
+        <tr>
+          <td><strong>Morno — Prefere sozinho</strong></td>
+          <td>487</td>
+          <td><span class="badge b-email">Email</span> D0<br><span style="font-size:.75rem;color:var(--text2)">Case: gestão profissional vs solo</span></td>
+          <td><span class="badge b-email">Email</span> D+30<br><span style="font-size:.75rem;color:var(--text2)">Comparativo rentabilidade</span></td>
+          <td>—</td>
+          <td style="font-size:.8rem;color:var(--text2)">Encerra. Muito difícil.</td>
+        </tr>
+        <tr>
+          <td><strong>Frio</strong></td>
+          <td>54.045</td>
+          <td colspan="3"><span class="badge b-email">Email</span> Nurturing semanal x 4 — admin por temporada, rentabilidade, depoimentos. <strong>Objetivo: agendar call coletiva</strong></td>
+          <td style="font-size:.8rem;color:var(--text2)">Clicou no link da call → sobe pra morno.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="v-mkt">MKT — Marketplace (venda complexa, ciclo longo, múltiplos stakeholders)</h3>
+    <table>
+      <thead><tr><th style="width:150px">Segmento</th><th>Volume</th><th>1o Contato</th><th>2o Contato</th><th>3o Contato</th><th>Se não responder</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Morno — Timing</strong><br><span style="color:var(--text2);font-size:.75rem">= falta de capital</span></td>
+          <td>531</td>
+          <td><span class="badge b-email">Email</span> D0<br><span style="font-size:.75rem;color:var(--text2)">Educativo: como funciona SPE, ROI</span></td>
+          <td><span class="badge b-email">Email</span> D+14<br><span style="font-size:.75rem;color:var(--text2)">Case de investidor</span></td>
+          <td><span class="badge b-wa">WA</span> D+30<br><span style="font-size:.75rem;color:var(--text2)">"Novas oportunidades no marketplace"</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">1 email/mês x 3. Depois pausa.</td>
+        </tr>
+        <tr>
+          <td><strong>Morno — Contato</strong><br><span style="color:var(--text2);font-size:.75rem">parou de responder</span></td>
+          <td>899</td>
+          <td><span class="badge b-email">Email</span> D0<br><span style="font-size:.75rem;color:var(--text2)">Educativo (NÃO venda direta)</span></td>
+          <td><span class="badge b-email">Email</span> D+14<br><span style="font-size:.75rem;color:var(--text2)">Novidade do mercado</span></td>
+          <td><span class="badge b-wa">WA</span> D+28<br><span style="font-size:.75rem;color:var(--text2)">Só se abriu algum email</span></td>
+          <td style="font-size:.8rem;color:var(--text2)">Encerra. Base fria.</td>
+        </tr>
+        <tr>
+          <td><strong>Frio</strong></td>
+          <td>23.674</td>
+          <td colspan="3"><span class="badge b-email">Email</span> Nurturing mensal — modelo SPE, rentabilidade, mercado. <strong>Tom: educativo, NUNCA venda direta</strong></td>
+          <td style="font-size:.8rem;color:var(--text2)">Abriu 3+ emails → sobe pra WA closer.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <div class="callout-title">Regra de ouro: WA só com sinal de interesse</div>
+      <p>Para SZI e MKT (vendas complexas), WhatsApp só entra DEPOIS de um sinal: abriu email, clicou link, respondeu algo. Para SZS (venda de transação), WA pode ser o primeiro contato — decisão é simples e rápida.</p>
+    </div>
+  </section>
+
+  <!-- CROSS-SELL -->
+  <section id="cross-sell">
+    <h2><span class="icon">🔗</span> Cross-sell entre Verticais — Dados + Fluxos</h2>
+    <p class="section-desc">Clientes de uma vertical comprando em outra. Dados de conversão + fluxo operacional de cada direção.</p>
+
+    <div class="kpi-row">
+      <div class="kpi green"><div class="value">48,7%</div><div class="label">Cliente SZN → SZS</div></div>
+      <div class="kpi green"><div class="value">48,9%</div><div class="label">Spot Seazone → SZI</div></div>
+      <div class="kpi green"><div class="value">23,7%</div><div class="label">Cliente SZN → SZI</div></div>
+    </div>
+
+    <h3>Fluxos Operacionais de Cross-sell</h3>
+    <div class="grid-2">
+      <div class="flow-box" style="border-left:4px solid var(--green)">
+        <div class="flow-title">SZI → SZS (admin do imóvel recém-comprado)</div>
+        <div class="flow-step"><span class="step-num">1</span> D+3 pós-compra: <span class="badge b-wa">WA</span> "Parabéns! Sabia que a Seazone administra?"</div>
+        <div class="flow-step"><span class="step-num">2</span> D+10: <span class="badge b-email">Email</span> Como funciona a gestão, rentabilidade</div>
+        <div class="flow-step"><span class="step-num">3</span> D+20: <span class="badge b-wa">WA</span> Link pra call coletiva SZS</div>
+        <div class="flow-step"><span class="step-num">→</span> <span style="color:var(--green);font-size:.8rem">Se agendar → closer SZS assume</span></div>
+      </div>
+      <div class="flow-box" style="border-left:4px solid var(--accent)">
+        <div class="flow-title">Quente → Novo Spot SZI (3-4 meses)</div>
+        <div class="flow-step"><span class="step-num">1</span> 3-4 meses pós-compra: <span class="badge b-email">Email</span> "Novos empreendimentos"</div>
+        <div class="flow-step"><span class="step-num">2</span> Só se abriu: <span class="badge b-wa">WA</span> D+7 closer com oportunidade</div>
+        <div class="flow-step"><span class="step-num">→</span> <span style="color:var(--text2);font-size:.8rem">Depois: só por gatilho de marco/lançamento</span></div>
+      </div>
+      <div class="flow-box" style="border-left:4px solid var(--green)">
+        <div class="flow-title">SZS → SZI (proprietário → investidor)</div>
+        <div class="flow-step"><span class="step-num">1</span> 3-4 meses pós-fechamento admin: <span class="badge b-email">Email</span> "Já pensou em investir?"</div>
+        <div class="flow-step"><span class="step-num">2</span> Só se abriu: <span class="badge b-wa">WA</span> D+7 closer SZI</div>
+        <div class="flow-step"><span class="step-num">→</span> <span style="color:var(--text2);font-size:.8rem">Proprietário já confia, converte 48%</span></div>
+      </div>
+      <div class="flow-box" style="border-left:4px solid var(--blue)">
+        <div class="flow-title">Hóspede → Investidor SZI</div>
+        <div class="flow-step"><span class="step-num">1</span> Pós-hospedagem: <span class="badge b-email">Email</span> Cadência 4 semanas (já ativa pela Mari)</div>
+        <div class="flow-step"><span class="step-num">2</span> Se engajar: <span class="badge b-wa">WA</span> Closer SZI</div>
+        <div class="flow-step"><span class="step-num">→</span> <span style="color:var(--text2);font-size:.8rem">Nurturing longo — decisão grande</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLUXO DO LEAD -->
+  <section id="fluxo">
+    <h2><span class="icon">🔄</span> Fluxo Completo do Lead — O que acontece em cada passo</h2>
+    <p class="section-desc">Do disparo até o fechamento ou descarte.</p>
+
+    <div class="grid-2">
+      <div class="flow-box">
+        <div class="flow-title" style="color:var(--accent)">SZI / MKT — Fluxo de Reativação</div>
+        <div class="flow-step"><span class="step-num">1</span> <span class="badge b-email">Email</span> enviado (primeiro contato sempre email)</div>
+        <div class="flow-step"><span class="step-num">2</span> Lead abriu email? → <span class="badge b-wa">WA</span> de follow-up após X dias</div>
+        <div class="flow-step"><span class="step-num">3</span> Lead respondeu WA? → Resposta fica no <strong>Pipedrive</strong></div>
+        <div class="flow-step"><span class="step-num">4</span> Closer vê no Pipedrive → agenda OP individual</div>
+        <div class="flow-step"><span class="step-num">5</span> OP → Fechou: <span style="color:var(--green)">WON</span> | Não fechou: volta pra régua</div>
+      </div>
+      <div class="flow-box">
+        <div class="flow-title" style="color:var(--green)">SZS — Fluxo de Reativação (NOVO)</div>
+        <div class="flow-step"><span class="step-num">1</span> <span class="badge b-wa">WA</span> direto (venda de transação, decisão simples)</div>
+        <div class="flow-step"><span class="step-num">2</span> Lead respondeu? → Link pra <strong>call coletiva</strong> (agenda imediata)</div>
+        <div class="flow-step"><span class="step-num">3</span> Call coletiva de 20min → entende a admin Seazone</div>
+        <div class="flow-step"><span class="step-num">4</span> Interessou? → Reunião individual → Fecha na hora</div>
+        <div class="flow-step"><span class="step-num">5</span> Não respondeu WA? → <span class="badge b-email">Email</span> D+5 → último <span class="badge b-wa">WA</span> D+12</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title" style="color:var(--accent2)">Onde fica cada dado</div>
+      <p>
+        <strong>Resposta do lead:</strong> Pipedrive (WA integrado) &nbsp;|&nbsp;
+        <strong>Disparo WA:</strong> CIA (SZS) / MIA (SZI/MKT) &nbsp;|&nbsp;
+        <strong>Disparo Email:</strong> RD Station<br>
+        <strong>Agendamento SZS:</strong> Plataforma call coletiva (nova) &nbsp;|&nbsp;
+        <strong>Agendamento SZI/MKT:</strong> Calendly (closer agenda)
+      </p>
+    </div>
+  </section>
+
+  <!-- CALENDÁRIO -->
+  <section id="calendario">
+    <h2><span class="icon">📅</span> Exemplo: Semana 1 de Execução (Onda 1)</h2>
+    <p class="section-desc">Como seriam os primeiros 5 dias úteis. Emails e WA rodam em paralelo — 1.000/dia é limite só de WA.</p>
+
+    <div class="calendar">
+      <div class="cal-day">
+        <div class="day-label">Dia 1 (Seg)</div>
+        <div class="cal-item cal-szi"><strong>SZI Timing</strong> — 400 emails</div>
+        <div class="cal-item cal-szs"><strong>SZS Timing</strong> — 400 WA</div>
+        <div class="cal-item cal-mkt"><strong>MKT Timing</strong> — 200 emails</div>
+      </div>
+      <div class="cal-day">
+        <div class="day-label">Dia 2 (Ter)</div>
+        <div class="cal-item cal-szi"><strong>SZI Contato</strong> — 400 emails</div>
+        <div class="cal-item cal-szs"><strong>SZS Contato</strong> — 400 WA</div>
+        <div class="cal-item cal-mkt"><strong>MKT Contato</strong> — 200 emails</div>
+      </div>
+      <div class="cal-day">
+        <div class="day-label">Dia 3 (Qua)</div>
+        <div class="cal-item cal-szi"><strong>SZI Timing</strong> — 400 emails (resto)</div>
+        <div class="cal-item cal-szs"><strong>SZS Timing</strong> — 400 WA (resto)</div>
+        <div class="cal-item cal-mkt"><strong>MKT Comercial</strong> — 200 emails</div>
+      </div>
+      <div class="cal-day">
+        <div class="day-label">Dia 4 (Qui)</div>
+        <div class="cal-item cal-szi"><strong>SZI Contato</strong> — 500 emails (resto)</div>
+        <div class="cal-item cal-szs"><strong>SZS Contato</strong> — 500 WA (resto)</div>
+      </div>
+      <div class="cal-day">
+        <div class="day-label">Dia 5 (Sex)</div>
+        <div class="cal-item cal-szi"><strong>SZI Comercial</strong> — 280 WA gatilho</div>
+        <div class="cal-item cal-szs"><strong>SZS Enxoval</strong> — 500 email</div>
+        <div class="cal-item" style="background:rgba(255,107,107,.1);border-left:3px solid var(--red);font-size:.7rem">Buffer: follow-ups dos que responderam</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXCLUSÕES -->
+  <section id="exclusoes">
+    <h2><span class="icon">🚫</span> Exclusões — Lista Completa e Final</h2>
+    <p class="section-desc">Todas as regras de exclusão consolidadas por vertical.</p>
+    <table>
+      <thead><tr><th>Regra</th><th>Vertical</th><th>Como identificar no Pipedrive</th></tr></thead>
+      <tbody>
+        <tr style="background:var(--red-bg)"><td><strong>Expansão / Condomínios</strong></td><td>SZI</td><td>Proibição contratual. Multa. Incidente anterior</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Comprador recente (&lt;3 dias)</strong></td><td>Todas</td><td>won_at nos últimos 3 dias — aguardar cross-sell</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Mesmo spot pro dono</strong></td><td>SZI</td><td>Cruzar empreendimento do deal com empreendimentos do owner</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>LGPD / opt-out</strong></td><td>Todas</td><td>Motivo "LGPD" no Pipedrive</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Duplicado / Contato inválido</strong></td><td>Todas</td><td>Motivos "Duplicado/Erro", "Contato Inválido"</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Fora do polígono</strong></td><td>SZS</td><td>Motivo "Região Inativa / Descartada" ou "Região Não Atendida"</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Aluguel anual vigente</strong></td><td>SZS</td><td>Motivo "Prefere Aluguel Anual"</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Desinscrito de cadência</strong></td><td>MKT</td><td>Opt-out de email na RD Station</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Em OP ativa</strong></td><td>Todas</td><td>Deals open com is_oportunidade = true</td></tr>
+        <tr style="background:var(--red-bg)"><td><strong>Sem interesse (&lt;6 meses)</strong></td><td>Todas</td><td>Motivo "Não tem interesse" + dia_perda &lt; 6 meses</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- DECISÕES -->
+  <section id="decisoes">
+    <h2><span class="icon">✅</span> Decisões Tomadas</h2>
+    <p class="section-desc">Decisões fechadas em 08/06 para validação com Mari em 09/06.</p>
+
+    <div class="decision-grid">
+      <div class="decision-card green-border">
+        <div class="d-title">1. Prioridade de Reativação</div>
+        <div class="d-choice">→ Recentes primeiro, cadência controlada</div>
+        <div class="d-detail">Mornos de 2026 + 2025 S2 (~6.600 leads). Recência define intensidade.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">2. Cadência por cenário</div>
+        <div class="d-choice">→ Varia por vertical × canal × etapa</div>
+        <div class="d-detail">SZS = WA direto (transação simples). SZI/MKT = email primeiro, WA só com sinal. Ver matriz acima.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">3. Volume WhatsApp</div>
+        <div class="d-choice">→ ~1.000/dia (Gaby). Email em paralelo</div>
+        <div class="d-detail">WA é o gargalo. Email roda sem limite. Onda 1 cobre em ~7 dias úteis.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">4. Tom da Mensagem</div>
+        <div class="d-choice">→ Personalizado por motivo de perda</div>
+        <div class="d-detail">Timing: novidades. Contato: pergunta aberta. Comercial: novas condições. MKT: sempre educativo.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">5. Cross-sell SZI→SZS</div>
+        <div class="d-choice">→ D+3 pós-compra (admin imóvel)</div>
+        <div class="d-detail">Faz sentido imediato — acabou de comprar, precisa administrar. WA D+3, Email D+10, WA D+20.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">6. Cross-sell → Novo Spot</div>
+        <div class="d-choice">→ 3-4 meses pós-compra</div>
+        <div class="d-detail">Cooldown respeitoso. Investidor precisa digerir a compra antes de pensar em outra.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">7. Temperatura por vertical</div>
+        <div class="d-choice">→ Definição diferente por vertical</div>
+        <div class="d-detail">SZI: funil (COM/SEM OP). SZS: posse de imóvel. MKT: engajamento + capital.</div>
+      </div>
+      <div class="decision-card green-border">
+        <div class="d-title">8. Frios (144k leads)</div>
+        <div class="d-choice">→ Nurturing por email, sem WA</div>
+        <div class="d-detail">SZI: quinzenal x8. SZS: semanal x4, direciona call coletiva. MKT: mensal, educativo.</div>
+      </div>
+      <div class="decision-card red-border">
+        <div class="d-title">9. SZS: MIA → CIA + Call Coletiva</div>
+        <div class="d-choice">→ Disparos SZS vão pra call coletiva</div>
+        <div class="d-detail">Leo trocando processo. CIA substitui MIA. Alinhar com Roberto Campos e Kelly.</div>
+      </div>
+      <div class="decision-card red-border">
+        <div class="d-title">10. MKT: Criar nurturing</div>
+        <div class="d-choice">→ Nunca teve conteúdo educativo</div>
+        <div class="d-detail">Só venda direta (0,4% conversão). Prioridade: criar conteúdo SPE/rentabilidade/cases.</div>
+      </div>
+      <div class="decision-card orange-border">
+        <div class="d-title">11. Gatilhos de Marco</div>
+        <div class="d-choice">→ SpotSys terá; investigar Pipedrive</div>
+        <div class="d-detail">Marcos (alvará, entrega) = gatilhos de reativação. Fase posterior.</div>
+      </div>
+      <div class="decision-card orange-border">
+        <div class="d-title">12. "Não tem interesse"</div>
+        <div class="d-choice">→ Esperar 6 meses, depois 1/mês</div>
+        <div class="d-detail">Não entra na reativação imediata. Após 6 meses, 1 email/mês. Sem resposta em 3 meses = exclui.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRÓXIMOS PASSOS -->
+  <section id="proximos">
+    <h2><span class="icon">🚀</span> Próximos Passos</h2>
+    <p class="section-desc">Plano de ação imediato após validação com Mari.</p>
+
+    <h3>Semana 09-13/06</h3>
+    <ul class="action-list">
+      <li><span class="a-num">1</span><div class="a-text"><strong>Validar com Mari (09/06)</strong> — Apresentar este relatório. Confirmar temperatura por vertical, exclusões, e matriz de cadências.</div></li>
+      <li><span class="a-num">2</span><div class="a-text"><strong>Alinhar com Leo/Roberto Campos sobre CIA</strong> — Roadmap da CIA, integração dos disparos SZS no fluxo de call coletiva.</div></li>
+      <li><span class="a-num">3</span><div class="a-text"><strong>Extrair lista da 1a onda</strong> — Query final: ~6.600 mornos recentes com nome, contato, vertical, motivo, empreendimento. Excluir região inativa (SZS) e desinscritos (MKT).</div></li>
+      <li><span class="a-num">4</span><div class="a-text"><strong>Definir mensagens com Mari/Gaby</strong> — Templates por motivo de perda e por vertical.</div></li>
+      <li><span class="a-num">5</span><div class="a-text"><strong>Falar com William Miranda (MKT)</strong> — Closer sênior, 3 anos. Dinâmica cedente/SPE.</div></li>
+      <li><span class="a-num">6</span><div class="a-text"><strong>Validar exclusões na base</strong> — Limpar antes de disparar.</div></li>
+      <li><span class="a-num">7</span><div class="a-text"><strong>Investigar marcos no Pipedrive/SpotSys</strong></div></li>
+    </ul>
+
+    <h3>Semana 16-20/06</h3>
+    <ul class="action-list">
+      <li><span class="a-num">8</span><div class="a-text"><strong>Iniciar 1a onda de disparos</strong> — Mornos recentes conforme matriz de cadências.</div></li>
+      <li><span class="a-num">9</span><div class="a-text"><strong>Criar conteúdo nurturing MKT</strong> — Material educativo: SPE, rentabilidade, cases.</div></li>
+      <li><span class="a-num">10</span><div class="a-text"><strong>Configurar cross-sell automático</strong> — SZI→SZS (D+3) e SZS→SZI (3-4 meses).</div></li>
+      <li><span class="a-num">11</span><div class="a-text"><strong>Montar nurturing frios (email)</strong> — Por vertical conforme matriz.</div></li>
+    </ul>
+  </section>
+
+</div>
+
+<div class="footer">
+  Motor de Disparos de Marketing — Seazone | Dados: Pipedrive via Nekt Data Lake<br>
+  Relatório gerado em 08/06/2026 | Preparado por Karen com Claude Code
+</div>
+
+<script>
+function switchTab(e, tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+document.querySelectorAll('.nav a').forEach(a => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+window.addEventListener('scroll', () => {
+  const navLinks = document.querySelectorAll('.nav a');
+  const ids = ['visao-geral','contexto-verticais','com-sem-op','temperatura','reativacao','canais','motivos','volumes','matriz','cross-sell','fluxo','calendario','exclusoes','decisoes','proximos'];
+  let current = '';
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 120) current = id;
+  });
+  navLinks.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -5,55 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motor de Disparos — Seazone</title>
     <style>
-        :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#232735;--border:#2d3244;--text:#e4e6ed;--text-muted:#8b90a0;--accent:#6c8cff;--accent-soft:rgba(108,140,255,0.12);--green:#4ade80;--green-soft:rgba(74,222,128,0.12);--amber:#fbbf24;--amber-soft:rgba(251,191,36,0.12);--purple:#a78bfa;--purple-soft:rgba(167,139,250,0.12);}
+        :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#232735;--border:#2d3244;--text:#e4e6ed;--text-muted:#8b90a0;--accent:#6c8cff;--accent-soft:rgba(108,140,255,0.12);--green:#4ade80;--green-soft:rgba(74,222,128,0.12);--amber:#fbbf24;--amber-soft:rgba(251,191,36,0.12);--purple:#a78bfa;--purple-soft:rgba(167,139,250,0.12);--red:#f87171;--red-soft:rgba(248,113,113,0.12);--cyan:#22d3ee;--cyan-soft:rgba(34,211,238,0.12);--pink:#f472b6;--pink-soft:rgba(244,114,182,0.12);}
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
-        h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#6c8cff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem;}
-        .subtitle{color:var(--text-muted);font-size:0.95rem;margin-bottom:0.5rem;}
-        .meta{color:var(--text-muted);font-size:0.78rem;margin-bottom:2.5rem;}
-        .cards{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;max-width:800px;}
-        .doc-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:360px;text-decoration:none;color:var(--text);transition:all 0.2s;}
-        .doc-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
-        .doc-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem;}
-        .doc-card h2{font-size:1.15rem;font-weight:700;margin-bottom:0.5rem;}
-        .doc-card p{color:var(--text-muted);font-size:0.85rem;line-height:1.5;margin-bottom:1rem;}
-        .doc-tag{display:inline-block;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;}
-        .doc-tag.rn{background:var(--amber-soft);color:var(--amber);}
-        .doc-tag.tech{background:var(--accent-soft);color:var(--accent);}
-        .doc-tag.apres{background:var(--green-soft);color:var(--green);}
-        .status{font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);}
-        .status strong{color:var(--text);}
+        body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;line-height:1.6;}
+        .header{text-align:center;padding:2.5rem 1.5rem 1.5rem;}
+        h1{font-size:1.8rem;font-weight:700;background:linear-gradient(135deg,#6c8cff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .subtitle{color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem;}
+        .meta{color:var(--text-muted);font-size:0.75rem;margin-top:0.3rem;}
+        .container{max-width:1000px;margin:0 auto;padding:0 1.5rem 3rem;}
+
+        /* Category */
+        .category{margin-bottom:2rem;}
+        .cat-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+        .cat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+        .cat-header h2{font-size:1rem;font-weight:700;}
+        .cat-header span{font-size:0.75rem;color:var(--text-muted);}
+
+        /* Doc cards */
+        .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:0.75rem;}
+        .doc{display:flex;gap:0.75rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem;text-decoration:none;color:var(--text);transition:all 0.15s;}
+        .doc:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+        .doc-badge{font-size:0.6rem;font-weight:700;padding:0.15rem 0.45rem;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;margin-top:0.15rem;flex-shrink:0;}
+        .doc-badge.rn{background:var(--amber-soft);color:var(--amber);}
+        .doc-badge.tech{background:var(--accent-soft);color:var(--accent);}
+        .doc-badge.data{background:var(--cyan-soft);color:var(--cyan);}
+        .doc-badge.ui{background:var(--purple-soft);color:var(--purple);}
+        .doc-badge.apres{background:var(--green-soft);color:var(--green);}
+        .doc-info{flex:1;min-width:0;}
+        .doc-title{font-size:0.88rem;font-weight:600;}
+        .doc-desc{font-size:0.78rem;color:var(--text-muted);margin-top:0.15rem;}
     </style>
 </head>
 <body>
-    <h1>Motor de Disparos de Marketing</h1>
-    <div class="subtitle">Comunicacao automatizada, segmentada e rastreavel por vertical</div>
-    <div class="meta">Karen Ubial | Gestora: Mariane Costa Resende | Junho 2026</div>
+    <div class="header">
+        <h1>Motor de Disparos de Marketing</h1>
+        <div class="subtitle">Comunicacao automatizada, segmentada e rastreavel por vertical</div>
+        <div class="meta">Karen Ubial | Gestora: Mariane Costa Resende | Junho 2026</div>
+    </div>
 
-    <div class="cards">
-        <a href="mockup/matriz-estrategica.html" class="doc-card">
-            <div class="doc-icon" style="background:var(--amber-soft);color:var(--amber);">&#128203;</div>
-            <h2>Regras de Negocio</h2>
-            <p>Matriz estrategica de comunicacao: verticais, temperaturas, subtipos, comunicacoes por segmento, exclusoes globais, marcos e cross-vertical.</p>
-            <span class="doc-tag rn">RN</span>
-            <div class="status"><strong>3 verticais</strong> · 34 comunicacoes · 10 exclusoes · 10 marcos</div>
-        </a>
+    <div class="container">
 
-        <a href="mockup/spec-motor-disparos.html" class="doc-card">
-            <div class="doc-icon" style="background:var(--accent-soft);color:var(--accent);">&#9881;</div>
-            <h2>Spec Tecnica</h2>
-            <p>Arquitetura do motor, fluxos de dados, integracoes (CIA/Morada/Nekt), decisoes tecnicas, viabilidade por comunicacao e analytics.</p>
-            <span class="doc-tag tech">TECH</span>
-            <div class="status"><strong>5 fases</strong> · 33 entregas · Hybrid Engine · 8 fontes de dados</div>
-        </a>
+        <!-- REGRAS DE NEGÓCIO -->
+        <div class="category">
+            <div class="cat-header">
+                <div class="cat-icon" style="background:var(--amber-soft);color:var(--amber);">&#128203;</div>
+                <h2>Regras de Negocio</h2>
+                <span>Definicoes validadas com gestores</span>
+            </div>
+            <div class="doc-grid">
+                <a href="mockup/matriz-estrategica.html" class="doc">
+                    <span class="doc-badge rn">RN</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Matriz Estrategica de Comunicacao</div>
+                        <div class="doc-desc">Verticais, temperaturas, subtipos, 34 comunicacoes, exclusoes, marcos, cross-vertical. Comentarios da Mari.</div>
+                    </div>
+                </a>
+                <a href="embasamento-cientifico-disparos.html" class="doc">
+                    <span class="doc-badge rn">RN</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Embasamento Cientifico</div>
+                        <div class="doc-desc">60+ fontes academicas e de mercado que fundamentam as decisoes de segmentacao e cadencia.</div>
+                    </div>
+                </a>
+            </div>
+        </div>
 
-        <a href="mockup/apresentacao-projeto.html" class="doc-card">
-            <div class="doc-icon" style="background:var(--green-soft);color:var(--green);">&#128202;</div>
-            <h2>Apresentacao do Projeto</h2>
-            <p>Visao executiva: dores operacionais, ganhos por fase, entregas tagueadas (SPEC/DEV/IMPL), progresso e timeline.</p>
-            <span class="doc-tag apres">APRESENTACAO</span>
-            <div class="status"><strong>Para Fernando/Iara</strong> · Foco em ganhos operacionais</div>
-        </a>
+        <!-- SPEC & PLANEJAMENTO -->
+        <div class="category">
+            <div class="cat-header">
+                <div class="cat-icon" style="background:var(--accent-soft);color:var(--accent);">&#9881;</div>
+                <h2>Spec e Planejamento</h2>
+                <span>Arquitetura, fases, entregas</span>
+            </div>
+            <div class="doc-grid">
+                <a href="mockup/spec-motor-disparos.html" class="doc">
+                    <span class="doc-badge tech">Tech</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Spec Tecnica do Motor</div>
+                        <div class="doc-desc">Arquitetura Hybrid Engine, integracoes CIA/Morada/Nekt, decisoes tecnicas, viabilidade por comunicacao.</div>
+                    </div>
+                </a>
+                <a href="mockup/apresentacao-projeto.html" class="doc">
+                    <span class="doc-badge apres">Apres</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Apresentacao Executiva</div>
+                        <div class="doc-desc">Visao de negocios: 5 fases, dores operacionais, ganhos, entregas SPEC/DEV/IMPL. Para Fernando/Iara.</div>
+                    </div>
+                </a>
+                <a href="mockup/planejamento-motor.html" class="doc">
+                    <span class="doc-badge tech">Tech</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Planejamento Visual</div>
+                        <div class="doc-desc">Timeline e dependencias entre fases do projeto.</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- ANÁLISE DE DADOS -->
+        <div class="category">
+            <div class="cat-header">
+                <div class="cat-icon" style="background:var(--cyan-soft);color:var(--cyan);">&#128202;</div>
+                <h2>Analise de Dados</h2>
+                <span>Pipedrive, Sapron, cobertura</span>
+            </div>
+            <div class="doc-grid">
+                <a href="relatorio-dados-pipedrive.html" class="doc">
+                    <span class="doc-badge data">Data</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Analise Pipedrive</div>
+                        <div class="doc-desc">Metricas por vertical, motivos de lost, volumes por pipeline, dados que sustentam a segmentacao.</div>
+                    </div>
+                </a>
+                <a href="mockup/relatorio-cobertura-dados.html" class="doc">
+                    <span class="doc-badge data">Data</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Cobertura de Dados</div>
+                        <div class="doc-desc">Quais campos estao disponiveis em cada fonte (Nekt, Sapron, Reservas) pra cada comunicacao.</div>
+                    </div>
+                </a>
+                <a href="mockup/mapa-segmentacao-mari.html" class="doc">
+                    <span class="doc-badge data">Data</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Mapa de Segmentacao</div>
+                        <div class="doc-desc">Visualizacao dos segmentos com criterios e tamanho estimado. Versao validada com Mari.</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- MOCKUPS DE INTERFACE -->
+        <div class="category">
+            <div class="cat-header">
+                <div class="cat-icon" style="background:var(--purple-soft);color:var(--purple);">&#128421;</div>
+                <h2>Mockups de Interface</h2>
+                <span>Telas do motor (conceito)</span>
+            </div>
+            <div class="doc-grid">
+                <a href="mockup/dashboard.html" class="doc">
+                    <span class="doc-badge ui">UI</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Dashboard Operacional</div>
+                        <div class="doc-desc">Metricas em tempo real: disparos, delivery, respostas, deals gerados.</div>
+                    </div>
+                </a>
+                <a href="mockup/campanhas.html" class="doc">
+                    <span class="doc-badge ui">UI</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Lista de Campanhas</div>
+                        <div class="doc-desc">Campanhas ativas, pausadas e concluidas com metricas de performance.</div>
+                    </div>
+                </a>
+                <a href="mockup/criar-campanha.html" class="doc">
+                    <span class="doc-badge ui">UI</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Wizard Nova Campanha</div>
+                        <div class="doc-desc">Fluxo de criacao: selecionar segmento, template, canal, agendar.</div>
+                    </div>
+                </a>
+                <a href="mockup/audiencias.html" class="doc">
+                    <span class="doc-badge ui">UI</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Base e Audiencias</div>
+                        <div class="doc-desc">Gestao de segmentos e audiencias com filtros dinamicos.</div>
+                    </div>
+                </a>
+                <a href="mockup/ciclo-vida.html" class="doc">
+                    <span class="doc-badge ui">UI</span>
+                    <div class="doc-info">
+                        <div class="doc-title">Ciclo de Vida do Lead</div>
+                        <div class="doc-desc">Visualizacao da jornada do lead por temperatura e comunicacoes recebidas.</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ciclo de Vida do Lead — Motor de Disparos Seazone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --border: rgba(255,255,255,0.1);
+      --text: #e2e8f0; --text-muted: #94a3b8; --text-dim: #64748b;
+      --szi: #38bdf8; --szs: #818cf8; --mkp: #fb923c;
+      --positive: #34d399; --negative: #ef4444;
+      --radius: 12px; --radius-sm: 8px; --sidebar-w: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border);
+      padding: 24px 16px; display: flex; flex-direction: column; gap: 8px;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;
+    }
+    .sidebar-logo { font-size: 18px; font-weight: 700; margin-bottom: 4px; padding: 0 8px; }
+    .sidebar-logo span { color: var(--szi); }
+    .sidebar-sub { font-size: 11px; color: var(--text-dim); padding: 0 8px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-link {
+      display: block; padding: 10px 12px; border-radius: var(--radius-sm);
+      color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: background .15s, color .15s;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .nav-link.active { background: rgba(56,189,248,0.12); color: var(--szi); }
+
+    /* ── Main ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; }
+    .page-title { font-size: 24px; font-weight: 700; }
+    .page-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .page-header { margin-bottom: 28px; }
+
+    /* ── Grid ── */
+    .row { display: grid; gap: 20px; margin-bottom: 20px; }
+    .row-3 { grid-template-columns: repeat(3, 1fr); }
+    .row-2 { grid-template-columns: 1fr 1fr; }
+    .row-1 { grid-template-columns: 1fr; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; overflow: hidden;
+    }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card-title .badge {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .badge-szi { background: rgba(56,189,248,0.15); color: var(--szi); }
+    .badge-szs { background: rgba(129,140,248,0.15); color: var(--szs); }
+    .badge-mkp { background: rgba(251,146,60,0.15); color: var(--mkp); }
+
+    /* ── Funnel ── */
+    .funnel { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .funnel-stage {
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      padding: 12px 16px; border-radius: var(--radius-sm); width: 100%; text-align: center;
+      position: relative; transition: transform .15s;
+    }
+    .funnel-stage:hover { transform: scale(1.02); }
+    .funnel-stage .stage-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; opacity: 0.85; }
+    .funnel-stage .stage-value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+    .funnel-stage .stage-pct { font-size: 12px; font-weight: 500; opacity: 0.7; }
+
+    .funnel-drop {
+      font-size: 11px; font-weight: 600; color: var(--negative); padding: 4px 0;
+      display: flex; align-items: center; gap: 4px; opacity: 0.9;
+    }
+    .funnel-drop::before { content: ''; display: inline-block; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--negative); }
+
+    /* Funnel color levels */
+    .funnel-szi .f-lv0 { background: rgba(56,189,248,0.35); }
+    .funnel-szi .f-lv1 { background: rgba(56,189,248,0.27); width: 85%; }
+    .funnel-szi .f-lv2 { background: rgba(56,189,248,0.19); width: 55%; }
+    .funnel-szi .f-lv3 { background: rgba(56,189,248,0.13); width: 35%; }
+    .funnel-szi .f-lv4 { background: rgba(56,189,248,0.08); width: 22%; }
+
+    .funnel-szs .f-lv0 { background: rgba(129,140,248,0.35); }
+    .funnel-szs .f-lv1 { background: rgba(129,140,248,0.27); width: 88%; }
+    .funnel-szs .f-lv2 { background: rgba(129,140,248,0.19); width: 58%; }
+    .funnel-szs .f-lv3 { background: rgba(129,140,248,0.13); width: 40%; }
+    .funnel-szs .f-lv4 { background: rgba(129,140,248,0.08); width: 28%; }
+
+    .funnel-mkp .f-lv0 { background: rgba(251,146,60,0.35); }
+    .funnel-mkp .f-lv1 { background: rgba(251,146,60,0.27); width: 78%; }
+    .funnel-mkp .f-lv2 { background: rgba(251,146,60,0.19); width: 42%; }
+    .funnel-mkp .f-lv3 { background: rgba(251,146,60,0.13); width: 25%; }
+    .funnel-mkp .f-lv4 { background: rgba(251,146,60,0.08); width: 14%; }
+
+    /* ── Table (Drop-offs) ── */
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th { text-align: left; font-weight: 600; color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .tbl td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .tbl tr:last-child td { border-bottom: none; }
+    .severity-4 { background: rgba(239,68,68,0.12); }
+    .severity-3 { background: rgba(239,68,68,0.08); }
+    .severity-2 { background: rgba(239,68,68,0.05); }
+    .drop-val { color: var(--negative); font-weight: 700; }
+    .insight { color: var(--text-muted); font-style: italic; font-size: 12px; }
+
+    /* ── Timeline (Tempo Medio) ── */
+    .timeline-row { display: flex; align-items: center; gap: 0; margin-bottom: 16px; }
+    .timeline-row:last-child { margin-bottom: 0; }
+    .timeline-label { min-width: 40px; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .timeline-segments { display: flex; flex: 1; height: 36px; border-radius: var(--radius-sm); overflow: hidden; }
+    .timeline-seg {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; color: var(--bg); padding: 0 6px;
+      white-space: nowrap; min-width: 40px; position: relative;
+    }
+    .timeline-seg .seg-label { font-size: 9px; opacity: 0.7; position: absolute; top: 2px; left: 6px; }
+    .timeline-seg .seg-value { font-size: 11px; font-weight: 700; }
+
+    .timeline-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+    .timeline-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+    .timeline-legend-item .dot { width: 10px; height: 10px; border-radius: 3px; }
+    .concern-tag { display: inline-block; font-size: 10px; font-weight: 600; color: var(--negative); background: rgba(239,68,68,0.12); padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+
+    /* ── Stacked Bar Chart ── */
+    .chart-week { display: flex; align-items: flex-end; gap: 24px; justify-content: center; padding: 16px 0; min-height: 200px; }
+    .chart-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .chart-bar-stack { display: flex; flex-direction: column-reverse; gap: 2px; width: 56px; }
+    .chart-bar-seg { border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--bg); min-height: 18px; }
+    .chart-label { font-size: 11px; color: var(--text-muted); text-align: center; max-width: 80px; }
+    .chart-total { font-size: 13px; font-weight: 700; }
+    .week-current { position: relative; }
+    .week-current::after {
+      content: 'ATUAL'; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+      font-size: 9px; font-weight: 700; color: var(--szi); background: rgba(56,189,248,0.15);
+      padding: 1px 6px; border-radius: 4px; letter-spacing: .5px;
+    }
+    .chart-legend { display: flex; gap: 20px; justify-content: center; margin-top: 24px; }
+    .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+    .chart-legend-item .swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1200px) {
+      .row-3 { grid-template-columns: 1fr; }
+      .row-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">Motor de Disparos <span>Seazone</span></div>
+    <div class="sidebar-sub">Seazone Marketing</div>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="campanhas.html" class="nav-link">Campanhas</a>
+    <a href="criar-campanha.html" class="nav-link">Criar Campanha</a>
+    <a href="audiencias.html" class="nav-link">Audiencias</a>
+    <a href="ciclo-vida.html" class="nav-link active">Ciclo de Vida</a>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">Ciclo de Vida do Lead</div>
+      <div class="page-subtitle">Do disparo ao resultado — acompanhe cada etapa do funil por vertical</div>
+    </div>
+
+    <!-- Row 1: Funnel Visual — 3 verticals -->
+    <div class="row row-3">
+
+      <!-- SZI Funnel -->
+      <div class="card">
+        <div class="card-title"><span class="badge badge-szi">SZI</span> Seazone Investidores</div>
+        <div class="funnel funnel-szi">
+          <div class="funnel-stage f-lv0">
+            <div class="stage-name">Disparado</div>
+            <div class="stage-value">6.400</div>
+            <div class="stage-pct">100%</div>
+          </div>
+          <div class="funnel-drop">-26%</div>
+          <div class="funnel-stage f-lv1">
+            <div class="stage-name">Abriu</div>
+            <div class="stage-value">4.736</div>
+            <div class="stage-pct">74%</div>
+          </div>
+          <div class="funnel-drop">-77%</div>
+          <div class="funnel-stage f-lv2">
+            <div class="stage-name">Respondeu</div>
+            <div class="stage-value">1.088</div>
+            <div class="stage-pct">17%</div>
+          </div>
+          <div class="funnel-drop">-65%</div>
+          <div class="funnel-stage f-lv3">
+            <div class="stage-name">OP Agendada</div>
+            <div class="stage-value">384</div>
+            <div class="stage-pct">6%</div>
+          </div>
+          <div class="funnel-drop">-72%</div>
+          <div class="funnel-stage f-lv4">
+            <div class="stage-name">Won</div>
+            <div class="stage-value">107</div>
+            <div class="stage-pct">1,7%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SZS Funnel -->
+      <div class="card">
+        <div class="card-title"><span class="badge badge-szs">SZS</span> Seazone Proprietarios</div>
+        <div class="funnel funnel-szs">
+          <div class="funnel-stage f-lv0">
+            <div class="stage-name">Disparado</div>
+            <div class="stage-value">3.200</div>
+            <div class="stage-pct">100%</div>
+          </div>
+          <div class="funnel-drop">-18%</div>
+          <div class="funnel-stage f-lv1">
+            <div class="stage-name">Abriu</div>
+            <div class="stage-value">2.624</div>
+            <div class="stage-pct">82%</div>
+          </div>
+          <div class="funnel-drop">-72%</div>
+          <div class="funnel-stage f-lv2">
+            <div class="stage-name">Respondeu</div>
+            <div class="stage-value">736</div>
+            <div class="stage-pct">23%</div>
+          </div>
+          <div class="funnel-drop">-61%</div>
+          <div class="funnel-stage f-lv3">
+            <div class="stage-name">OP Agendada</div>
+            <div class="stage-value">288</div>
+            <div class="stage-pct">9%</div>
+          </div>
+          <div class="funnel-drop">-57%</div>
+          <div class="funnel-stage f-lv4">
+            <div class="stage-name">Won</div>
+            <div class="stage-value">125</div>
+            <div class="stage-pct">3,9%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MKP Funnel -->
+      <div class="card">
+        <div class="card-title"><span class="badge badge-mkp">MKP</span> Marketplace</div>
+        <div class="funnel funnel-mkp">
+          <div class="funnel-stage f-lv0">
+            <div class="stage-name">Disparado</div>
+            <div class="stage-value">5.200</div>
+            <div class="stage-pct">100%</div>
+          </div>
+          <div class="funnel-drop">-35%</div>
+          <div class="funnel-stage f-lv1">
+            <div class="stage-name">Abriu</div>
+            <div class="stage-value">3.380</div>
+            <div class="stage-pct">65%</div>
+          </div>
+          <div class="funnel-drop">-85%</div>
+          <div class="funnel-stage f-lv2">
+            <div class="stage-name">Respondeu</div>
+            <div class="stage-value">520</div>
+            <div class="stage-pct">10%</div>
+          </div>
+          <div class="funnel-drop">-70%</div>
+          <div class="funnel-stage f-lv3">
+            <div class="stage-name">OP Agendada</div>
+            <div class="stage-value">156</div>
+            <div class="stage-pct">3%</div>
+          </div>
+          <div class="funnel-drop">-88%</div>
+          <div class="funnel-stage f-lv4">
+            <div class="stage-name">Won</div>
+            <div class="stage-value">19</div>
+            <div class="stage-pct">0,4%</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 2: Drop-offs + Tempo Medio -->
+    <div class="row row-2">
+
+      <!-- Left: Onde o Funil Sangra -->
+      <div class="card">
+        <div class="card-title">Onde o Funil Sangra <span style="font-size:11px; color:var(--text-dim); font-weight:400; margin-left:4px;">(Maiores Drop-offs)</span></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Vertical</th>
+              <th>Etapa</th>
+              <th>Drop</th>
+              <th>Volume perdido</th>
+              <th>Insight</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="severity-4">
+              <td><span class="badge badge-mkp">MKP</span></td>
+              <td>Abriu &rarr; Respondeu</td>
+              <td class="drop-val">-85%</td>
+              <td>2.860 leads</td>
+              <td class="insight">Template nao gera engajamento</td>
+            </tr>
+            <tr class="severity-3">
+              <td><span class="badge badge-szi">SZI</span></td>
+              <td>Abriu &rarr; Respondeu</td>
+              <td class="drop-val">-77%</td>
+              <td>3.648 leads</td>
+              <td class="insight">Alta abertura mas sem CTA claro</td>
+            </tr>
+            <tr class="severity-2">
+              <td><span class="badge badge-mkp">MKP</span></td>
+              <td>Respondeu &rarr; OP</td>
+              <td class="drop-val">-70%</td>
+              <td>364 leads</td>
+              <td class="insight">Leads frios sem intencao real</td>
+            </tr>
+            <tr class="severity-2">
+              <td><span class="badge badge-szi">SZI</span></td>
+              <td>Respondeu &rarr; OP</td>
+              <td class="drop-val">-65%</td>
+              <td>704 leads</td>
+              <td class="insight">Timing: lead ja comprou em outro lugar</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right: Tempo Medio entre Etapas -->
+      <div class="card">
+        <div class="card-title">Tempo Medio entre Etapas</div>
+
+        <!-- SZI Timeline -->
+        <div class="timeline-row">
+          <div class="timeline-label" style="color:var(--szi)">SZI</div>
+          <div class="timeline-segments">
+            <div class="timeline-seg" style="flex:2; background:rgba(56,189,248,0.5);">
+              <span class="seg-label">Disp&rarr;Abert</span>
+              <span class="seg-value">2h</span>
+            </div>
+            <div class="timeline-seg" style="flex:12; background:rgba(56,189,248,0.38);">
+              <span class="seg-label">Abert&rarr;Resp</span>
+              <span class="seg-value">1,2 dias</span>
+            </div>
+            <div class="timeline-seg" style="flex:34; background:rgba(56,189,248,0.26);">
+              <span class="seg-label">Resp&rarr;OP</span>
+              <span class="seg-value">3,4 dias</span>
+            </div>
+            <div class="timeline-seg" style="flex:180; background:rgba(56,189,248,0.15);">
+              <span class="seg-label">OP&rarr;Won</span>
+              <span class="seg-value">18 dias</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SZS Timeline -->
+        <div class="timeline-row">
+          <div class="timeline-label" style="color:var(--szs)">SZS</div>
+          <div class="timeline-segments">
+            <div class="timeline-seg" style="flex:1.5; background:rgba(129,140,248,0.5);">
+              <span class="seg-label">Disp&rarr;Abert</span>
+              <span class="seg-value">1,5h</span>
+            </div>
+            <div class="timeline-seg" style="flex:8; background:rgba(129,140,248,0.38);">
+              <span class="seg-label">Abert&rarr;Resp</span>
+              <span class="seg-value">0,8 dias</span>
+            </div>
+            <div class="timeline-seg" style="flex:21; background:rgba(129,140,248,0.26);">
+              <span class="seg-label">Resp&rarr;OP</span>
+              <span class="seg-value">2,1 dias</span>
+            </div>
+            <div class="timeline-seg" style="flex:120; background:rgba(129,140,248,0.15);">
+              <span class="seg-label">OP&rarr;Won</span>
+              <span class="seg-value">12 dias</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MKP Timeline -->
+        <div class="timeline-row">
+          <div class="timeline-label" style="color:var(--mkp)">MKP</div>
+          <div class="timeline-segments">
+            <div class="timeline-seg" style="flex:4; background:rgba(251,146,60,0.5);">
+              <span class="seg-label">Disp&rarr;Abert</span>
+              <span class="seg-value">4h</span>
+            </div>
+            <div class="timeline-seg" style="flex:23; background:rgba(251,146,60,0.38);">
+              <span class="seg-label">Abert&rarr;Resp</span>
+              <span class="seg-value">2,3 dias</span>
+            </div>
+            <div class="timeline-seg" style="flex:57; background:rgba(251,146,60,0.26);">
+              <span class="seg-label">Resp&rarr;OP</span>
+              <span class="seg-value">5,7 dias</span>
+            </div>
+            <div class="timeline-seg" style="flex:310; background:rgba(251,146,60,0.15);">
+              <span class="seg-label">OP&rarr;Won</span>
+              <span class="seg-value">31 dias</span>
+            </div>
+          </div>
+          <span class="concern-tag">Ciclo longo</span>
+        </div>
+
+        <div class="timeline-legend">
+          <div class="timeline-legend-item"><div class="dot" style="background:rgba(255,255,255,0.4)"></div> Disparo &rarr; Abertura</div>
+          <div class="timeline-legend-item"><div class="dot" style="background:rgba(255,255,255,0.3)"></div> Abertura &rarr; Resposta</div>
+          <div class="timeline-legend-item"><div class="dot" style="background:rgba(255,255,255,0.2)"></div> Resposta &rarr; OP</div>
+          <div class="timeline-legend-item"><div class="dot" style="background:rgba(255,255,255,0.12)"></div> OP &rarr; Won</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 3: Tendencia Semanal -->
+    <div class="row row-1">
+      <div class="card">
+        <div class="card-title">Tendencia Semanal — OPs Geradas por Disparo</div>
+
+        <div class="chart-week">
+          <!-- Sem 1 -->
+          <div class="chart-col">
+            <div class="chart-total">14</div>
+            <div class="chart-bar-stack">
+              <div class="chart-bar-seg" style="height:40px; background:var(--szi);">8</div>
+              <div class="chart-bar-seg" style="height:25px; background:var(--szs);">5</div>
+              <div class="chart-bar-seg" style="height:10px; background:var(--mkp);">1</div>
+            </div>
+            <div class="chart-label">Sem 1<br><span style="font-size:10px; color:var(--text-dim)">Jun 1-7</span></div>
+          </div>
+
+          <!-- Sem 2 (current) -->
+          <div class="chart-col week-current">
+            <div class="chart-total">21</div>
+            <div class="chart-bar-stack">
+              <div class="chart-bar-seg" style="height:60px; background:var(--szi);">12</div>
+              <div class="chart-bar-seg" style="height:35px; background:var(--szs);">7</div>
+              <div class="chart-bar-seg" style="height:14px; background:var(--mkp);">2</div>
+            </div>
+            <div class="chart-label">Sem 2<br><span style="font-size:10px; color:var(--text-dim)">Jun 8-14</span></div>
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <div class="chart-legend-item"><div class="swatch" style="background:var(--szi)"></div> SZI</div>
+          <div class="chart-legend-item"><div class="swatch" style="background:var(--szs)"></div> SZS</div>
+          <div class="chart-legend-item"><div class="swatch" style="background:var(--mkp)"></div> MKP</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

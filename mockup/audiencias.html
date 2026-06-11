@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base & Audiências — Motor de Disparos Seazone</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: #1e293b;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f8fafc;
+    padding: 8px 12px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-logo .icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar nav { display: flex; flex-direction: column; gap: 4px; }
+  .sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .sidebar nav a:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+  .sidebar nav a.active {
+    background: rgba(56,189,248,0.1);
+    color: #38bdf8;
+  }
+  .sidebar nav a .nav-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  /* Main content */
+  .main {
+    margin-left: 260px;
+    flex: 1;
+    padding: 32px 40px;
+    min-width: 0;
+  }
+
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .top-bar h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  .pills {
+    display: flex;
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    padding: 4px;
+    border-radius: 10px;
+  }
+  .pill {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    transition: all 0.2s;
+  }
+  .pill:hover { color: #e2e8f0; }
+  .pill.active { background: #38bdf8; color: #0f172a; }
+  .pill[data-v="szi"] { }
+  .pill[data-v="szs"] { }
+  .pill[data-v="mkp"] { }
+
+  /* Cards */
+  .card {
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 16px;
+  }
+
+  /* Row layouts */
+  .row { display: grid; gap: 20px; margin-bottom: 20px; }
+  .row-3 { grid-template-columns: repeat(3, 1fr); }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-1 { grid-template-columns: 1fr; }
+
+  /* Temperature cards */
+  .temp-card { position: relative; overflow: hidden; }
+  .temp-card .accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+  }
+  .temp-card.quente .accent { background: linear-gradient(90deg, #ef4444, #f97316); }
+  .temp-card.morno .accent { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .temp-card.frio .accent { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+
+  .temp-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding-top: 8px;
+  }
+  .temp-header .emoji { font-size: 22px; }
+  .temp-header .label {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .temp-header .count {
+    font-size: 26px;
+    font-weight: 800;
+    margin-left: auto;
+  }
+  .temp-card.quente .temp-header .label,
+  .temp-card.quente .temp-header .count { color: #ef4444; }
+  .temp-card.morno .temp-header .label,
+  .temp-card.morno .temp-header .count { color: #f59e0b; }
+  .temp-card.frio .temp-header .label,
+  .temp-card.frio .temp-header .count { color: #38bdf8; }
+
+  .temp-def {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .temp-breakdown {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .temp-tag {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+  }
+  .temp-insight {
+    font-size: 12px;
+    color: #cbd5e1;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .temp-card.quente .temp-insight { border-color: #ef4444; }
+  .temp-card.morno .temp-insight { border-color: #f59e0b; }
+  .temp-card.frio .temp-insight { border-color: #38bdf8; }
+
+  .motivos {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .motivo {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(245,158,11,0.1);
+    color: #fbbf24;
+  }
+
+  /* Colors */
+  .c-szi { color: #38bdf8; }
+  .c-szs { color: #818cf8; }
+  .c-mkp { color: #fb923c; }
+  .c-green { color: #34d399; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .acao-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .acao-nao { background: rgba(239,68,68,0.1); color: #f87171; }
+  .acao-primeira { background: rgba(52,211,153,0.1); color: #34d399; }
+  .acao-segunda { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .acao-nutricao { background: rgba(56,189,248,0.1); color: #38bdf8; }
+  .acao-baixa { background: rgba(255,255,255,0.05); color: #94a3b8; }
+
+  /* Bar chart */
+  .bar-chart { margin-top: 16px; }
+  .bar-group {
+    margin-bottom: 20px;
+  }
+  .bar-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .bar-type {
+    font-size: 11px;
+    width: 70px;
+    text-align: right;
+    color: #94a3b8;
+  }
+  .bar-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    min-width: 50px;
+    transition: width 0.5s;
+  }
+  .bar-fill.com { background: #34d399; }
+  .bar-fill.sem { background: #475569; color: #94a3b8; }
+  .bar-value {
+    font-size: 13px;
+    font-weight: 600;
+    width: 55px;
+  }
+  .killer-text {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #34d399;
+    padding: 16px;
+    background: rgba(52,211,153,0.08);
+    border-radius: 8px;
+  }
+
+  /* Exclusions */
+  .exclusion-list { display: flex; flex-direction: column; gap: 12px; }
+  .exclusion-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+  }
+  .exclusion-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .exclusion-text { flex: 1; }
+  .exclusion-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 2px;
+  }
+  .exclusion-desc {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+  /* Toggle switch */
+  .toggle {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #475569;
+    border-radius: 22px;
+    transition: 0.3s;
+  }
+  .toggle .slider:before {
+    content: '';
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle input:checked + .slider { background: #34d399; }
+  .toggle input:checked + .slider:before { transform: translateX(18px); }
+
+  /* Cross-sell Venn */
+  .crosssell-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    min-height: 360px;
+  }
+  .venn-container {
+    position: relative;
+    width: 500px;
+    height: 340px;
+  }
+  .venn-circle {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-weight: 700;
+    font-size: 18px;
+    border: 2px solid;
+  }
+  .venn-circle.szi {
+    top: 0;
+    left: 80px;
+    background: rgba(56,189,248,0.1);
+    border-color: rgba(56,189,248,0.4);
+    color: #38bdf8;
+  }
+  .venn-circle.szs {
+    top: 100px;
+    left: 0;
+    background: rgba(129,140,248,0.1);
+    border-color: rgba(129,140,248,0.4);
+    color: #818cf8;
+  }
+  .venn-circle.mkp {
+    top: 100px;
+    left: 160px;
+    background: rgba(251,146,60,0.1);
+    border-color: rgba(251,146,60,0.4);
+    color: #fb923c;
+  }
+  .venn-circle .venn-label { font-size: 14px; opacity: 0.8; }
+
+  .venn-overlap {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(15,23,42,0.9);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+    white-space: nowrap;
+  }
+  .venn-overlap.szi-szs { top: 120px; left: 95px; color: #a5b4fc; }
+  .venn-overlap.szi-mkp { top: 120px; left: 230px; color: #fdba74; }
+  .venn-overlap.szs-mkp { top: 230px; left: 110px; color: #c4b5fd; }
+  .venn-overlap.center { top: 170px; left: 155px; color: #f8fafc; background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); }
+
+  .crosssell-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-left: 60px;
+    flex-shrink: 0;
+  }
+  .highlight-box {
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border-left: 3px solid;
+    max-width: 340px;
+  }
+  .highlight-box.szs-to-szi { border-color: #38bdf8; }
+  .highlight-box.szi-to-szs { border-color: #818cf8; }
+  .highlight-num {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .highlight-box.szs-to-szi .highlight-num { color: #38bdf8; }
+  .highlight-box.szi-to-szs .highlight-num { color: #818cf8; }
+  .highlight-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+  .highlight-desc strong { color: #e2e8f0; }
+
+  /* Horizontal bar chart (canais) */
+  .hbar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .hbar-label {
+    font-size: 13px;
+    font-weight: 500;
+    width: 180px;
+    text-align: right;
+    color: #cbd5e1;
+    flex-shrink: 0;
+  }
+  .hbar-track {
+    flex: 1;
+    height: 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hbar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    min-width: 50px;
+    transition: width 0.6s ease;
+  }
+  .hbar-fill.green { background: linear-gradient(90deg, #22c55e, #34d399); }
+  .hbar-fill.teal { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
+  .hbar-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .hbar-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); color: #fff; }
+
+  /* Motivos de perda */
+  .motivo-reativavel {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .motivo-sim { background: rgba(52,211,153,0.1); color: #34d399; }
+  .motivo-talvez { background: rgba(245,158,11,0.1); color: #fbbf24; }
+  .motivo-nao { background: rgba(239,68,68,0.1); color: #f87171; }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 1200px) {
+    .row-3 { grid-template-columns: 1fr; }
+    .row-2 { grid-template-columns: 1fr; }
+    .crosssell-visual { flex-direction: column; }
+    .crosssell-highlights { margin-left: 0; margin-top: 24px; flex-direction: row; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">&#9889;</div>
+    Motor de Disparos
+  </div>
+  <nav>
+    <a href="dashboard.html">
+      <span class="nav-icon">&#9632;</span>
+      Dashboard
+    </a>
+    <a href="campanhas.html">
+      <span class="nav-icon">&#9993;</span>
+      Campanhas
+    </a>
+    <a href="criar-campanha.html">
+      <span class="nav-icon">&#10010;</span>
+      Nova Campanha
+    </a>
+    <a href="ciclo-vida.html">
+      <span class="nav-icon">&#9854;</span>
+      Ciclo de Vida
+    </a>
+    <a href="audiencias.html" class="active">
+      <span class="nav-icon">&#9783;</span>
+      Base / Audiencias
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <h1>Base &amp; Audiencias</h1>
+    <div class="pills">
+      <button class="pill active" data-v="todas">Todas</button>
+      <button class="pill" data-v="szi" style="--accent:#38bdf8">SZI</button>
+      <button class="pill" data-v="szs" style="--accent:#818cf8">SZS</button>
+      <button class="pill" data-v="mkp" style="--accent:#fb923c">MKP</button>
+    </div>
+  </div>
+
+  <!-- Temperature overview -->
+  <div class="row row-3">
+
+    <!-- QUENTE -->
+    <div class="card temp-card quente">
+      <div class="accent"></div>
+      <div class="temp-header">
+        <span class="emoji">&#128293;</span>
+        <span class="label">QUENTE</span>
+        <span class="count">9.399</span>
+      </div>
+      <p class="temp-def">Ja comprou da Seazone (Won). Base de cross-sell e upsell.</p>
+      <div class="temp-breakdown">
+        <span class="temp-tag c-szi">SZI: 3.099</span>
+        <span class="temp-tag c-szs">SZS: 6.300</span>
+      </div>
+      <div class="temp-insight">
+        Potencial cross-sell: <strong>1.062</strong> proprietarios &rarr; investidores, <strong>491</strong> investidores &rarr; gestao
+      </div>
+    </div>
+
+    <!-- MORNO -->
+    <div class="card temp-card morno">
+      <div class="accent"></div>
+      <div class="temp-header">
+        <span class="emoji">&#128993;</span>
+        <span class="label">MORNO</span>
+        <span class="count">15.683</span>
+      </div>
+      <p class="temp-def">Chegou ate OP (reuniao) e deu Lost. Conhece o modelo, ja foi qualificado.</p>
+      <div class="temp-breakdown">
+        <span class="temp-tag c-szi">SZI COM OP Lost: 6.400</span>
+        <span class="temp-tag c-szs">SZS COM OP Lost: 6.643</span>
+        <span class="temp-tag c-mkp">MKP COM OP Lost: 2.640</span>
+      </div>
+      <div class="motivos">
+        <span class="motivo">Timing: 2.723</span>
+        <span class="motivo">Nao atende: 1.092</span>
+        <span class="motivo">Sem interesse: 930</span>
+      </div>
+      <div class="temp-insight">
+        Taxa historica de reativacao: <strong>15,3%</strong> &mdash; a base mais valiosa do funil
+      </div>
+    </div>
+
+    <!-- FRIO -->
+    <div class="card temp-card frio">
+      <div class="accent"></div>
+      <div class="temp-header">
+        <span class="emoji">&#10052;&#65039;</span>
+        <span class="label">FRIO</span>
+        <span class="count">116.591</span>
+      </div>
+      <p class="temp-def">Travou ANTES da OP. Nao conhece o modelo de negocio. Precisa nutricao longa.</p>
+      <div class="temp-breakdown">
+        <span class="temp-tag c-szi">SZI SEM OP: 53.807</span>
+        <span class="temp-tag c-szs">SZS SEM OP: 42.398</span>
+        <span class="temp-tag c-mkp">MKP SEM OP: 20.386</span>
+      </div>
+      <div class="temp-insight">
+        Conversao historica: <strong>0%</strong>. Objetivo: empurrar pra OP.
+      </div>
+    </div>
+  </div>
+
+  <!-- Segmentacao por Recencia -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-title">Segmentacao por Recencia</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Faixa</th>
+              <th>SZI</th>
+              <th>SZS</th>
+              <th>MKP</th>
+              <th>Total</th>
+              <th>Acao Sugerida</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>&lt;30 dias (cooldown)</td>
+              <td class="c-szi">3.347</td>
+              <td class="c-szs">1.204</td>
+              <td class="c-mkp">3.047</td>
+              <td style="font-weight:700">7.598</td>
+              <td><span class="acao-tag acao-nao">&#9940; Nao disparar</span></td>
+            </tr>
+            <tr>
+              <td>30-90 dias (morno)</td>
+              <td class="c-szi">6.473</td>
+              <td class="c-szs">2.473</td>
+              <td class="c-mkp">3.265</td>
+              <td style="font-weight:700">12.211</td>
+              <td><span class="acao-tag acao-primeira">&#128994; Primeira onda</span></td>
+            </tr>
+            <tr>
+              <td>90-180 dias</td>
+              <td class="c-szi">8.400</td>
+              <td class="c-szs">3.428</td>
+              <td class="c-mkp">3.245</td>
+              <td style="font-weight:700">15.073</td>
+              <td><span class="acao-tag acao-segunda">&#128993; Segunda onda</span></td>
+            </tr>
+            <tr>
+              <td>180-365 dias</td>
+              <td class="c-szi">11.396</td>
+              <td class="c-szs">4.582</td>
+              <td class="c-mkp">5.447</td>
+              <td style="font-weight:700">21.425</td>
+              <td><span class="acao-tag acao-nutricao">&#128309; Nutricao mensal</span></td>
+            </tr>
+            <tr>
+              <td>&gt;365 dias</td>
+              <td class="c-szi">24.294</td>
+              <td class="c-szs">23.008</td>
+              <td class="c-mkp">6.606</td>
+              <td style="font-weight:700">53.908</td>
+              <td><span class="acao-tag acao-baixa">&#9898; Baixa frequencia</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COM OP vs SEM OP + Exclusoes -->
+  <div class="row row-2">
+
+    <!-- Motivos de Perda Reativáveis -->
+    <div class="card">
+      <div class="card-title">Oportunidade de Reativacao por Motivo de Perda</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">
+        Leads COM OP que foram perdidos — ordenados por potencial de reativacao.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.15);border-radius:8px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Timing / Momento errado</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">SZI: 2.800 &middot; SZS: 1.644 &middot; MKP: 890</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:700;color:var(--positive);">5.334</div>
+            <div style="font-size:11px;color:var(--positive);">Alta chance</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.15);border-radius:8px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Ja comprou outro</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">SZI: 3.100 &middot; SZS: 1.900 &middot; MKP: 180</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:700;color:var(--positive);">5.180</div>
+            <div style="font-size:11px;color:var(--positive);">Cross-sell</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Preco / Condicoes</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">SZI: 1.200 &middot; SZS: 2.800 &middot; MKP: 450</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:700;color:#fbbf24;">4.450</div>
+            <div style="font-size:11px;color:#fbbf24;">Se condicao mudar</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Nao atende / Nao responde</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">SZI: 35.000 &middot; SZS: 8.200 &middot; MKP: 6.100</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:700;color:#fbbf24;">49.300</div>
+            <div style="font-size:11px;color:#fbbf24;">Baixa chance</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">Sem interesse declarado</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">SZI: 5.400 &middot; SZS: 3.100 &middot; MKP: 2.300</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:700;color:var(--negative);">10.800</div>
+            <div style="font-size:11px;color:var(--negative);">Nao reabordar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exclusoes Ativas -->
+    <div class="card">
+      <div class="card-title">Exclusoes Ativas</div>
+      <div class="exclusion-list">
+
+        <div class="exclusion-item">
+          <span class="exclusion-icon">&#9940;</span>
+          <div class="exclusion-text">
+            <div class="exclusion-name">Expansao / Condominios</div>
+            <div class="exclusion-desc">Proibicao contratual, multa. NUNCA abordar.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="exclusion-item">
+          <span class="exclusion-icon">&#9940;</span>
+          <div class="exclusion-text">
+            <div class="exclusion-name">Comprador recente (&lt;30 dias)</div>
+            <div class="exclusion-desc">Quem comprou spot nao recebe oferta de outro imediatamente.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="exclusion-item">
+          <span class="exclusion-icon">&#9940;</span>
+          <div class="exclusion-text">
+            <div class="exclusion-name">Mesmo spot pro dono</div>
+            <div class="exclusion-desc">Nunca oferecer o mesmo spot que a pessoa ja possui.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="exclusion-item">
+          <span class="exclusion-icon">&#9940;</span>
+          <div class="exclusion-text">
+            <div class="exclusion-name">Cooldown pos-disparo</div>
+            <div class="exclusion-desc">Respeitar intervalo minimo entre comunicacoes.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="exclusion-item">
+          <span class="exclusion-icon">&#9888;&#65039;</span>
+          <div class="exclusion-text">
+            <div class="exclusion-name">Anti-saturacao WA</div>
+            <div class="exclusion-desc">Maximo 4 WhatsApp/mes por pessoa.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="exclusion-item">
+          <span class="exclusion-icon">&#9888;&#65039;</span>
+          <div class="exclusion-text">
+            <div class="exclusion-name">Anti-saturacao Email</div>
+            <div class="exclusion-desc">Maximo 8 emails/mes por pessoa.</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Cross-sell Oportunidades -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-title">Cross-sell &mdash; Oportunidades entre Verticais</div>
+      <div class="crosssell-visual">
+
+        <div class="venn-container">
+          <div class="venn-circle szi">
+            SZI
+            <span class="venn-label">Investimento</span>
+          </div>
+          <div class="venn-circle szs">
+            SZS
+            <span class="venn-label">Gestao</span>
+          </div>
+          <div class="venn-circle mkp">
+            MKP
+            <span class="venn-label">Marketplace</span>
+          </div>
+
+          <div class="venn-overlap szi-szs">SZI &harr; SZS: 3.405</div>
+          <div class="venn-overlap szi-mkp">SZI &harr; MKP: 5.949</div>
+          <div class="venn-overlap szs-mkp">SZS &harr; MKP: 1.634</div>
+          <div class="venn-overlap center">&#127919; 884 nas 3</div>
+        </div>
+
+        <div class="crosssell-highlights">
+          <div class="highlight-box szs-to-szi">
+            <div class="highlight-num">1.062</div>
+            <div class="highlight-desc">
+              <strong>Proprietarios SZS</strong> &rarr; potencial investidor SZI<br>
+              Ja confiam na Seazone, podem diversificar com cotas.
+            </div>
+          </div>
+          <div class="highlight-box szi-to-szs">
+            <div class="highlight-num">491</div>
+            <div class="highlight-desc">
+              <strong>Investidores SZI</strong> &rarr; potencial gestao SZS<br>
+              Possuem imovel proprio, podem aderir a gestao Seazone.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Funil por Vertical -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-title">Funil por Vertical</div>
+      <p class="section-subtitle">Dados consolidados do Pipedrive &mdash; todos os deals desde o inicio da operacao.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Vertical</th>
+              <th>Deals</th>
+              <th>Won</th>
+              <th>Taxa</th>
+              <th>COM OP</th>
+              <th>SEM OP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong class="c-szi">SZI</strong></td>
+              <td>78.359</td>
+              <td style="font-weight:700">3.099</td>
+              <td style="font-weight:700; color:#34d399">3,95%</td>
+              <td style="color:#34d399">27,8%</td>
+              <td style="color:#64748b">0%</td>
+            </tr>
+            <tr>
+              <td><strong class="c-szs">SZS</strong></td>
+              <td>68.941</td>
+              <td style="font-weight:700">6.300</td>
+              <td style="font-weight:700; color:#34d399">9,14%</td>
+              <td style="color:#34d399">43,5%</td>
+              <td style="color:#64748b">0%</td>
+            </tr>
+            <tr>
+              <td><strong class="c-mkp">MKP</strong></td>
+              <td>27.539</td>
+              <td style="font-weight:700">328</td>
+              <td style="font-weight:700; color:#fbbf24">1,19%</td>
+              <td style="color:#34d399">10,5%</td>
+              <td style="color:#64748b">0%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Canais de Origem - Taxa de Conversao SZI -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-title">Top Canais de Origem &mdash; Taxa de Conversao SZI</div>
+      <p class="section-subtitle">Canais ranqueados por taxa de conversao (Won / Total Deals). Dados Nekt/Pipedrive.</p>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Colaborador Seazone</span>
+        <div class="hbar-track">
+          <div class="hbar-fill green" style="width: 87.3%">87,3%</div>
+        </div>
+      </div>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Spot Seazone</span>
+        <div class="hbar-track">
+          <div class="hbar-fill teal" style="width: 48.9%">48,9%</div>
+        </div>
+      </div>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Indicacao Colaborador</span>
+        <div class="hbar-track">
+          <div class="hbar-fill teal" style="width: 44.6%">44,6%</div>
+        </div>
+      </div>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Cliente Szn</span>
+        <div class="hbar-track">
+          <div class="hbar-fill amber" style="width: 23.7%">23,7%</div>
+        </div>
+      </div>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Indicacao Corretor</span>
+        <div class="hbar-track">
+          <div class="hbar-fill amber" style="width: 17.8%">17,8%</div>
+        </div>
+      </div>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Marketing (pago)</span>
+        <div class="hbar-track">
+          <div class="hbar-fill red" style="width: 5%">0,9%</div>
+        </div>
+      </div>
+
+      <div class="hbar-row">
+        <span class="hbar-label">Prospeccao Ativa</span>
+        <div class="hbar-track">
+          <div class="hbar-fill red" style="width: 5%">0,5%</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Motivos de Perda por Vertical -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-title">Motivos de Perda por Vertical</div>
+      <p class="section-subtitle">Top motivos de Lost que informam estrategia de reativacao. Dados Pipedrive.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Motivo</th>
+              <th>SZI</th>
+              <th>SZS</th>
+              <th>MKP</th>
+              <th>Reativavel?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nao atende/responde</td>
+              <td class="c-szi">35.000</td>
+              <td class="c-szs">8.200</td>
+              <td class="c-mkp">6.100</td>
+              <td><span class="motivo-reativavel motivo-talvez">&#9888;&#65039; Baixa chance</span></td>
+            </tr>
+            <tr>
+              <td>Timing</td>
+              <td class="c-szi">2.800</td>
+              <td class="c-szs">1.644</td>
+              <td class="c-mkp">890</td>
+              <td><span class="motivo-reativavel motivo-sim">&#9989; Alta chance</span></td>
+            </tr>
+            <tr>
+              <td>Sem interesse</td>
+              <td class="c-szi">5.400</td>
+              <td class="c-szs">3.100</td>
+              <td class="c-mkp">2.300</td>
+              <td><span class="motivo-reativavel motivo-nao">&#10060; Nao reabordar</span></td>
+            </tr>
+            <tr>
+              <td>Preco/Condicoes</td>
+              <td class="c-szi">1.200</td>
+              <td class="c-szs">2.800</td>
+              <td class="c-mkp">450</td>
+              <td><span class="motivo-reativavel motivo-sim">&#9989; Se condicao mudar</span></td>
+            </tr>
+            <tr>
+              <td>Ja comprou outro</td>
+              <td class="c-szi">3.100</td>
+              <td class="c-szs">1.900</td>
+              <td class="c-mkp">180</td>
+              <td><span class="motivo-reativavel motivo-sim">&#9989; Cross-sell</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Pill selection interaction
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

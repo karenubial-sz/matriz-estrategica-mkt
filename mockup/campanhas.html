@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campanhas — Motor de Disparos Seazone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: rgba(255,255,255,0.1);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --szi: #38bdf8;
+      --szs: #818cf8;
+      --mkp: #fb923c;
+      --positive: #34d399;
+      --negative: #ef4444;
+      --yellow: #facc15;
+      --radius-card: 12px;
+      --radius-inner: 8px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-logo {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--szi);
+      padding: 8px 12px 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-logo span {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-inner);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(56,189,248,0.1);
+      color: var(--szi);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* ── Main ── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 32px 40px;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--szi);
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: var(--radius-inner);
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    /* ── Filters ── */
+    .filters-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius-inner);
+      padding: 3px;
+    }
+
+    .tab {
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: all 0.15s;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .separator {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    .pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .pill:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .pill.active { border-color: var(--text-muted); color: var(--text); background: rgba(255,255,255,0.05); }
+    .pill.szi { border-color: var(--szi); color: var(--szi); }
+    .pill.szs { border-color: var(--szs); color: var(--szs); }
+    .pill.mkp { border-color: var(--mkp); color: var(--mkp); }
+
+    /* ── Campaign table ── */
+    .campaign-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .campaign-header {
+      display: grid;
+      grid-template-columns: 28px 1fr 80px 60px 90px 90px 260px 100px;
+      gap: 12px;
+      align-items: center;
+      padding: 8px 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .campaign-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 80px 60px 90px 90px 260px 100px;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      transition: border-color 0.15s;
+    }
+
+    .campaign-row:hover {
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    /* Status dot */
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.ativa { background: var(--positive); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
+    .status-dot.agendada { background: var(--yellow); box-shadow: 0 0 6px rgba(250,204,21,0.3); }
+    .status-dot.finalizada { background: var(--text-dim); }
+    .status-dot.rascunho { background: transparent; border: 2px dashed var(--text-dim); }
+
+    /* Campaign name block */
+    .campaign-name-block {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .campaign-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .campaign-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .badge-regua { background: rgba(56,189,248,0.12); color: var(--szi); }
+    .badge-pontual { background: rgba(129,140,248,0.12); color: var(--szs); }
+
+    .badge-szi { background: rgba(56,189,248,0.15); color: var(--szi); }
+    .badge-szs { background: rgba(129,140,248,0.15); color: var(--szs); }
+    .badge-mkp { background: rgba(251,146,60,0.15); color: var(--mkp); }
+
+    /* Channel */
+    .channel {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .channel-icon {
+      font-size: 14px;
+    }
+
+    /* Audience */
+    .audience {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      text-align: right;
+    }
+
+    .audience small {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-dim);
+    }
+
+    /* Metrics */
+    .metrics {
+      display: flex;
+      gap: 16px;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 70px;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .metric-value .pct {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    .metric-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    .metric-bar-fill.sent { background: var(--szi); }
+    .metric-bar-fill.opened { background: var(--positive); }
+    .metric-bar-fill.converted { background: var(--mkp); }
+
+    /* Date */
+    .campaign-date {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    /* Scheduled placeholder */
+    .metrics-placeholder {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* ── Summary bar ── */
+    .summary-bar {
+      margin-top: 24px;
+      padding: 14px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-bar strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .summary-sep {
+      color: var(--text-dim);
+    }
+
+    /* Responsive: ensure minimum width for content */
+    @media (min-width: 1440px) {
+      .main { max-width: 1400px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">Motor de Disparos <span>Seazone</span></div>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="campanhas.html" class="nav-item active">
+      <span class="nav-icon">📨</span> Campanhas
+    </a>
+    <a href="criar-campanha.html" class="nav-item">
+      <span class="nav-icon">➕</span> Nova Campanha
+    </a>
+    <a href="audiencias.html" class="nav-item">
+      <span class="nav-icon">👥</span> Base / Audiencias
+    </a>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1 class="page-title">Campanhas</h1>
+      <a href="criar-campanha.html" class="btn-primary">+ Nova Campanha</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <div class="tabs">
+        <button class="tab">Todas</button>
+        <button class="tab active">Ativas</button>
+        <button class="tab">Agendadas</button>
+        <button class="tab">Finalizadas</button>
+        <button class="tab">Rascunho</button>
+      </div>
+      <div class="separator"></div>
+      <div class="pills">
+        <button class="pill active">Todas</button>
+        <button class="pill szi">SZI</button>
+        <button class="pill szs">SZS</button>
+        <button class="pill mkp">MKP</button>
+      </div>
+    </div>
+
+    <!-- Campaign list -->
+    <div class="campaign-header">
+      <span></span>
+      <span>Campanha</span>
+      <span>Tipo</span>
+      <span>Vertical</span>
+      <span>Canal</span>
+      <span style="text-align:right">Audiencia</span>
+      <span>Metricas</span>
+      <span style="text-align:right">Data</span>
+    </div>
+
+    <div class="campaign-list">
+
+      <!-- 1. Ativa -->
+      <div class="campaign-row">
+        <span class="status-dot ativa"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Reativacao SZI Mornos COM OP</span>
+          <span class="campaign-sub">Regua D0 → D+7</span>
+        </div>
+        <span class="badge badge-regua">Regua</span>
+        <span class="badge badge-szi">SZI</span>
+        <span class="channel"><span class="channel-icon">💬</span> WhatsApp</span>
+        <span class="audience">6.400<small>audiencia</small></span>
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Enviados</span>
+            <span class="metric-value">2.340</span>
+            <div class="metric-bar"><div class="metric-bar-fill sent" style="width:36.6%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Abertos</span>
+            <span class="metric-value">798 <span class="pct">34%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill opened" style="width:34%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Convertidos</span>
+            <span class="metric-value">47 <span class="pct">2%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill converted" style="width:2%"></div></div>
+          </div>
+        </div>
+        <span class="campaign-date">Criada 02/06</span>
+      </div>
+
+      <!-- 2. Ativa -->
+      <div class="campaign-row">
+        <span class="status-dot ativa"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Cross-sell Proprietarios→Investidores</span>
+          <span class="campaign-sub">Pontual</span>
+        </div>
+        <span class="badge badge-pontual">Pontual</span>
+        <span class="badge badge-szs">SZS</span>
+        <span class="channel"><span class="channel-icon">📧</span> Email</span>
+        <span class="audience">1.062<small>audiencia</small></span>
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Enviados</span>
+            <span class="metric-value">1.062</span>
+            <div class="metric-bar"><div class="metric-bar-fill sent" style="width:100%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Abertos</span>
+            <span class="metric-value">436 <span class="pct">41%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill opened" style="width:41%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Convertidos</span>
+            <span class="metric-value">23 <span class="pct">2,2%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill converted" style="width:2.2%"></div></div>
+          </div>
+        </div>
+        <span class="campaign-date">Criada 01/06</span>
+      </div>
+
+      <!-- 3. Ativa -->
+      <div class="campaign-row">
+        <span class="status-dot ativa"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Nutricao MKP Base Fria</span>
+          <span class="campaign-sub">Regua D0 → D+14</span>
+        </div>
+        <span class="badge badge-regua">Regua</span>
+        <span class="badge badge-mkp">MKP</span>
+        <span class="channel"><span class="channel-icon">📧</span> Email</span>
+        <span class="audience">11.957<small>audiencia</small></span>
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Enviados</span>
+            <span class="metric-value">5.200</span>
+            <div class="metric-bar"><div class="metric-bar-fill sent" style="width:43.5%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Abertos</span>
+            <span class="metric-value">1.144 <span class="pct">22%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill opened" style="width:22%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Convertidos</span>
+            <span class="metric-value">12 <span class="pct">0,2%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill converted" style="width:0.2%"></div></div>
+          </div>
+        </div>
+        <span class="campaign-date">Criada 28/05</span>
+      </div>
+
+      <!-- 4. Agendada -->
+      <div class="campaign-row">
+        <span class="status-dot agendada"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Reativacao SZS Timing Lost</span>
+          <span class="campaign-sub">Regua D0 → D+3 → D+7</span>
+        </div>
+        <span class="badge badge-regua">Regua</span>
+        <span class="badge badge-szs">SZS</span>
+        <span class="channel"><span class="channel-icon">💬</span> WhatsApp</span>
+        <span class="audience">1.644<small>audiencia</small></span>
+        <div class="metrics">
+          <span class="metrics-placeholder">Agendada para 15/06</span>
+        </div>
+        <span class="campaign-date">Agendada 15/06</span>
+      </div>
+
+      <!-- 5. Agendada -->
+      <div class="campaign-row">
+        <span class="status-dot agendada"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">SZI Lancamento Ponta das Canas II</span>
+          <span class="campaign-sub">Pontual</span>
+        </div>
+        <span class="badge badge-pontual">Pontual</span>
+        <span class="badge badge-szi">SZI</span>
+        <span class="channel"><span class="channel-icon">💬📧</span> Email+WA</span>
+        <span class="audience">6.200<small>audiencia</small></span>
+        <div class="metrics">
+          <span class="metrics-placeholder">Agendada para 20/06</span>
+        </div>
+        <span class="campaign-date">Agendada 20/06</span>
+      </div>
+
+      <!-- 6. Finalizada -->
+      <div class="campaign-row">
+        <span class="status-dot finalizada"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Campanha Inverno SZS</span>
+          <span class="campaign-sub">Regua</span>
+        </div>
+        <span class="badge badge-regua">Regua</span>
+        <span class="badge badge-szs">SZS</span>
+        <span class="channel"><span class="channel-icon">📧</span> Email</span>
+        <span class="audience">4.200<small>audiencia</small></span>
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Enviados</span>
+            <span class="metric-value">4.200</span>
+            <div class="metric-bar"><div class="metric-bar-fill sent" style="width:100%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Abertos</span>
+            <span class="metric-value">1.680 <span class="pct">40%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill opened" style="width:40%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Convertidos</span>
+            <span class="metric-value">89 <span class="pct">2,1%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill converted" style="width:2.1%"></div></div>
+          </div>
+        </div>
+        <span class="campaign-date">Mai 2026</span>
+      </div>
+
+      <!-- 7. Finalizada -->
+      <div class="campaign-row">
+        <span class="status-dot finalizada"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Black Friday SZI</span>
+          <span class="campaign-sub">Pontual</span>
+        </div>
+        <span class="badge badge-pontual">Pontual</span>
+        <span class="badge badge-szi">SZI</span>
+        <span class="channel"><span class="channel-icon">💬</span> WhatsApp</span>
+        <span class="audience">8.000<small>audiencia</small></span>
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Enviados</span>
+            <span class="metric-value">8.000</span>
+            <div class="metric-bar"><div class="metric-bar-fill sent" style="width:100%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Abertos</span>
+            <span class="metric-value">3.200 <span class="pct">40%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill opened" style="width:40%"></div></div>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Convertidos</span>
+            <span class="metric-value">156 <span class="pct">2%</span></span>
+            <div class="metric-bar"><div class="metric-bar-fill converted" style="width:2%"></div></div>
+          </div>
+        </div>
+        <span class="campaign-date">Nov 2025</span>
+      </div>
+
+      <!-- 8. Rascunho -->
+      <div class="campaign-row">
+        <span class="status-dot rascunho"></span>
+        <div class="campaign-name-block">
+          <span class="campaign-name">Cross-sell Hospedes→SZI</span>
+          <span class="campaign-sub">Rascunho</span>
+        </div>
+        <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--text-dim)">—</span>
+        <span class="badge badge-szi">SZI</span>
+        <span class="channel" style="color:var(--text-dim)">—</span>
+        <span class="audience">3.405<small>estimativa</small></span>
+        <div class="metrics">
+          <span class="metrics-placeholder">Rascunho — sem envios</span>
+        </div>
+        <span class="campaign-date">Criada 07/06</span>
+      </div>
+
+    </div>
+
+    <!-- Summary bar -->
+    <div class="summary-bar">
+      <strong>8</strong> campanhas total
+      <span class="summary-sep">&middot;</span>
+      <strong>3</strong> ativas
+      <span class="summary-sep">&middot;</span>
+      <strong>2</strong> agendadas
+      <span class="summary-sep">&middot;</span>
+      <strong>2</strong> finalizadas
+      <span class="summary-sep">&middot;</span>
+      <strong>1</strong> rascunho
+    </div>
+
+  </main>
+
+</body>
+</html>

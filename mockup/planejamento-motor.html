@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motor de Disparos Seazone — Planejamento</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0f; color: #e0e0e8; line-height: 1.6; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 40px; }
+
+  /* ---- PHASE TIMELINE ---- */
+  .timeline { display: flex; gap: 0; margin-bottom: 48px; position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; top: 28px; left: 0; right: 0;
+    height: 3px; background: #1a1a2e;
+  }
+  .phase {
+    flex: 1; position: relative; padding: 0 8px;
+  }
+  .phase-dot {
+    width: 20px; height: 20px; border-radius: 50%; margin: 18px auto 16px;
+    position: relative; z-index: 2; border: 3px solid #0a0a0f;
+  }
+  .phase.done .phase-dot { background: #22c55e; box-shadow: 0 0 12px #22c55e44; }
+  .phase.current .phase-dot { background: #3b82f6; box-shadow: 0 0 16px #3b82f688; animation: pulse 2s infinite; }
+  .phase.next .phase-dot { background: #334155; }
+  .phase.future .phase-dot { background: #1e1e2e; border-color: #1e1e2e; }
+
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 12px #3b82f644; } 50% { box-shadow: 0 0 24px #3b82f6aa; } }
+
+  .phase-label {
+    text-align: center; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px; color: #666;
+  }
+  .phase.done .phase-label { color: #22c55e; }
+  .phase.current .phase-label { color: #3b82f6; }
+  .phase-title { text-align: center; font-size: 13px; color: #aaa; margin-top: 4px; }
+  .phase.done .phase-title { color: #ccc; }
+  .phase.current .phase-title { color: #fff; font-weight: 600; }
+
+  /* ---- SECTIONS ---- */
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 8px; border-bottom: 1px solid #1a1a2e;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    font-weight: 600; text-transform: uppercase;
+  }
+  .badge-done { background: #22c55e22; color: #22c55e; }
+  .badge-now { background: #3b82f622; color: #3b82f6; }
+  .badge-next { background: #f59e0b22; color: #f59e0b; }
+
+  /* ---- SCHEMA DIAGRAM ---- */
+  .schema-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  @media (max-width: 900px) { .schema-grid { grid-template-columns: 1fr; } }
+
+  .layer-card {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px;
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .layer-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .layer-sync::before { background: linear-gradient(90deg, #22c55e, #16a34a); }
+  .layer-motor::before { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+  .layer-ops::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+  .layer-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 12px;
+  }
+  .layer-sync .layer-label { color: #22c55e; }
+  .layer-motor .layer-label { color: #3b82f6; }
+  .layer-ops .layer-label { color: #f59e0b; }
+
+  .table-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; margin-bottom: 4px;
+    background: #0a0a0f; border-radius: 6px; font-size: 13px;
+  }
+  .table-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+  .table-name { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #ddd; }
+  .table-desc { font-size: 11px; color: #666; margin-left: auto; white-space: nowrap; }
+
+  /* ---- COMMUNICATION GRID ---- */
+  .comm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 1100px) { .comm-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .vertical-card {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px;
+    padding: 16px; position: relative; overflow: hidden;
+  }
+  .vertical-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .vc-szi::before { background: #8b5cf6; }
+  .vc-szs::before { background: #06b6d4; }
+  .vc-mkp::before { background: #f97316; }
+  .vc-hsp::before { background: #ec4899; }
+
+  .vc-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .vc-name { font-weight: 700; font-size: 16px; }
+  .vc-szi .vc-name { color: #8b5cf6; }
+  .vc-szs .vc-name { color: #06b6d4; }
+  .vc-mkp .vc-name { color: #f97316; }
+  .vc-hsp .vc-name { color: #ec4899; }
+
+  .vc-count {
+    font-size: 24px; font-weight: 800; color: #fff;
+  }
+  .temp-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid #1a1a2e; font-size: 13px;
+  }
+  .temp-row:last-child { border-bottom: none; }
+  .temp-label { color: #888; }
+  .temp-count { font-weight: 700; }
+  .temp-hot { color: #ef4444; }
+  .temp-warm { color: #f59e0b; }
+  .temp-cold { color: #3b82f6; }
+
+  /* ---- FLOW DIAGRAM ---- */
+  .flow-container {
+    display: flex; align-items: stretch; gap: 0; overflow-x: auto;
+    padding: 20px 0;
+  }
+  .flow-step {
+    flex: 1; min-width: 180px; padding: 16px;
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px;
+    text-align: center; position: relative;
+  }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; flex-shrink: 0; color: #334155; font-size: 24px;
+  }
+  .flow-num {
+    font-size: 28px; font-weight: 800; color: #3b82f6; margin-bottom: 4px;
+  }
+  .flow-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .flow-desc { font-size: 11px; color: #666; }
+  .flow-step.active { border-color: #3b82f6; background: #12142a; }
+  .flow-step.active .flow-num { color: #60a5fa; }
+
+  /* ---- EXCLUSION LIST ---- */
+  .excl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @media (max-width: 800px) { .excl-grid { grid-template-columns: 1fr; } }
+  .excl-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: #12121a; border-radius: 8px;
+    border-left: 3px solid #ef4444;
+  }
+  .excl-item.soft { border-left-color: #f59e0b; }
+  .excl-name { font-weight: 600; font-size: 13px; color: #ddd; }
+  .excl-desc { font-size: 11px; color: #666; }
+  .excl-sev {
+    font-size: 10px; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; margin-left: auto; flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .sev-hard { background: #ef444422; color: #ef4444; }
+  .sev-soft { background: #f59e0b22; color: #f59e0b; }
+
+  /* ---- NEXT STEPS ---- */
+  .steps-list { list-style: none; }
+  .steps-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; margin-bottom: 8px;
+    background: #12121a; border-radius: 8px; border: 1px solid #1e1e2e;
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-ready .step-num { background: #22c55e22; color: #22c55e; }
+  .step-active .step-num { background: #3b82f622; color: #3b82f6; }
+  .step-pending .step-num { background: #33415522; color: #64748b; }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 600; font-size: 14px; color: #ddd; }
+  .step-desc { font-size: 12px; color: #666; margin-top: 2px; }
+  .step-status {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 4px; text-transform: uppercase; margin-left: auto;
+    flex-shrink: 0; align-self: center;
+  }
+  .status-done { background: #22c55e22; color: #22c55e; }
+  .status-now { background: #3b82f622; color: #3b82f6; }
+  .status-wait { background: #33415522; color: #64748b; }
+
+  /* ---- VIEWS GRID ---- */
+  .views-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 900px) { .views-grid { grid-template-columns: repeat(2, 1fr); } }
+  .view-card {
+    padding: 12px 14px; background: #12121a; border-radius: 8px;
+    border-left: 3px solid #8b5cf6;
+  }
+  .view-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #c4b5fd; }
+  .view-desc { font-size: 11px; color: #666; margin-top: 2px; }
+
+  /* ---- STATS BAR ---- */
+  .stats-bar {
+    display: flex; gap: 16px; margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .stat-card {
+    flex: 1; min-width: 140px; padding: 16px 20px;
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px;
+    text-align: center;
+  }
+  .stat-num { font-size: 32px; font-weight: 800; color: #fff; }
+  .stat-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .highlight-box {
+    background: #12142a; border: 1px solid #1e3a5f; border-radius: 12px;
+    padding: 20px; margin-bottom: 32px;
+  }
+  .highlight-box p { font-size: 14px; color: #94a3b8; }
+  .highlight-box strong { color: #60a5fa; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Motor de Disparos Seazone</h1>
+  <p class="subtitle">Planejamento completo — Schema, Comunicacoes, Regras e Proximos Passos</p>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-num">35</div><div class="stat-label">Comunicacoes</div></div>
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Tabelas</div></div>
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Views</div></div>
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Exclusoes</div></div>
+    <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">Verticais</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Camadas</div></div>
+  </div>
+
+  <!-- PRINCIPLE -->
+  <div class="highlight-box">
+    <p><strong>Principio fundamental:</strong> todo dado necessario pra decidir um disparo esta LOCAL neste banco. Zero dependencia externa em runtime. O motor le apenas do Supabase — nunca consulta Pipedrive, Sapron ou Reservas em tempo real.</p>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="section">
+    <div class="section-title">Fases do Projeto</div>
+    <div class="timeline">
+      <div class="phase done">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Concluido</div>
+        <div class="phase-title">Pesquisa & Mapeamento</div>
+      </div>
+      <div class="phase done">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Concluido</div>
+        <div class="phase-title">Spec & Matriz</div>
+      </div>
+      <div class="phase done">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Concluido</div>
+        <div class="phase-title">Auditoria de Dados</div>
+      </div>
+      <div class="phase done">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Concluido</div>
+        <div class="phase-title">Schema SQL</div>
+      </div>
+      <div class="phase current">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Agora</div>
+        <div class="phase-title">Criar BD Supabase</div>
+      </div>
+      <div class="phase next">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Proximo</div>
+        <div class="phase-title">Sync de Dados</div>
+      </div>
+      <div class="phase future">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Futuro</div>
+        <div class="phase-title">API & Frontend</div>
+      </div>
+      <div class="phase future">
+        <div class="phase-dot"></div>
+        <div class="phase-label">Futuro</div>
+        <div class="phase-title">Integracao SIA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEMA -->
+  <div class="section">
+    <div class="section-title">Arquitetura do Banco <span class="badge badge-done">Pronto</span></div>
+    <div class="schema-grid">
+
+      <!-- SYNC -->
+      <div class="layer-card layer-sync">
+        <div class="layer-label">Camada 1 — SYNC</div>
+        <p style="font-size:11px;color:#666;margin-bottom:12px;">Snapshots diarios das fontes externas. Nunca editados pelo motor.</p>
+        <div class="table-item">
+          <span class="table-icon">👤</span>
+          <span class="table-name">lead_unificado</span>
+          <span class="table-desc">Entidade central</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">🤝</span>
+          <span class="table-name">lead_deal</span>
+          <span class="table-desc">Deals Pipedrive</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">🏨</span>
+          <span class="table-name">lead_reserva</span>
+          <span class="table-desc">Reservas hospede</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">🏠</span>
+          <span class="table-name">lead_propriedade</span>
+          <span class="table-desc">Imoveis Sapron</span>
+        </div>
+      </div>
+
+      <!-- MOTOR -->
+      <div class="layer-card layer-motor">
+        <div class="layer-label">Camada 2 — MOTOR</div>
+        <p style="font-size:11px;color:#666;margin-bottom:12px;">Dados proprios do motor. Gerenciados pela aplicacao.</p>
+        <div class="table-item">
+          <span class="table-icon">📨</span>
+          <span class="table-name">comunicacao</span>
+          <span class="table-desc">35 catalogadas</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">🚫</span>
+          <span class="table-name">exclusao</span>
+          <span class="table-desc">10 regras</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">📋</span>
+          <span class="table-name">campanha</span>
+          <span class="table-desc">Agrupador + metricas</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">🚀</span>
+          <span class="table-name">disparo</span>
+          <span class="table-desc">Cada envio + snapshot</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">⏰</span>
+          <span class="table-name">lead_cooldown</span>
+          <span class="table-desc">Intervalo min</span>
+        </div>
+        <div class="table-item">
+          <span class="table-icon">🛑</span>
+          <span class="table-name">lead_opt_out</span>
+          <span class="table-desc">LGPD opt-outs</span>
+        </div>
+      </div>
+
+      <!-- OPS -->
+      <div class="layer-card layer-ops">
+        <div class="layer-label">Camada 3 — OPS</div>
+        <p style="font-size:11px;color:#666;margin-bottom:12px;">Observabilidade e logs de sincronizacao.</p>
+        <div class="table-item">
+          <span class="table-icon">📊</span>
+          <span class="table-name">sync_log</span>
+          <span class="table-desc">Log de cada sync</span>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:#0a0a0f;border-radius:6px;">
+          <p style="font-size:11px;color:#f59e0b;font-weight:600;margin-bottom:4px;">Monitoramento</p>
+          <p style="font-size:11px;color:#666;">Cada sync registra: fonte, tabela, inicio/fim, registros lidos/criados/atualizados/erro</p>
+        </div>
+        <div style="margin-top:8px;padding:12px;background:#0a0a0f;border-radius:6px;">
+          <p style="font-size:11px;color:#f59e0b;font-weight:600;margin-bottom:4px;">Seguranca</p>
+          <p style="font-size:11px;color:#666;">RLS em todas tabelas. Policy service_role_full via loop DRY.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEWS -->
+  <div class="section">
+    <div class="section-title">Views de Segmentacao <span class="badge badge-done">Pronto</span></div>
+    <div class="views-grid">
+      <div class="view-card"><div class="view-name">v_leads_elegiveis</div><div class="view-desc">Todos sem exclusao global</div></div>
+      <div class="view-card"><div class="view-name">v_szi_quente</div><div class="view-desc">Compradores ativos</div></div>
+      <div class="view-card"><div class="view-name">v_szi_morno</div><div class="view-desc">COM OP, lost</div></div>
+      <div class="view-card"><div class="view-name">v_szi_frio</div><div class="view-desc">SEM OP, sem historico WA check</div></div>
+      <div class="view-card"><div class="view-name">v_szs_quente</div><div class="view-desc">Won SZI sem SZS</div></div>
+      <div class="view-card"><div class="view-name">v_hsp_repeat</div><div class="view-desc">Hospedes recorrentes</div></div>
+      <div class="view-card"><div class="view-name">v_hsp_inativo</div><div class="view-desc">Hospedes sem reserva recente</div></div>
+      <div class="view-card"><div class="view-name">v_cross_sell</div><div class="view-desc">Won 3+ meses, elegivel cross</div></div>
+      <div class="view-card"><div class="view-name">v_leads_em_cooldown</div><div class="view-desc">Cooldown ativo por canal</div></div>
+      <div class="view-card"><div class="view-name">v_dashboard_campanhas</div><div class="view-desc">Metricas de campanha</div></div>
+    </div>
+  </div>
+
+  <!-- COMMUNICATIONS -->
+  <div class="section">
+    <div class="section-title">35 Comunicacoes por Vertical <span class="badge badge-done">Pronto</span></div>
+    <div class="comm-grid">
+      <div class="vertical-card vc-szi">
+        <div class="vc-header">
+          <span class="vc-name">SZI</span>
+          <span class="vc-count">12</span>
+        </div>
+        <div class="temp-row"><span class="temp-label">Quente</span><span class="temp-count temp-hot">4</span></div>
+        <div class="temp-row"><span class="temp-label">Morno (COM OP)</span><span class="temp-count temp-warm">5</span></div>
+        <div class="temp-row"><span class="temp-label">Frio (SEM OP)</span><span class="temp-count temp-cold">3</span></div>
+        <div style="margin-top:8px;font-size:11px;color:#555;">OPP semana, repescagem, case investidor, trigger comportamental</div>
+      </div>
+      <div class="vertical-card vc-szs">
+        <div class="vc-header">
+          <span class="vc-name">SZS</span>
+          <span class="vc-count">10</span>
+        </div>
+        <div class="temp-row"><span class="temp-label">Quente</span><span class="temp-count temp-hot">3</span></div>
+        <div class="temp-row"><span class="temp-label">Morno</span><span class="temp-count temp-warm">4</span></div>
+        <div class="temp-row"><span class="temp-label">Frio</span><span class="temp-count temp-cold">3</span></div>
+        <div style="margin-top:8px;font-size:11px;color:#555;">Call coletiva, comparativo gestao, reativacao timing</div>
+      </div>
+      <div class="vertical-card vc-mkp">
+        <div class="vc-header">
+          <span class="vc-name">MKP</span>
+          <span class="vc-count">11</span>
+        </div>
+        <div class="temp-row"><span class="temp-label">Quente</span><span class="temp-count temp-hot">3</span></div>
+        <div class="temp-row"><span class="temp-label">Morno</span><span class="temp-count temp-warm">4</span></div>
+        <div class="temp-row"><span class="temp-label">Frio</span><span class="temp-count temp-cold">4</span></div>
+        <div style="margin-top:8px;font-size:11px;color:#555;">Serie educativa, simulacao retorno, radar mercado</div>
+      </div>
+      <div class="vertical-card vc-hsp">
+        <div class="vc-header">
+          <span class="vc-name">HSP + Cross</span>
+          <span class="vc-count">6+2</span>
+        </div>
+        <div class="temp-row"><span class="temp-label">Repeat</span><span class="temp-count temp-hot">3</span></div>
+        <div class="temp-row"><span class="temp-label">Unico</span><span class="temp-count temp-warm">1</span></div>
+        <div class="temp-row"><span class="temp-label">Inativo</span><span class="temp-count temp-cold">1</span></div>
+        <div class="temp-row"><span class="temp-label">Cross-vertical</span><span class="temp-count" style="color:#a78bfa;">2</span></div>
+        <div style="margin-top:8px;font-size:11px;color:#555;">Pre-checkin, NPS, cupom aniversario, cross hospede→SZS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXCLUSIONS -->
+  <div class="section">
+    <div class="section-title">10 Regras de Exclusao <span class="badge badge-done">Pronto</span></div>
+    <div class="excl-grid">
+      <div class="excl-item">
+        <div><div class="excl-name">Expansao / Condominios</div><div class="excl-desc">Proibicao contratual — incidente com multa</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Leads de parceiros</div><div class="excl-desc">Exclusividade contratual</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Deal em aberto</div><div class="excl-desc">Nao pisar no vendedor</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item soft">
+        <div><div class="excl-name">Comprador recente</div><div class="excl-desc">Cooldown 3 meses (override: SZS/Decor)</div></div>
+        <span class="excl-sev sev-soft">Soft</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Mesmo spot pro dono</div><div class="excl-desc">Nunca oferecer o que ja possui</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Fora do poligono SZS</div><div class="excl-desc">Regiao inativa</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Desinscrito email MKP</div><div class="excl-desc">"Nunca vai converter" — Roberto</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Sem historico WA</div><div class="excl-desc">60% falha (erro 131049) — so email</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Duplicado / erro</div><div class="excl-desc">Testes e duplicatas — excluir de tudo</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+      <div class="excl-item">
+        <div><div class="excl-name">Limite diario</div><div class="excl-desc">~1000/dia por numero WA, 2 numeros/vertical</div></div>
+        <span class="excl-sev sev-hard">Hard</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA FLOW -->
+  <div class="section">
+    <div class="section-title">Fluxo de Dados <span class="badge badge-now">Proximo</span></div>
+    <div class="flow-container">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-title">Fontes</div>
+        <div class="flow-desc">Pipedrive (212K deals)<br>Sapron (imoveis+owners)<br>Reservas (hospedes)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-title">Nekt / Athena</div>
+        <div class="flow-desc">Data lake existente<br>SQL via MCP<br>Bronze/Silver/Gold</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active">
+        <div class="flow-num">3</div>
+        <div class="flow-title">Supabase</div>
+        <div class="flow-desc">lead_unificado<br>Snapshot diario<br>Zero dep. runtime</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-title">Motor</div>
+        <div class="flow-desc">Segmentacao (views)<br>Exclusoes<br>Cooldowns</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-title">Disparo</div>
+        <div class="flow-desc">SIA (WA + email)<br>Throttle 1K/dia<br>Janela 9h-20h</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <div class="section">
+    <div class="section-title">Proximos Passos</div>
+    <ul class="steps-list">
+      <li class="step-ready">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <div class="step-title">Conectar MCP Supabase</div>
+          <div class="step-desc">Configurar acesso ao banco via MCP para o Claude poder executar SQL direto</div>
+        </div>
+        <span class="step-status status-now">Agora</span>
+      </li>
+      <li class="step-active">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <div class="step-title">Criar banco (schema.sql + seed.sql)</div>
+          <div class="step-desc">Executar os 2 arquivos SQL no Supabase — cria 10 tabelas, 10 views, RLS, 35 comunicacoes, 10 exclusoes</div>
+        </div>
+        <span class="step-status status-now">Agora</span>
+      </li>
+      <li class="step-pending">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <div class="step-title">Popular lead_unificado com dados reais</div>
+          <div class="step-desc">Sync inicial: consultar Nekt (Pipedrive deals + persons) e inserir no Supabase</div>
+        </div>
+        <span class="step-status status-wait">Pendente</span>
+      </li>
+      <li class="step-pending">
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <div class="step-title">Popular lead_deal, lead_reserva, lead_propriedade</div>
+          <div class="step-desc">Trazer deals (212K), reservas e propriedades das fontes via Nekt + Reservas MCP</div>
+        </div>
+        <span class="step-status status-wait">Pendente</span>
+      </li>
+      <li class="step-pending">
+        <span class="step-num">5</span>
+        <div class="step-content">
+          <div class="step-title">Validar views de segmentacao</div>
+          <div class="step-desc">Rodar as views com dados reais e conferir volumetria vs expectativa dos gestores</div>
+        </div>
+        <span class="step-status status-wait">Pendente</span>
+      </li>
+      <li class="step-pending">
+        <span class="step-num">6</span>
+        <div class="step-content">
+          <div class="step-title">Validacao com gestores (Roberto + Mari)</div>
+          <div class="step-desc">Leo SZS ja aprovou. Falta Roberto (MKP/CRM) e Mari (growth/estrategia)</div>
+        </div>
+        <span class="step-status status-wait">Pendente</span>
+      </li>
+      <li class="step-pending">
+        <span class="step-num">7</span>
+        <div class="step-content">
+          <div class="step-title">API + Frontend (Next.js)</div>
+          <div class="step-desc">Interface para PMMs criarem campanhas, acompanharem metricas, gerenciarem exclusoes</div>
+        </div>
+        <span class="step-status status-wait">Pendente</span>
+      </li>
+      <li class="step-pending">
+        <span class="step-num">8</span>
+        <div class="step-content">
+          <div class="step-title">Integracao SIA (disparo real)</div>
+          <div class="step-desc">Conectar com SIA para envio WA + email. SIA ja tem API pronta.</div>
+        </div>
+        <span class="step-status status-wait">Pendente</span>
+      </li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

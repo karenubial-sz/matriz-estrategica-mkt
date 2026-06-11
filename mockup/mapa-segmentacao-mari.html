@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de Segmentacao — Validacao</title>
+<style>
+  :root {
+    --hot: #ef4444; --warm: #f59e0b; --cold: #3b82f6; --frozen: #6b7280;
+    --green: #10b981; --purple: #8b5cf6;
+    --bg: #0f172a; --card: #1e293b; --card-alt: #334155;
+    --text: #f1f5f9; --text-muted: #94a3b8; --border: #475569; --accent: #38bdf8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding: 2rem; }
+  .container { max-width: 1300px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 1.8rem; font-weight: 700; } header h1 span { color: var(--accent); }
+  header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem; }
+
+  .concept { background: var(--card); border-radius: 10px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent); display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .concept h3 { font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .concept p { font-size: 0.82rem; color: var(--text-muted); }
+
+  .section { margin-bottom: 2rem; }
+  .section-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+  .section-header h2 { font-size: 1.2rem; font-weight: 700; }
+  .vtag { padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: white; }
+  .vtag.szi { background: #7c3aed; } .vtag.mkp { background: #d97706; }
+  .vtag.szs { background: #059669; } .vtag.hsp { background: #db2777; }
+  .section-note { font-size: 0.8rem; color: var(--text-muted); }
+
+  .temp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 0.5rem; }
+  .tc { background: var(--card); border-radius: 10px; padding: 1.1rem; border-top: 3px solid; }
+  .tc.hot { border-color: var(--hot); } .tc.warm { border-color: var(--warm); } .tc.cold { border-color: var(--cold); }
+  .tc h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .tc .def { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.5rem; padding: 0.4rem 0.6rem; background: rgba(255,255,255,0.05); border-radius: 5px; border-left: 3px solid; }
+  .tc.hot .def { border-color: var(--hot); } .tc.warm .def { border-color: var(--warm); } .tc.cold .def { border-color: var(--cold); }
+  .tc ul { list-style: none; font-size: 0.8rem; color: var(--text-muted); }
+  .tc li { padding: 0.15rem 0 0.15rem 0.9rem; position: relative; }
+  .tc li::before { content: ''; position: absolute; left: 0; top: 0.5rem; width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); }
+  .tc .freq { display: inline-block; margin-top: 0.4rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: 600; background: rgba(56,189,248,0.15); color: var(--accent); }
+
+  .op-row { background: var(--card); border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--green); display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .op-row h2 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--green); grid-column: 1/-1; }
+  .op-row h4 { font-size: 0.85rem; margin-bottom: 0.3rem; }
+  .op-row p { font-size: 0.82rem; color: var(--text-muted); }
+  .opb { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; font-weight: 700; }
+  .opb.c { background: #166534; color: #bbf7d0; } .opb.s { background: #991b1b; color: #fecaca; }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--card); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+  .tbl th { text-align: left; padding: 0.5rem 0.7rem; background: var(--card-alt); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--border); }
+  .arr { color: var(--accent); font-weight: 700; }
+
+  .alert { background: var(--card); border-radius: 8px; padding: 0.8rem 1.2rem; margin-bottom: 0.8rem; font-size: 0.83rem; }
+  .alert.green { border-left: 3px solid var(--green); }
+  .alert.warn { border-left: 3px solid var(--warm); }
+  .alert strong { font-size: 0.85rem; }
+
+  .excl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.7rem; margin-bottom: 1.5rem; }
+  .exc { background: var(--card); padding: 0.8rem; border-radius: 8px; }
+  .exc h4 { font-size: 0.82rem; margin-bottom: 0.2rem; }
+  .exc p { font-size: 0.78rem; color: var(--text-muted); }
+  .exc.crit h4 { color: var(--hot); }
+
+  .pend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.7rem; }
+  .pend { background: var(--card); padding: 0.8rem 1rem; border-radius: 8px; border-left: 3px solid var(--warm); }
+  .pend h4 { font-size: 0.82rem; margin-bottom: 0.2rem; }
+  .pend p { font-size: 0.78rem; color: var(--text-muted); }
+
+  footer { text-align: center; padding-top: 1.2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.75rem; margin-top: 1rem; }
+  @media (max-width: 768px) { .temp-row, .concept, .op-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Mapa de <span>Segmentacao</span></h1>
+  <p>Pilar 1 — Definicao de Publico por Vertical &middot; PDA 1.1-1.4 &middot; 09/06/2026</p>
+</header>
+
+<!-- Conceito -->
+<div class="concept">
+  <div>
+    <h3>&#x1F3F7;&#xFE0F; Temperatura = Fixa</h3>
+    <p>Classifica o lead pelo estagio mais avancado que ja alcancou. Aprovada pelos gestores, vira <strong>contrato</strong>. Nao muda com o tempo.</p>
+  </div>
+  <div>
+    <h3>&#x1F333; Regras de Acao = Dinamicas</h3>
+    <p>Determinam o que fazer com o lead AGORA (respondeu? leu? quanto tempo faz?). A acao muda, a temperatura nao.</p>
+  </div>
+</div>
+
+<!-- COM OP vs SEM OP -->
+<div class="op-row">
+  <h2>Eixo de Segmentacao: COM OP vs SEM OP</h2>
+  <div>
+    <h4><span class="opb c">COM OP</span> Lead com Oportunidade</h4>
+    <p>Ja teve reuniao. Sabe como funciona. Se Lost: motivo conhecido (timing, dinheiro).</p>
+  </div>
+  <div>
+    <h4><span class="opb s">SEM OP</span> Lead sem Oportunidade</h4>
+    <p>Impactado por midia. NAO sabe o modelo. Precisa de educacao antes de venda.</p>
+  </div>
+</div>
+
+<!-- ===== SZI ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="vtag szi">SZI</span>
+    <h2>Investimento</h2>
+    <span class="section-note">Ciclo 30-120d &middot; R$250K-600K &middot; PDA 1.1</span>
+  </div>
+  <div class="temp-row">
+    <div class="tc hot">
+      <h3>&#x1F525; Quente</h3>
+      <div class="def">Ja comprou spot Seazone</div>
+      <ul>
+        <li>Confia no modelo, tem dinheiro, renda passiva</li>
+        <li>Top investidores com multiplos spots</li>
+        <li>Indicacao de cliente existente</li>
+      </ul>
+      <span class="freq">Cross-sell em lancamentos + marcos</span>
+    </div>
+    <div class="tc warm">
+      <h3>&#x1F321;&#xFE0F; Morno</h3>
+      <div class="def">Foi ate OP e deu Lost</div>
+      <ul>
+        <li>Teve reuniao, sabe como funciona</li>
+        <li>Motivo: timing, dinheiro, explorando</li>
+        <li>Reabordar em marcos do empreendimento</li>
+      </ul>
+      <span class="freq">Quinzenal + marcos como gatilho</span>
+    </div>
+    <div class="tc cold">
+      <h3>&#x2744;&#xFE0F; Frio</h3>
+      <div class="def">Travou antes da OP</div>
+      <ul>
+        <li>Lost sem reuniao, SQL, no-show</li>
+        <li>NAO sabe o modelo — precisa educacao</li>
+        <li>Hospedes entram aqui</li>
+      </ul>
+      <span class="freq">Max 1x/mes &middot; Educacional, nao venda</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MKP ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="vtag mkp">MKP</span>
+    <h2>Marketplace</h2>
+    <span class="section-note">Ciclo 15-120d &middot; R$200K-500K &middot; Multiplos stakeholders &middot; PDA 1.3</span>
+  </div>
+  <div class="temp-row">
+    <div class="tc hot">
+      <h3>&#x1F525; Quente</h3>
+      <div class="def">Responde rapido, capital 150k+, proativo</div>
+      <ul>
+        <li>Entende ROI/SPE — investidor experiente</li>
+        <li>Ja e proprietario Seazone</li>
+        <li>Base interna funciona muito bem</li>
+      </ul>
+      <span class="freq">Sob demanda + opp semanal</span>
+    </div>
+    <div class="tc warm">
+      <h3>&#x1F321;&#xFE0F; Morno</h3>
+      <div class="def">Engajado mas indeciso, cheio de duvidas</div>
+      <ul>
+        <li>Troca msgs mas nao fecha</li>
+        <li>Nunca recebeu conteudo educativo</li>
+        <li>Timing = capital em 4-6 meses</li>
+      </ul>
+      <span class="freq">Nurturing educacional — prioridade #1 (Roberto)</span>
+    </div>
+    <div class="tc cold">
+      <h3>&#x2744;&#xFE0F; Frio</h3>
+      <div class="def">Nao responde, precisa 2-3 msgs pra dar alo</div>
+      <ul>
+        <li>Lost 60+ dias inativo</li>
+        <li>ICP MKP ainda indefinido</li>
+      </ul>
+      <span class="freq">Max 1x/mes &middot; Educativo, nao venda</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SZS ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="vtag szs">SZS</span>
+    <h2>Gestao (Proprietarios)</h2>
+    <span class="section-note">"Venda de transacao" &middot; Admin R$700 &middot; PDA 1.2</span>
+  </div>
+
+  <div class="alert green">
+    <strong>CIA substituindo MIA (semana 09/06).</strong> Novo fluxo: form → call coletiva em 30min → individual. Roberto Campos + Kelly. Todo disparo SZS direciona pra call coletiva.
+  </div>
+  <div class="alert warn">
+    <strong>Temperatura SZS = posse de imovel</strong>, diferente de SZI/MKP que usam estagio no funil.
+  </div>
+
+  <div class="temp-row">
+    <div class="tc hot">
+      <h3>&#x1F525; Quente</h3>
+      <div class="def">Ja tem imovel Seazone (comprou via SZI)</div>
+      <ul>
+        <li>Cross-sell natural: ja confia, ja investiu</li>
+        <li>"Metade da venda e tirar pedido" (Leo)</li>
+      </ul>
+      <span class="freq">Imediato apos Won SZI</span>
+    </div>
+    <div class="tc warm">
+      <h3>&#x1F321;&#xFE0F; Morno</h3>
+      <div class="def">Tem imovel de temporada, NAO e Seazone</div>
+      <ul>
+        <li>Outra administradora ou autogestao</li>
+        <li>Conhece o mercado mas nao a Seazone</li>
+      </ul>
+      <span class="freq">Quinzenal &middot; Comparativo rentabilidade</span>
+    </div>
+    <div class="tc cold">
+      <h3>&#x2744;&#xFE0F; Frio</h3>
+      <div class="def">Fora do poligono OU aluguel anual</div>
+      <ul>
+        <li>Fora do poligono = exclusao na pratica</li>
+        <li>Timing (imovel nao pronto) = reativar no marco</li>
+        <li>Nao atende = melhor alvo pra reativacao (Leo)</li>
+      </ul>
+      <span class="freq">Caso a caso</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOSPEDES ===== -->
+<div class="section">
+  <div class="section-header">
+    <span class="vtag hsp">HSP</span>
+    <h2>Hospedes</h2>
+    <span class="section-note">31K users &middot; 36% repeat &middot; PDA: segmento prioritario go-live</span>
+  </div>
+  <div class="alert warn">
+    <strong>Questao aberta:</strong> Trabalhar como sub-segmento de SZI Frio (visao atual da Mari) ou como vertical propria? Base rica: 28K com telefone, 9.2K repeat guests, 59% com data de nascimento.
+  </div>
+</div>
+
+<!-- ===== CROSS-VERTICAL ===== -->
+<div class="section">
+  <div class="section-header"><h2>Rotas Cross-Vertical</h2></div>
+  <table class="tbl">
+    <thead><tr><th>De</th><th></th><th>Para</th><th>Gatilho</th><th>Cooling</th></tr></thead>
+    <tbody>
+      <tr><td>SZI Won</td><td class="arr">&rarr;</td><td>SZS Quente</td><td>Compra de spot</td><td>Imediato</td></tr>
+      <tr><td>SZI Won</td><td class="arr">&rarr;</td><td>DECOR</td><td>Compra de spot</td><td>Imediato</td></tr>
+      <tr><td>SZI Won</td><td class="arr">&rarr;</td><td>MKP Quente</td><td>Compra de spot</td><td>3 meses</td></tr>
+      <tr><td>MKP Won</td><td class="arr">&rarr;</td><td>SZS Quente</td><td>Compra de cota</td><td>Imediato</td></tr>
+      <tr><td>SZS Ativo</td><td class="arr">&rarr;</td><td>SZI Quente</td><td>Proprietario satisfeito</td><td>Sempre aberto</td></tr>
+      <tr><td>Hospede</td><td class="arr">&rarr;</td><td>SZI Frio</td><td>Pos-checkout</td><td>Cadencia 4 sem email</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== MARCOS ===== -->
+<div class="section">
+  <div class="section-header"><h2>Marcos como Gatilho de Reabordagem</h2></div>
+  <table class="tbl">
+    <thead><tr><th>Marco</th><th>Vertical</th><th>Publico</th></tr></thead>
+    <tbody>
+      <tr><td>Lancamento oficial</td><td>SZI</td><td>Quentes + Mornos do empreendimento</td></tr>
+      <tr><td>Projeto arquitetonico / Alvara</td><td>SZI</td><td>Mornos que disseram "muito cedo"</td></tr>
+      <tr><td>Inicio de obra</td><td>SZI + DECOR</td><td>Todos do empreendimento</td></tr>
+      <tr><td>Entrega do predio</td><td>SZI + SZS + DECOR</td><td>Compradores</td></tr>
+      <tr><td>Expansao de poligono</td><td>SZS</td><td>Frios por "regiao inativa"</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== EXCLUSOES ===== -->
+<div class="section">
+  <div class="section-header"><h2>Exclusoes — NUNCA Disparar</h2></div>
+  <div class="excl-grid">
+    <div class="exc crit">
+      <h4>&#x1F6A8; Expansao / Condominios</h4>
+      <p>Proibicao contratual com multa. Ja houve incidente.</p>
+    </div>
+    <div class="exc crit">
+      <h4>&#x1F6A8; Leads de Parceiros</h4>
+      <p>Contrato garante exclusividade.</p>
+    </div>
+    <div class="exc crit">
+      <h4>&#x1F6A8; Deal em Aberto</h4>
+      <p>Nao pisar no vendedor.</p>
+    </div>
+    <div class="exc">
+      <h4>Comprador Recente</h4>
+      <p>Cooling ~3 meses apos compra.</p>
+    </div>
+    <div class="exc">
+      <h4>Mesmo Spot pro Dono</h4>
+      <p>Nunca oferecer o que ja possui.</p>
+    </div>
+    <div class="exc">
+      <h4>Desinscritos Email MKP</h4>
+      <p>"Nunca vai converter" (Roberto).</p>
+    </div>
+    <div class="exc">
+      <h4>Fora do Poligono SZS</h4>
+      <p>API/SLP ja filtra. Base: "Regiao Inativa".</p>
+    </div>
+    <div class="exc">
+      <h4>Duplicado/Erro</h4>
+      <p>Sempre excluir de bases e metricas.</p>
+    </div>
+    <div class="exc">
+      <h4>~1000 pessoas/dia</h4>
+      <p>Limite por saude do numero WA.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PENDENCIAS ===== -->
+<div class="section">
+  <div class="section-header"><h2>Pendencias pra Validacao</h2></div>
+  <div class="pend-grid">
+    <div class="pend">
+      <h4>1. Aprovar temperaturas SZI (PDA 1.1 — 10/06)</h4>
+      <p>Quente=comprou, Morno=OP Lost, Frio=antes da OP. Gestor SZI assina.</p>
+    </div>
+    <div class="pend">
+      <h4>2. Aprovar temperaturas SZS (PDA 1.2 — 10/06)</h4>
+      <p>Quente=imovel SZ, Morno=imovel nao-SZ, Frio=fora poligono. Leo assina.</p>
+    </div>
+    <div class="pend">
+      <h4>3. Aprovar temperaturas MKP (PDA 1.3 — 10/06)</h4>
+      <p>Quente=capital+rapido, Morno=indeciso, Frio=nao responde. Roberto assina.</p>
+    </div>
+    <div class="pend">
+      <h4>4. Hospedes: sub-SZI Frio ou vertical propria?</h4>
+      <p>31K users, 36% repeat — rico pra ser so "frio". Definir abordagem v1.</p>
+    </div>
+    <div class="pend">
+      <h4>5. Cooling period por vertical</h4>
+      <p>Gaby usa ~3 meses. Pode variar por vertical?</p>
+    </div>
+    <div class="pend">
+      <h4>6. Deduplicacao cross-vertical</h4>
+      <p>Mesmo lead em 2 verticais: priorizar qual?</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Motor de Disparos Seazone — Mapa de Segmentacao v3.1 (validacao) — 09/06/2026<br>
+  Fontes: Mari (08/06), Leo (08/06), Roberto (08/06), Gaby (03-05/06), dados MCP (Morada AI, Reservas, Nekt)
+</footer>
+
+</div>
+</body>
+</html>
