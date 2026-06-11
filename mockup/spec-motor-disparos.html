@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor de Disparos — Spec de Design | Seazone</title>
+    <style>
+        :root {
+            --bg: #0f1117; --surface: #1a1d27; --surface2: #232735; --border: #2d3244;
+            --text: #e4e6ed; --text-muted: #8b90a0;
+            --accent: #6c8cff; --accent-soft: rgba(108,140,255,0.12);
+            --green: #4ade80; --green-soft: rgba(74,222,128,0.12);
+            --amber: #fbbf24; --amber-soft: rgba(251,191,36,0.12);
+            --red: #f87171; --red-soft: rgba(248,113,113,0.12);
+            --purple: #a78bfa; --purple-soft: rgba(167,139,250,0.12);
+            --cyan: #22d3ee; --cyan-soft: rgba(34,211,238,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+        .hero { background:linear-gradient(135deg,#1a1d27 0%,#1e2538 50%,#1a2235 100%); border-bottom:1px solid var(--border); padding:3rem 2rem; text-align:center; }
+        .hero h1 { font-size:2.2rem; font-weight:700; background:linear-gradient(135deg,#6c8cff,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .hero .subtitle { color:var(--text-muted); font-size:1.05rem; max-width:700px; margin:0.5rem auto 0; }
+        .hero .meta { margin-top:1rem; font-size:0.85rem; color:var(--text-muted); }
+        .badge { display:inline-block; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.75rem; font-weight:600; margin:0.25rem; }
+        .badge-decided { background:var(--green-soft); color:var(--green); }
+        .badge-pending { background:var(--amber-soft); color:var(--amber); }
+        .badge-progress { background:var(--accent-soft); color:var(--accent); }
+        .nav-bar { position:sticky; top:0; z-index:100; background:rgba(15,17,23,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:0.75rem 2rem; display:flex; gap:0.5rem; overflow-x:auto; scrollbar-width:thin; }
+        .nav-bar a { color:var(--text-muted); text-decoration:none; font-size:0.82rem; font-weight:500; padding:0.4rem 0.8rem; border-radius:6px; white-space:nowrap; transition:all 0.2s; }
+        .nav-bar a:hover,.nav-bar a.active { color:var(--accent); background:var(--accent-soft); }
+        .container { max-width:1100px; margin:0 auto; padding:2rem; }
+        .section { margin-bottom:3rem; }
+        .section-header { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border); }
+        .section-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+        .section-header h2 { font-size:1.4rem; font-weight:700; }
+        .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.25rem; transition:border-color 0.2s; }
+        .card:hover { border-color:var(--accent); }
+        .card h3 { font-size:1.05rem; font-weight:600; margin-bottom:0.5rem; }
+        .card p,.card li { color:var(--text-muted); font-size:0.88rem; line-height:1.55; }
+        .card ul { padding-left:1.2rem; margin-top:0.4rem; }
+        .card li { margin-bottom:0.3rem; }
+        .card-label { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem; }
+        .arch-diagram { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:2rem; margin-bottom:1.5rem; }
+        .arch-row { display:flex; gap:0.5rem; margin-bottom:0.5rem; justify-content:center; flex-wrap:wrap; }
+        .arch-box { padding:0.75rem 1.25rem; border-radius:8px; text-align:center; font-weight:600; font-size:0.8rem; min-width:140px; }
+        .arch-box small { display:block; font-weight:400; font-size:0.7rem; opacity:0.7; margin-top:0.2rem; }
+        .arch-connector { text-align:center; color:var(--text-muted); font-size:1.2rem; margin:0.25rem 0; }
+        .layer-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:0.35rem; text-align:center; }
+        table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.85rem; }
+        th { text-align:left; padding:0.6rem 0.75rem; border-bottom:2px solid var(--border); color:var(--text-muted); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+        td { padding:0.6rem 0.75rem; border-bottom:1px solid var(--border); }
+        tr:hover td { background:var(--surface2); }
+        .tree { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1rem; }
+        .tree-node { display:flex; align-items:flex-start; gap:0.75rem; padding:0.6rem 0; border-left:2px solid var(--border); margin-left:1rem; padding-left:1rem; }
+        .tree-node:last-child { border-left-color:transparent; }
+        .tree-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:0.3rem; }
+        .tree-content { flex:1; }
+        .tree-reaction { font-weight:600; font-size:0.9rem; margin-bottom:0.15rem; }
+        .tree-action { color:var(--text-muted); font-size:0.82rem; }
+        .funnel { margin:1rem 0; }
+        .funnel-row { display:flex; align-items:center; gap:1rem; margin-bottom:0.75rem; }
+        .funnel-label { width:120px; font-size:0.82rem; font-weight:500; text-align:right; flex-shrink:0; }
+        .funnel-bar-container { flex:1; }
+        .funnel-bar { height:28px; border-radius:6px; position:relative; display:flex; align-items:center; padding-left:0.75rem; font-size:0.75rem; font-weight:600; }
+        .funnel-coverage { height:8px; border-radius:4px; margin-top:0.25rem; }
+        .funnel-coverage-label { font-size:0.7rem; color:var(--text-muted); margin-top:0.15rem; }
+        .funnel-alert { font-size:0.7rem; color:var(--amber); margin-left:0.5rem; }
+        .pending-card { background:var(--amber-soft); border:1px solid rgba(251,191,36,0.3); border-radius:12px; padding:1.25rem; margin-bottom:1rem; }
+        .pending-card h3 { color:var(--amber); font-size:1rem; margin-bottom:0.5rem; }
+        .pending-card p { color:var(--text); font-size:0.88rem; }
+        .pending-card .proposal { background:var(--surface); border-radius:8px; padding:0.75rem; margin-top:0.75rem; font-size:0.85rem; }
+        .pending-card .proposal-label { color:var(--cyan); font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.25rem; }
+        .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin:1rem 0; }
+        .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1rem; text-align:center; }
+        .stat-value { font-size:1.8rem; font-weight:800; }
+        .stat-label { font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem; }
+        .stat-source { font-size:0.65rem; color:var(--purple); margin-top:0.25rem; }
+        .profile-mock { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        .profile-header { padding:1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:1rem; }
+        .profile-avatar { width:48px; height:48px; border-radius:50%; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:700; color:var(--accent); }
+        .profile-name { font-size:1.1rem; font-weight:600; }
+        .profile-meta { font-size:0.8rem; color:var(--text-muted); }
+        .profile-tags { display:flex; gap:0.4rem; margin-top:0.35rem; flex-wrap:wrap; }
+        .profile-tag { font-size:0.7rem; padding:0.15rem 0.5rem; border-radius:4px; font-weight:500; }
+        .profile-body { display:grid; grid-template-columns:1fr 1fr; }
+        .profile-section { padding:1rem 1.25rem; border-bottom:1px solid var(--border); }
+        .profile-section:nth-child(even) { border-left:1px solid var(--border); }
+        .profile-section h4 { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.5rem; }
+        .profile-row { display:flex; justify-content:space-between; font-size:0.82rem; padding:0.2rem 0; }
+        .profile-row span:last-child { color:var(--text); font-weight:500; }
+        .profile-row span:first-child { color:var(--text-muted); }
+        .profile-timeline { padding:1rem 1.25rem; grid-column:1/-1; }
+        .timeline-item { display:flex; gap:0.75rem; padding:0.4rem 0; font-size:0.8rem; border-left:2px solid var(--border); padding-left:1rem; margin-left:0.5rem; }
+        .timeline-date { color:var(--text-muted); white-space:nowrap; flex-shrink:0; width:70px; }
+        .flow-container { display:flex; align-items:center; justify-content:center; gap:0.5rem; margin:1.5rem 0; flex-wrap:wrap; }
+        .flow-box { padding:0.6rem 1rem; border-radius:8px; font-size:0.8rem; font-weight:600; text-align:center; }
+        .flow-arrow { color:var(--text-muted); font-size:1.2rem; }
+        /* Progress bar */
+        .progress-container { margin:1rem 0; }
+        .progress-bar-bg { height:24px; background:var(--surface2); border-radius:6px; overflow:hidden; display:flex; }
+        .progress-segment { height:100%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:600; }
+        .progress-legend { display:flex; gap:1.5rem; margin-top:0.5rem; font-size:0.75rem; flex-wrap:wrap; }
+        .progress-legend-item { display:flex; align-items:center; gap:0.4rem; }
+        .progress-legend-dot { width:10px; height:10px; border-radius:3px; }
+        /* Task table */
+        .tag { font-size:0.65rem; padding:0.15rem 0.4rem; border-radius:4px; font-weight:600; }
+        .tag-spec { background:var(--purple-soft); color:var(--purple); }
+        .tag-dev { background:var(--cyan-soft); color:var(--cyan); }
+        .tag-impl { background:var(--green-soft); color:var(--green); }
+        .status-done { color:var(--green); font-weight:600; }
+        .status-progress { color:var(--amber); font-weight:600; }
+        .status-designed { color:var(--accent); font-weight:600; }
+        .status-todo { color:var(--text-muted); }
+        /* Upload mockup */
+        .upload-zone { border:2px dashed var(--border); border-radius:12px; padding:2rem; text-align:center; margin:1rem 0; transition:border-color 0.2s; }
+        .upload-zone:hover { border-color:var(--accent); }
+        .upload-icon { font-size:2rem; margin-bottom:0.5rem; }
+        .upload-text { color:var(--text-muted); font-size:0.85rem; }
+        .upload-text strong { color:var(--text); }
+        .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:1rem; }
+        .tab { padding:0.6rem 1.25rem; font-size:0.82rem; font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; }
+        .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        @media(max-width:768px) { .profile-body{grid-template-columns:1fr;} .profile-section:nth-child(even){border-left:none;} .card-grid{grid-template-columns:1fr;} .funnel-label{width:80px;font-size:0.75rem;} }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Motor de Disparos Seazone</h1>
+    <p class="subtitle">Segmentacao, cadencia inteligente e analytics — spec de design v1.1</p>
+    <p class="meta">Autora: Karen Ubial | 09/06/2026 | Piloto: inicio jul/2026</p>
+    <div>
+        <span class="badge badge-decided">6 tarefas concluidas</span>
+        <span class="badge badge-progress">5 em andamento</span>
+        <span class="badge badge-pending">5 decisoes pra Mari</span>
+    </div>
+</div>
+
+<nav class="nav-bar">
+    <a href="#progresso">Progresso</a>
+    <a href="#regras">Regras de Negocio</a>
+    <a href="#arquitetura">Arquitetura</a>
+    <a href="#pessoas">Pessoas</a>
+    <a href="#campanhas">Campanhas</a>
+    <a href="#opp">Portal OPPs</a>
+    <a href="#ia">Templates IA</a>
+    <a href="#decisoes">Arvore Decisao</a>
+    <a href="#analytics">Analytics</a>
+    <a href="#ciencia">Embasamento</a>
+    <a href="#pendentes">Pendentes</a>
+    <a href="#viabilidade">Viabilidade</a>
+</nav>
+
+<div class="container">
+
+    <!-- PROGRESSO -->
+    <section class="section" id="progresso">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--accent-soft);color:var(--accent);">&#9776;</div>
+            <h2>Progresso vs Plano</h2>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-segment" style="width:27%;background:var(--green);">27%</div>
+                <div class="progress-segment" style="width:27%;background:var(--amber);">27%</div>
+                <div class="progress-segment" style="width:8%;background:var(--accent);">8%</div>
+                <div class="progress-segment" style="width:38%;background:var(--surface);;color:var(--text-muted);">38%</div>
+            </div>
+            <div class="progress-legend">
+                <div class="progress-legend-item"><div class="progress-legend-dot" style="background:var(--green);"></div> Feito (7)</div>
+                <div class="progress-legend-item"><div class="progress-legend-dot" style="background:var(--amber);"></div> Em andamento (7)</div>
+                <div class="progress-legend-item"><div class="progress-legend-dot" style="background:var(--accent);"></div> Desenhado (2)</div>
+                <div class="progress-legend-item"><div class="progress-legend-dot" style="background:var(--surface2);"></div> Nao iniciado (10)</div>
+            </div>
+        </div>
+
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:1rem 0;">Dias uteis disponiveis: <strong style="color:var(--amber);">~9 dias</strong> (esta semana + ultima semana jun). Semana de lideranca = off.</p>
+
+        <!-- Pilar 1 -->
+        <h3 style="margin:1.5rem 0 0.75rem;">Pilar 1 — Segmentacao Dinamica <span style="font-size:0.8rem;color:var(--text-muted);">(prazo: 18/jun)</span></h3>
+        <div class="card">
+            <table>
+                <tr><th>Tarefa</th><th>Fase</th><th>Status</th><th>Obs</th></tr>
+                <tr><td>1.1 Temperatura SZI</td><td><span class="tag tag-spec">spec</span></td><td class="status-done">FEITO</td><td>Reuniao Mari 08/06</td></tr>
+                <tr><td>1.2 Temperatura SZS</td><td><span class="tag tag-spec">spec</span></td><td class="status-done">FEITO</td><td>Reuniao Leo 08/06</td></tr>
+                <tr><td>1.3 Temperatura MKT</td><td><span class="tag tag-spec">spec</span></td><td class="status-done">FEITO</td><td>Reuniao Roberto 08/06</td></tr>
+                <tr><td>1.4 Matriz unificada</td><td><span class="tag tag-spec">spec</span></td><td class="status-progress">90%</td><td>Matriz v2.0 + regras na spec. Falta: Leo e Roberto aprovarem</td></tr>
+                <tr><td>1.5 Segmentos adicionais (6+)</td><td><span class="tag tag-spec">spec</span></td><td class="status-progress">70%</td><td>HSP (3 sub-temps), cross-vertical, motivos de lost mapeados</td></tr>
+                <tr><td>1.6 Queries SQL/filtros</td><td><span class="tag tag-dev">dev</span></td><td class="status-progress">30%</td><td>Auditoria dados 10/06: 31/35 comms com dados OK. JOINs mapeados</td></tr>
+                <tr><td>1.7 Catalogo de segmentos</td><td><span class="tag tag-dev">dev</span></td><td class="status-todo">NAO</td><td>Depende de 1.6</td></tr>
+                <tr><td>1.8 Atualizacao automatica</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Cron diario</td></tr>
+            </table>
+        </div>
+
+        <!-- Pilar 2 -->
+        <h3 style="margin:1.5rem 0 0.75rem;">Pilar 2 — Base Unificada <span style="font-size:0.8rem;color:var(--text-muted);">(prazo: 02/jul)</span></h3>
+        <div class="card">
+            <table>
+                <tr><th>Tarefa</th><th>Fase</th><th>Status</th><th>Obs</th></tr>
+                <tr><td>2.1 Mapear Sapron</td><td><span class="tag tag-spec">spec</span></td><td class="status-progress">80%</td><td>owner+property+user mapeados. JOIN path completo (10/06)</td></tr>
+                <tr><td>2.2 Mapear Pipedrive</td><td><span class="tag tag-spec">spec</span></td><td class="status-done">FEITO</td><td>222K deals, 169K persons, 1.67M activities auditados (10/06)</td></tr>
+                <tr><td>2.3 Chave de juncao</td><td><span class="tag tag-spec">spec</span></td><td class="status-todo">NAO</td><td>CPF/email/telefone</td></tr>
+                <tr><td>2.4 Schema unificado</td><td><span class="tag tag-dev">dev</span></td><td class="status-todo">NAO</td><td>Tabela logica cliente</td></tr>
+                <tr><td>2.5 Script ingestao</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Sapron + Pipedrive &rarr; staging</td></tr>
+                <tr><td>2.6 Validar qualidade</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Match, duplicatas, nulos</td></tr>
+            </table>
+        </div>
+
+        <!-- Pilar 3 -->
+        <h3 style="margin:1.5rem 0 0.75rem;">Pilar 3 — Motor de Disparos <span style="font-size:0.8rem;color:var(--text-muted);">(prazo: 11/jul)</span></h3>
+        <div class="card">
+            <table>
+                <tr><th>Tarefa</th><th>Fase</th><th>Status</th><th>Obs</th></tr>
+                <tr><td>3.1 Mapear canais</td><td><span class="tag tag-spec">spec</span></td><td class="status-done">FEITO</td><td>MIA, Blip, SIA, Email</td></tr>
+                <tr><td>3.2 Regras elegibilidade</td><td><span class="tag tag-spec">spec</span></td><td class="status-done">FEITO</td><td>Builder visual desenhado</td></tr>
+                <tr><td>3.3 Templates mensagem</td><td><span class="tag tag-spec">spec</span>/<span class="tag tag-dev">dev</span></td><td class="status-progress">70%</td><td>Reais mapeados + IA desenhado</td></tr>
+                <tr><td>3.4 Integracao base &rarr; disparo</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td style="color:var(--amber);">Investigar: SIA como conector unico?</td></tr>
+                <tr><td>3.5 Throttling e janela</td><td><span class="tag tag-dev">dev</span></td><td class="status-designed">DESENHADO</td><td>Regras na spec</td></tr>
+                <tr><td>3.6 Validar entregabilidade</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Taxa &ge;95%</td></tr>
+            </table>
+        </div>
+
+        <!-- Pilar 4 -->
+        <h3 style="margin:1.5rem 0 0.75rem;">Pilar 4 — Tracking de Funil <span style="font-size:0.8rem;color:var(--text-muted);">(prazo: 23/jul)</span></h3>
+        <div class="card">
+            <table>
+                <tr><th>Tarefa</th><th>Fase</th><th>Status</th><th>Obs</th></tr>
+                <tr><td>4.1 Mapear estagios</td><td><span class="tag tag-spec">spec</span></td><td class="status-progress">70%</td><td>Funil x cobertura desenhado</td></tr>
+                <tr><td>4.2 Eventos conversao</td><td><span class="tag tag-dev">dev</span></td><td class="status-todo">NAO</td><td>Deal criado, won/lost</td></tr>
+                <tr><td>4.3 Campo origem_cdp</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Campo Pipedrive</td></tr>
+                <tr><td>4.4 Dashboard</td><td><span class="tag tag-impl">impl</span></td><td class="status-designed">DESENHADO</td><td>Mockups prontos</td></tr>
+                <tr><td>4.5 Teste loop completo</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Disparo &rarr; deal rastreado</td></tr>
+            </table>
+        </div>
+
+        <!-- Pilar 5 -->
+        <h3 style="margin:1.5rem 0 0.75rem;">Pilar 5 — Piloto + Aceite <span style="font-size:0.8rem;color:var(--text-muted);">(prazo: 30/jul)</span></h3>
+        <div class="card">
+            <table>
+                <tr><th>Tarefa</th><th>Fase</th><th>Status</th><th>Obs</th></tr>
+                <tr><td>5.1 Selecionar segmento piloto</td><td><span class="tag tag-spec">spec</span></td><td class="status-todo">NAO</td><td>50-200 contatos</td></tr>
+                <tr><td>5.2 Executar disparo piloto</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Acompanhamento real-time</td></tr>
+                <tr><td>5.3 Coletar metricas</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Entrega, resposta, deals</td></tr>
+                <tr><td>5.4 Apresentar resultados</td><td><span class="tag tag-spec">spec</span></td><td class="status-todo">NAO</td><td>CRO/CEO</td></tr>
+                <tr><td>5.5 Ajustes + handoff</td><td><span class="tag tag-impl">impl</span></td><td class="status-todo">NAO</td><td>Marketing opera sozinho</td></tr>
+            </table>
+        </div>
+
+        <div class="card" style="border-color:var(--amber);margin-top:1rem;">
+            <div class="card-label" style="color:var(--amber);">Investigacao critica</div>
+            <h3>SIA como conector unico?</h3>
+            <p>A SIA (Roberto Campos / Bryan) ja faz disparos WhatsApp e email. Se o motor conectar APENAS na SIA, simplifica drasticamente — sem precisar integrar MIA + Blip + RD Station separados. <strong>Investigar com Roberto/Kelly esta semana.</strong></p>
+        </div>
+    </section>
+
+    <!-- REGRAS DE NEGOCIO -->
+    <section class="section" id="regras">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--orange-soft);color:var(--orange);">&#128220;</div>
+            <h2>Regras de Negocio — Matriz Estrategica de Comunicacao</h2>
+        </div>
+        <p style="color:var(--text-muted);margin-bottom:1rem;">Documento completo: <a href="matriz-estrategica.html" style="color:var(--accent);text-decoration:underline;">matriz-estrategica.html</a> (v2.0, 10/06/2026)</p>
+
+        <h3>Conceito Central</h3>
+        <div class="card-grid">
+            <div class="card">
+                <h4 style="color:var(--accent);">Temperatura = Definicao Fixa</h4>
+                <p style="font-size:0.85rem;">Classifica o lead pelo estagio mais avancado que ja alcancou na jornada. Aprovada pelos gestores, vira contrato. <strong>Nao muda com o tempo</strong> — quem comprou e sempre Quente.</p>
+            </div>
+            <div class="card">
+                <h4 style="color:var(--accent);">COM OP vs SEM OP</h4>
+                <p style="font-size:0.85rem;">Eixo que cruza com temperatura em todas as verticais. Lead COM OP (teve reuniao) → abordagem direta. Lead SEM OP → educacao antes de venda.</p>
+            </div>
+        </div>
+
+        <h3>Resumo por Vertical</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Vertical</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Quente</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Morno</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Frio</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Comms</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.4rem;"><strong style="color:var(--accent);">SZI</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Investimentos · Mari</span></td>
+                    <td style="padding:0.4rem;">Ja comprou spot<br><span style="font-size:0.75rem;color:var(--text-muted);">Won pipeline 28</span></td>
+                    <td style="padding:0.4rem;">Fez OP, deu lost<br><span style="font-size:0.75rem;color:var(--text-muted);">Lost + meeting_at</span></td>
+                    <td style="padding:0.4rem;">Travou antes da OP<br><span style="font-size:0.75rem;color:var(--text-muted);">Lost + sem reuniao</span></td>
+                    <td style="padding:0.4rem;text-align:center;"><strong>13</strong></td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.4rem;"><strong style="color:var(--green);">SZS</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Administracao · Leo</span></td>
+                    <td style="padding:0.4rem;">Tem imovel SZI<br><span style="font-size:0.75rem;color:var(--text-muted);">Won SZI + sem SZS</span></td>
+                    <td style="padding:0.4rem;">Tem imovel, nao SZ<br><span style="font-size:0.75rem;color:var(--text-muted);">Lead pipeline 14</span></td>
+                    <td style="padding:0.4rem;">Fora poligono/anual<br><span style="font-size:0.75rem;color:var(--text-muted);">Motivo perda</span></td>
+                    <td style="padding:0.4rem;text-align:center;"><strong>10</strong></td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.4rem;"><strong style="color:var(--purple);">MKP</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Marketplace · Roberto</span></td>
+                    <td style="padding:0.4rem;">Responde rapido, 150k+<br><span style="font-size:0.75rem;color:var(--text-muted);">Open + atividades</span></td>
+                    <td style="padding:0.4rem;">Engajado, indeciso<br><span style="font-size:0.75rem;color:var(--text-muted);">Open/lost + atividades</span></td>
+                    <td style="padding:0.4rem;">Nao responde 60d+<br><span style="font-size:0.75rem;color:var(--text-muted);">Lost + sem atividade</span></td>
+                    <td style="padding:0.4rem;text-align:center;"><strong>11</strong></td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.4rem;"><strong style="color:var(--pink);">HSP</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Hospedes (dentro SZS)</span></td>
+                    <td style="padding:0.4rem;">Repeat (2+ reservas)<br><span style="font-size:0.75rem;color:var(--text-muted);">2.197 guests</span></td>
+                    <td style="padding:0.4rem;">Unico (1 reserva)<br><span style="font-size:0.75rem;color:var(--text-muted);">14.570 guests</span></td>
+                    <td style="padding:0.4rem;">Inativo (6m+ sem)<br><span style="font-size:0.75rem;color:var(--text-muted);">11.463 guests</span></td>
+                    <td style="padding:0.4rem;text-align:center;"><strong>6</strong></td>
+                </tr>
+            </tbody>
+            <tfoot><tr style="border-top:2px solid var(--border);">
+                <td colspan="4" style="padding:0.4rem;font-weight:700;">Total + Cross-Vertical (6 comms)</td>
+                <td style="padding:0.4rem;text-align:center;font-weight:700;color:var(--accent);">36</td>
+            </tr></tfoot>
+        </table>
+
+        <h3 style="margin-top:1.5rem;">Inventario de Comunicacoes</h3>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" style="color:var(--green);font-size:1.4rem;">8</div><div class="stat-label">Existentes (template Morada)</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--lime);font-size:1.4rem;">26</div><div class="stat-label">Novas sugeridas</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--amber);font-size:1.4rem;">1</div><div class="stat-label">Em teste (Mari)</div></div>
+        </div>
+
+        <h3 style="margin-top:1rem;">Exclusoes Globais — NUNCA abordar</h3>
+        <ol style="font-size:0.85rem;padding-left:1.2rem;line-height:2;">
+            <li><strong style="color:var(--red);">Expansao / Condominios</strong> — proibicao contratual, ja houve multa</li>
+            <li><strong style="color:var(--red);">Leads de parceiros</strong> — exclusividade contratual</li>
+            <li><strong style="color:var(--red);">Deal em aberto</strong> — nao pisar no vendedor</li>
+            <li><strong>Comprador recente</strong> — cooldown ~3 meses (SZS/Decor = imediato)</li>
+            <li><strong>Mesmo spot pro dono</strong> — nunca oferecer o que ja possui</li>
+            <li><strong>Fora do poligono SZS</strong> — regiao inativa (Bill configura)</li>
+            <li><strong>Desinscritos email MKP</strong> — fora pra sempre (Roberto)</li>
+            <li><strong>Numeros sem historico WA</strong> — 60% falha (erro 131049). So email.</li>
+            <li><strong>Motivo "duplicado/erro"</strong> — excluir de tudo</li>
+            <li><strong>Limite operacional</strong> — ~1000 pessoas/dia por numero WA</li>
+        </ol>
+
+        <h3 style="margin-top:1rem;">Frequencias por Temperatura</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;">Temperatura</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;">WA</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;">Email</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;">Intervalo min.</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;color:var(--red);font-weight:700;">Quente</td><td style="padding:0.4rem;">Ate 2x/semana</td><td style="padding:0.4rem;">Newsletter semanal</td><td style="padding:0.4rem;">48h entre disparos</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;color:var(--amber);font-weight:700;">Morno</td><td style="padding:0.4rem;">1x/semana</td><td style="padding:0.4rem;">Newsletter semanal/quinzenal</td><td style="padding:0.4rem;">48h entre disparos</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;color:var(--accent);font-weight:700;">Frio</td><td style="padding:0.4rem;">Max 1x/mes (ou nunca)</td><td style="padding:0.4rem;">Newsletter mensal/quinzenal</td><td style="padding:0.4rem;">48h entre disparos</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;color:var(--pink);font-weight:700;">HSP Inativo</td><td style="padding:0.4rem;">—</td><td style="padding:0.4rem;">Trimestral MAX</td><td style="padding:0.4rem;">—</td></tr>
+            </tbody>
+        </table>
+
+        <div style="background:var(--surface2);border-radius:8px;padding:1rem;margin-top:1.5rem;font-size:0.85rem;">
+            <strong>Detalhamento completo:</strong> Todas as 35 comunicacoes com criterios de segmentacao, canais, gatilhos cross-vertical, marcos e pendencias estao em <a href="matriz-estrategica.html" style="color:var(--accent);text-decoration:underline;">matriz-estrategica.html</a>. A viabilidade tecnica de cada comunicacao esta na secao <a href="#viabilidade" style="color:var(--accent);text-decoration:underline;">Viabilidade Tecnica</a>.
+        </div>
+    </section>
+
+    <!-- ARQUITETURA -->
+    <section class="section" id="arquitetura">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--accent-soft);color:var(--accent);">&#9881;</div>
+            <h2>Arquitetura — Hybrid Engine</h2>
+        </div>
+        <p style="color:var(--text-muted);margin-bottom:1.5rem;">Lifecycle always-on + campanhas pontuais + newsletter. Orquestrador central anti-fadiga.</p>
+        <div class="arch-diagram">
+            <div class="layer-label">Interface — PMMs criam e monitoram</div>
+            <div class="arch-row">
+                <div class="arch-box" style="background:var(--accent-soft);color:var(--accent);">Dashboard<small>Funil x Cobertura</small></div>
+                <div class="arch-box" style="background:var(--accent-soft);color:var(--accent);">Campanhas<small>Builder visual</small></div>
+                <div class="arch-box" style="background:var(--accent-soft);color:var(--accent);">Pessoas<small>Perfil + Timeline</small></div>
+                <div class="arch-box" style="background:var(--accent-soft);color:var(--accent);">Portal OPPs<small>Upload + IA</small></div>
+            </div>
+            <div class="arch-connector">&darr;</div>
+            <div class="layer-label">Logica — Motor decide o que, quando, pra quem</div>
+            <div class="arch-row">
+                <div class="arch-box" style="background:var(--purple-soft);color:var(--purple);">Newsletter<small>Email semanal</small></div>
+                <div class="arch-box" style="background:var(--purple-soft);color:var(--purple);">Campanhas<small>Pontuais</small></div>
+                <div class="arch-box" style="background:var(--purple-soft);color:var(--purple);">Lifecycle<small>Always-on</small></div>
+                <div class="arch-box" style="background:var(--purple-soft);color:var(--purple);">Orquestrador<small>Limites + prioridade</small></div>
+            </div>
+            <div class="arch-connector">&darr;</div>
+            <div class="layer-label">Execucao — Investigar: SIA como conector unico?</div>
+            <div class="arch-row">
+                <div class="arch-box" style="background:var(--green-soft);color:var(--green);border:2px solid var(--green);">SIA<small>WA + Email (preferencial)</small></div>
+                <div class="arch-box" style="background:var(--surface2);color:var(--text-muted);">MIA/Morada<small>Fallback WA</small></div>
+                <div class="arch-box" style="background:var(--surface2);color:var(--text-muted);">Blip<small>Fallback WA</small></div>
+            </div>
+            <div class="arch-connector">&darr;</div>
+            <div class="layer-label">Dados</div>
+            <div class="arch-row">
+                <div class="arch-box" style="background:var(--surface2);color:var(--text-muted);">Pipedrive<small>Deals, leads</small></div>
+                <div class="arch-box" style="background:var(--surface2);color:var(--text-muted);">Nekt/Sapron<small>Imoveis, reservas</small></div>
+                <div class="arch-box" style="background:var(--surface2);color:var(--text-muted);">Base propria<small>Estado campanha</small></div>
+            </div>
+        </div>
+        <div class="card" style="border-color:var(--purple);">
+            <div class="card-label" style="color:var(--purple);">Regras do Orquestrador</div>
+            <h3>Anti-fadiga: protege o lead</h3>
+            <ul>
+                <li>Max <strong>2 WA/semana</strong> + <strong>2 emails/semana</strong> por pessoa</li>
+                <li>Intervalo minimo <strong>48h</strong> entre disparos</li>
+                <li>Prioridade: urgente &gt; normal &gt; lifecycle</li>
+                <li>Horarios otimos: 12-14h / 19-21h</li>
+                <li>Respeita opt-out + saude do numero</li>
+            </ul>
+            <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--purple);"><em>Omnisend: 56% cancelam se 4+ msgs/mes</em></p>
+        </div>
+    </section>
+
+    <!-- PESSOAS -->
+    <section class="section" id="pessoas">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--cyan-soft);color:var(--cyan);">&#9787;</div>
+            <h2>Perfil do Cliente</h2>
+        </div>
+        <div class="profile-mock">
+            <div class="profile-header">
+                <div class="profile-avatar">JS</div>
+                <div>
+                    <div class="profile-name">Joao Silva</div>
+                    <div class="profile-meta">joao.silva@email.com | (11) 99999-1234</div>
+                    <div class="profile-tags">
+                        <span class="profile-tag" style="background:var(--green-soft);color:var(--green);">Ativo</span>
+                        <span class="profile-tag" style="background:var(--amber-soft);color:var(--amber);">Morno (62 pts)</span>
+                        <span class="profile-tag" style="background:var(--accent-soft);color:var(--accent);">Marketplace</span>
+                        <span class="profile-tag" style="background:var(--purple-soft);color:var(--purple);">2 campanhas</span>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-body">
+                <div class="profile-section">
+                    <h4>Perfil de Investidor</h4>
+                    <div class="profile-row"><span>Ja tem spot?</span><span>Sim — Campeche Spot</span></div>
+                    <div class="profile-row"><span>Admin SZS?</span><span>Nao</span></div>
+                    <div class="profile-row"><span>Empreendimentos</span><span>1</span></div>
+                    <div class="profile-row"><span>Ultima compra</span><span>15/03/2026 (86 dias)</span></div>
+                    <div class="profile-row"><span>Fez OPP?</span><span>2 reunioes</span></div>
+                    <div class="profile-row"><span>Origem</span><span>Midia paga</span></div>
+                </div>
+                <div class="profile-section">
+                    <h4>Campanhas Ativas</h4>
+                    <div class="profile-row"><span>OPP Bonito Spot</span><span style="color:var(--green);">Disparo 1/4 — 05/06</span></div>
+                    <div class="profile-row"><span>Newsletter MKP</span><span style="color:var(--accent);">Semanal — 02/06</span></div>
+                    <div style="margin-top:0.75rem;"><h4>Interacoes</h4>
+                    <div class="profile-row"><span>Interagiu</span><span style="color:var(--cyan);">Campeche Spot (15/03)</span></div>
+                    <div class="profile-row"><span>Interagiu</span><span style="color:var(--cyan);">Bonito Spot (05/06)</span></div></div>
+                </div>
+                <div class="profile-timeline">
+                    <h4>Timeline</h4>
+                    <div class="timeline-item"><span class="timeline-date" style="color:var(--green);">08/06</span><span>Abriu newsletter — clicou em "Bonito Spot"</span></div>
+                    <div class="timeline-item"><span class="timeline-date" style="color:var(--accent);">05/06</span><span>WA OPP Bonito Spot (disparo 1) — <strong>ignorou</strong></span></div>
+                    <div class="timeline-item"><span class="timeline-date" style="color:var(--green);">02/06</span><span>Newsletter MKP — abriu (32s)</span></div>
+                    <div class="timeline-item"><span class="timeline-date" style="color:var(--text-muted);">15/03</span><span>Won — Campeche Spot (R$ 352k)</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CAMPANHAS -->
+    <section class="section" id="campanhas">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--green-soft);color:var(--green);">&#9993;</div>
+            <h2>Criacao de Campanha</h2>
+        </div>
+        <div class="card-grid">
+            <div class="card"><div class="card-label" style="color:var(--accent);">Etapa 1</div><h3>Definicao basica</h3><ul><li>Nome, tipo (pontual/lifecycle/newsletter)</li><li>Vertical: SZI / Marketplace / SZS</li><li>Canal: WhatsApp / Email / Multicanal</li><li>Responsavel + aprovador</li></ul></div>
+            <div class="card"><div class="card-label" style="color:var(--accent);">Etapa 2</div><h3>Elegibilidade + Overlap</h3><ul><li>Builder visual de filtros</li><li>Preview em tempo real</li><li>Card de overlap: quem ja esta em outras</li><li><strong>Excluir</strong> grupo / individuo / manter</li></ul></div>
+            <div class="card"><div class="card-label" style="color:var(--accent);">Etapa 3</div><h3>Cadencia (arvore)</h3><ul><li>Sequencia de disparos + decisoes</li><li>Templates editaveis (se nao enviados)</li><li>Cadencia NAO para ao editar</li><li>Confirmacao visual da alteracao</li></ul></div>
+            <div class="card"><div class="card-label" style="color:var(--accent);">Etapa 4</div><h3>Aprovacao e ativacao</h3><ul><li>Preview: cadencia + base + overlap</li><li>Estimativa volume/dia</li><li>Aprovador revisa e ativa</li></ul></div>
+        </div>
+        <h3 style="margin-top:2rem;margin-bottom:1rem;">3 tipos de comunicacao</h3>
+        <div class="flow-container">
+            <div class="flow-box" style="background:var(--accent-soft);color:var(--accent);">Newsletter<br><small>Email, valor + opps</small></div>
+            <div class="flow-arrow">&rarr; sinais &rarr;</div>
+            <div class="flow-box" style="background:var(--green-soft);color:var(--green);">Campanha Pontual<br><small>WA, OPP da semana</small></div>
+            <div class="flow-arrow">&rarr; resposta &rarr;</div>
+            <div class="flow-box" style="background:var(--purple-soft);color:var(--purple);">Closer Humano<br><small>Atendimento</small></div>
+        </div>
+        <div class="flow-container">
+            <div class="flow-box" style="background:var(--cyan-soft);color:var(--cyan);">Lifecycle<br><small>Nurturing, reativacao</small></div>
+            <div class="flow-arrow">&rarr; esquenta &rarr;</div>
+            <div class="flow-box" style="background:var(--green-soft);color:var(--green);">Campanha Pontual</div>
+        </div>
+    </section>
+
+    <!-- PORTAL OPPs -->
+    <section class="section" id="opp">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--green-soft);color:var(--green);">&#9733;</div>
+            <h2>Portal de OPPs — Entrada de Oportunidades</h2>
+        </div>
+        <p style="color:var(--text-muted);margin-bottom:1.5rem;">Hoje Anna Beatriz (SZI) e Laura (MKP) escolhem as melhores cotas, escrevem textos e entregam pra Gaby via Slack. Com o motor, cadastram direto no sistema.</p>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab(this,'tab-upload')">Upload Inteligente</div>
+            <div class="tab" onclick="showTab(this,'tab-manual')">Manual</div>
+            <div class="tab" onclick="showTab(this,'tab-ia')">Gerar com IA</div>
+        </div>
+
+        <div id="tab-upload" class="tab-content">
+            <div class="upload-zone">
+                <div class="upload-icon">&#128196;</div>
+                <p class="upload-text"><strong>Arraste o arquivo da OPP aqui</strong><br>Doc, PDF, print, planilha — a IA extrai tudo automaticamente</p>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;">Ideal pra quem ja montou a OPP com Claude/ChatGPT e tem o arquivo pronto</p>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <div class="card-label" style="color:var(--green);">IA extraiu automaticamente</div>
+                <table>
+                    <tr><td style="color:var(--text-muted);">Empreendimento</td><td><strong>Bonito Spot</strong></td></tr>
+                    <tr><td style="color:var(--text-muted);">Unidade</td><td>203 (vista parcial mar)</td></tr>
+                    <tr><td style="color:var(--text-muted);">Investimento</td><td>R$ 231.000</td></tr>
+                    <tr><td style="color:var(--text-muted);">Entrada</td><td>R$ 92.400 em ate 6x</td></tr>
+                    <tr><td style="color:var(--text-muted);">Diferencial</td><td>Inicio das obras + alvara aprovado</td></tr>
+                    <tr><td style="color:var(--text-muted);">Entrega</td><td>2028</td></tr>
+                </table>
+                <p style="margin-top:0.75rem;font-size:0.82rem;">Revise e confirme &rarr; sistema cria campanha automaticamente</p>
+            </div>
+        </div>
+        <div id="tab-manual" class="tab-content" style="display:none;">
+            <div class="card">
+                <p>PMM preenche os campos: empreendimento, unidade, valor, entrada, parcelamento, diferencial, entrega, imagem/criativo.</p>
+            </div>
+        </div>
+        <div id="tab-ia" class="tab-content" style="display:none;">
+            <div class="card">
+                <p>PMM seleciona o empreendimento e a IA puxa dados do sistema + gera texto da OPP automaticamente.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEMPLATES IA -->
+    <section class="section" id="ia">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--purple-soft);color:var(--purple);">&#9998;</div>
+            <h2>Gerador de Templates com IA</h2>
+        </div>
+        <p style="color:var(--text-muted);margin-bottom:1.5rem;">PMM seleciona empreendimento + tipo de campanha. IA gera 3 opcoes. PMM edita e aprova.</p>
+        <div class="card">
+            <div class="card-label" style="color:var(--purple);">Gerando para: OPP Bonito Spot — WhatsApp</div>
+            <div style="margin-top:0.75rem;">
+                <div style="background:var(--surface2);border-radius:8px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid var(--green);">
+                    <div style="font-size:0.7rem;color:var(--green);font-weight:600;margin-bottom:0.3rem;">OPCAO 1 — CTA informativo (recomendada)</div>
+                    <p style="font-size:0.85rem;">Oi, {{nome}}! O Bonito Spot acaba de ter o alvara aprovado e as obras iniciam em 2026. Quer ver o fluxo de pagamento e a projecao de faturamento? Te mando agora.</p>
+                </div>
+                <div style="background:var(--surface2);border-radius:8px;padding:1rem;margin-bottom:0.75rem;border-left:3px solid var(--accent);">
+                    <div style="font-size:0.7rem;color:var(--accent);font-weight:600;margin-bottom:0.3rem;">OPCAO 2 — Escassez genuina</div>
+                    <p style="font-size:0.85rem;">Oi, {{nome}}! O alvara do Bonito Spot saiu e restam poucas cotas na faixa de entrada abaixo de R$100 mil. Posso te mandar os detalhes dessa oportunidade?</p>
+                </div>
+                <div style="background:var(--surface2);border-radius:8px;padding:1rem;border-left:3px solid var(--text-muted);">
+                    <div style="font-size:0.7rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem;">OPCAO 3 — Prova social</div>
+                    <p style="font-size:0.85rem;">Oi, {{nome}}! 47 investidores ja garantiram cota no Bonito Spot, que acaba de ter o alvara aprovado. Quer entender como funciona o investimento?</p>
+                </div>
+            </div>
+            <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--cyan);">Baseado em: reciprocidade (Cialdini), CTA informativo > CTA contato (validado nas transcricoes), escassez genuina (marcos reais)</p>
+        </div>
+    </section>
+
+    <!-- ARVORE DECISAO -->
+    <section class="section" id="decisoes">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--purple-soft);color:var(--purple);">&#9734;</div>
+            <h2>Arvore de Decisao por Comportamento</h2>
+        </div>
+        <div class="tree">
+            <div style="font-weight:700;margin-bottom:1rem;color:var(--accent);">DISPARO ENVIADO &darr;</div>
+            <div class="tree-node"><div class="tree-dot" style="background:var(--green);"></div><div class="tree-content"><div class="tree-reaction" style="color:var(--green);">Respondeu positivo</div><div class="tree-action">Sai da cadencia &rarr; marca quente &rarr; closer assume</div></div></div>
+            <div class="tree-node"><div class="tree-dot" style="background:var(--amber);"></div><div class="tree-content"><div class="tree-reaction" style="color:var(--amber);">Respondeu neutro (duvida)</div><div class="tree-action">Pausa automacao &rarr; humano responde &rarr; retorna ou sai</div></div></div>
+            <div class="tree-node"><div class="tree-dot" style="background:var(--red);"></div><div class="tree-content"><div class="tree-reaction" style="color:var(--red);">Respondeu "nao quero mais"</div><div class="tree-action">Opt-out global &rarr; nunca mais recebe</div></div></div>
+            <div class="tree-node"><div class="tree-dot" style="background:var(--amber);"></div><div class="tree-content"><div class="tree-reaction" style="color:var(--amber);">Respondeu "nao agora"</div><div class="tree-action">Sai &rarr; lifecycle frio &rarr; reativacao 90 dias</div></div></div>
+            <div class="tree-node"><div class="tree-dot" style="background:var(--text-muted);"></div><div class="tree-content"><div class="tree-reaction">Ignorou</div><div class="tree-action">Avanca na cadencia &rarr; 3 ignorados = esfria &rarr; fim = lifecycle</div></div></div>
+            <div class="tree-node"><div class="tree-dot" style="background:var(--red);"></div><div class="tree-content"><div class="tree-reaction" style="color:var(--red);">Erro tecnico</div><div class="tree-action">Canal alternativo &rarr; 2 falhas = incontactavel</div></div></div>
+        </div>
+        <h3 style="margin-top:1.5rem;margin-bottom:0.75rem;">Cadencia automatica por motivo de lost</h3>
+        <div class="card"><table>
+            <tr><th>Motivo</th><th>Cadencia</th><th>Timing</th></tr>
+            <tr><td>Momento financeiro</td><td>Reativacao condicoes flexiveis</td><td>90 dias</td></tr>
+            <tr><td>Escolheu concorrente</td><td>Nurturing educativo</td><td>60 dias</td></tr>
+            <tr><td>Nao respondeu/sumiu</td><td>Repescagem leve</td><td>30 dias</td></tr>
+            <tr><td>Nao tem interesse</td><td>So newsletter</td><td>Imediato</td></tr>
+            <tr><td>Comprou outro</td><td>Cross-sell</td><td>90 dias</td></tr>
+        </table></div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section class="section" id="analytics">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--green-soft);color:var(--green);">&#9776;</div>
+            <h2>Analytics — Funil x Cobertura</h2>
+        </div>
+        <h3 style="margin-bottom:1rem;">Marketplace — Ciclo de Vida</h3>
+        <div class="card">
+            <div class="funnel">
+                <div class="funnel-row"><div class="funnel-label">Qualificacao</div><div class="funnel-bar-container"><div class="funnel-bar" style="width:100%;background:var(--accent-soft);color:var(--accent);">820 leads</div><div class="funnel-coverage" style="width:72%;background:var(--green);"></div><div class="funnel-coverage-label">72% em campanha</div></div></div>
+                <div class="funnel-row"><div class="funnel-label">FUP</div><div class="funnel-bar-container"><div class="funnel-bar" style="width:66%;background:var(--accent-soft);color:var(--accent);">540 leads</div><div class="funnel-coverage" style="width:45%;background:var(--amber);"></div><div class="funnel-coverage-label">45% em campanha <span class="funnel-alert">&#9888; gap</span></div></div></div>
+                <div class="funnel-row"><div class="funnel-label">Oportunidade</div><div class="funnel-bar-container"><div class="funnel-bar" style="width:38%;background:var(--accent-soft);color:var(--accent);">310 leads</div><div class="funnel-coverage" style="width:89%;background:var(--green);"></div><div class="funnel-coverage-label">89% em campanha</div></div></div>
+                <div class="funnel-row"><div class="funnel-label">Lost</div><div class="funnel-bar-container"><div class="funnel-bar" style="width:100%;background:var(--red-soft);color:var(--red);">1.890 leads</div><div class="funnel-coverage" style="width:18%;background:var(--red);"></div><div class="funnel-coverage-label">18% em campanha <span class="funnel-alert">&#9888; 1.549 descobertos</span></div></div></div>
+                <div class="funnel-row"><div class="funnel-label">Won</div><div class="funnel-bar-container"><div class="funnel-bar" style="width:28%;background:var(--green-soft);color:var(--green);">230 (cross-sell: 180)</div><div class="funnel-coverage" style="width:42%;background:var(--amber);"></div><div class="funnel-coverage-label">42% em cross-sell</div></div></div>
+            </div>
+        </div>
+        <h3 style="margin-top:2rem;margin-bottom:1rem;">Teste A/B</h3>
+        <div class="card">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                <div style="flex:1;min-width:250px;"><div class="card-label" style="color:var(--green);">Variacao A — vencedora</div><p><strong>"27% abaixo do valor de mercado"</strong></p><div style="margin-top:0.5rem;"><div style="background:var(--green);height:24px;width:82%;border-radius:4px;display:flex;align-items:center;padding-left:0.5rem;font-size:0.8rem;font-weight:700;color:var(--bg);">41% resposta</div></div></div>
+                <div style="flex:1;min-width:250px;"><div class="card-label" style="color:var(--text-muted);">Variacao B</div><p><strong>"Faturamento R$79k/ano"</strong></p><div style="margin-top:0.5rem;"><div style="background:var(--surface2);height:24px;width:56%;border-radius:4px;display:flex;align-items:center;padding-left:0.5rem;font-size:0.8rem;font-weight:600;">28% resposta</div></div></div>
+            </div>
+            <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--green);">A vence com 95% confianca</p>
+        </div>
+    </section>
+
+    <!-- EMBASAMENTO -->
+    <section class="section" id="ciencia">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--purple-soft);color:var(--purple);">&#9878;</div>
+            <h2>Embasamento Cientifico</h2>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" style="color:var(--green);">4-10x</div><div class="stat-label">mais respostas com drip campaigns</div><div class="stat-source">Forrester</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--accent);">+78%</div><div class="stat-label">conversao com scoring comportamental</div><div class="stat-source">HubSpot</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--amber);">56%</div><div class="stat-label">cancelam se 4+ msgs/mes</div><div class="stat-source">Omnisend</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--cyan);">$36-42</div><div class="stat-label">ROI por $1 em email</div><div class="stat-source">McKinsey</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--green);">95-98%</div><div class="stat-label">abertura WhatsApp</div><div class="stat-source">Opinion Box</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--purple);">+50%</div><div class="stat-label">leads qualificados com nurturing</div><div class="stat-source">Forrester</div></div>
+        </div>
+        <div class="card-grid" style="margin-top:1rem;">
+            <div class="card"><h3>Insight das transcricoes</h3><ul>
+                <li><strong>WA >> email:</strong> Lead recebeu 5 emails sem reagir, 1o WA marcou reuniao (Gaby)</li>
+                <li><strong>CTA informativo > contato:</strong> "ver fluxo pagamento" clica mais que "fale com time" (Gaby)</li>
+                <li><strong>Base interna supera midia paga</strong> em vendas ha 2 meses (Mari)</li>
+                <li><strong>~40k leads, so ~1.500 aproveitados</strong> (Bruno)</li>
+                <li><strong>Nunca houve nurturing real</strong> — so disparo de venda (Roberto)</li>
+            </ul></div>
+            <div class="card"><h3>Principios aplicados (Cialdini + Godin)</h3><ul>
+                <li><strong>Reciprocidade:</strong> newsletter com valor antes de pedir</li>
+                <li><strong>Escassez real:</strong> marcos genuinos (alvara, ultimas cotas)</li>
+                <li><strong>Prova social:</strong> "X investidores ja compraram"</li>
+                <li><strong>Permission Marketing:</strong> antecipadas, pessoais, relevantes</li>
+                <li><strong>Nunca venda direta no 1o contato</strong></li>
+            </ul></div>
+        </div>
+    </section>
+
+    <!-- PENDENTES -->
+    <section class="section" id="pendentes">
+        <div class="section-header">
+            <div class="section-icon" style="background:var(--amber-soft);color:var(--amber);">?</div>
+            <h2>Decisoes Pendentes — Validar com Mari</h2>
+        </div>
+        <div class="pending-card">
+            <h3>1. Pesos do Scoring de Temperatura</h3>
+            <p>Motor calcula temperatura automaticamente. Pesos parametrizaveis pelo site.</p>
+            <div class="proposal"><div class="proposal-label">Proposta</div>
+            <table><tr><th>Acao</th><th>Pontos</th></tr>
+            <tr><td>Respondeu positivo WA</td><td style="color:var(--green);">+30</td></tr>
+            <tr><td>Clicou newsletter</td><td style="color:var(--green);">+15</td></tr>
+            <tr><td>Abriu email</td><td style="color:var(--green);">+5</td></tr>
+            <tr><td>Agendou reuniao</td><td style="color:var(--green);">+50</td></tr>
+            <tr><td>Ignorou disparo</td><td style="color:var(--red);">-10</td></tr>
+            <tr><td>Disse "nao agora"</td><td style="color:var(--red);">-20</td></tr>
+            <tr><td>Opt-out</td><td style="color:var(--red);">-100</td></tr>
+            <tr><td>Sem interacao 30 dias</td><td style="color:var(--red);">-15</td></tr>
+            </table></div>
+            <p style="margin-top:0.75rem;"><strong>Pergunta:</strong> Pesos ok? Quer ajustar?</p>
+        </div>
+        <div class="pending-card">
+            <h3>2. Atribuicao de Closer</h3>
+            <p>Quando lead responde, pra quem direcionar? (caso Will vs Nevine)</p>
+            <div class="proposal"><div class="proposal-label">Opcoes</div>
+            <p><strong>A)</strong> Motor sabe qual closer atendeu antes<br><strong>B)</strong> Direciona pra fila geral<br><strong>C)</strong> Nao entra no v1</p></div>
+        </div>
+        <div class="pending-card">
+            <h3>3. LGPD / Opt-in</h3>
+            <p>Registrar de onde veio o consentimento?</p>
+            <div class="proposal"><div class="proposal-label">Recomendacao</div><p>Minimo: registrar origem do contato (ja temos no Pipedrive). Robusto: v2.</p></div>
+        </div>
+        <div class="pending-card">
+            <h3>4. SZS e Call Coletiva</h3>
+            <p>SZS = call coletiva + CIA, nao cadencia individual.</p>
+            <div class="proposal"><div class="proposal-label">Opcoes</div>
+            <p><strong>A)</strong> SZS no v1 so com newsletter + pontuais<br><strong>B)</strong> SZS fora do v1<br><strong>C)</strong> Motor convida pra call coletiva como tipo de campanha</p></div>
+        </div>
+        <div class="pending-card">
+            <h3>5. Cooldown de Cross-sell</h3>
+            <div class="proposal"><div class="proposal-label">Proposta</div>
+            <p><strong>Admin SZS / Decor:</strong> imediato<br><strong>Novo empreendimento:</strong> 3 meses</p></div>
+            <p style="margin-top:0.75rem;"><strong>Pergunta:</strong> 3 meses ok?</p>
+        </div>
+    </section>
+
+    <!-- ==================== VIABILIDADE TECNICA ==================== -->
+    <section class="section" id="viabilidade">
+        <h2>&#128202; Viabilidade Tecnica — Cobertura de Dados</h2>
+        <p style="color:var(--text-muted);margin-bottom:1rem;">Auditoria automatizada em 10/06/2026 cruzando as 35 comunicacoes da Matriz Estrategica com dados reais dos MCPs (Nekt, Reservas, Sapron).</p>
+
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" style="color:var(--green);">31</div><div class="stat-label">Dados completos</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--amber);">3</div><div class="stat-label">Parcial (JOIN ou input manual)</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--red);">1</div><div class="stat-label">Gap (click rate)</div></div>
+            <div class="stat-card"><div class="stat-value">35</div><div class="stat-label">Total comunicacoes</div></div>
+        </div>
+
+        <h3>Fontes de Dados Auditadas</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin:0.5rem 0 1.5rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Fonte</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Tabela</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Registros</th>
+                <th style="text-align:left;padding:0.4rem;color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Campos-chave</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-spec">NEKT</span></td><td style="padding:0.4rem;">pipedrive_deals_kpi_base</td><td style="padding:0.4rem;">222K</td><td style="padding:0.4rem;">deal_id, vertical_comercial, is_ganho/perda, won_at, lost_at, motivo_da_perda, meeting_at, empreendimento</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-spec">NEKT</span></td><td style="padding:0.4rem;">pipedrive_persons_expanded</td><td style="padding:0.4rem;">169K</td><td style="padding:0.4rem;">emails, phones, name, org_id — <strong>100% cobertura email+phone</strong></td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-spec">NEKT</span></td><td style="padding:0.4rem;">pipedrive_activities (bronze)</td><td style="padding:0.4rem;">1.67M</td><td style="padding:0.4rem;">type, deal_id, person_id — 37 tipos, 112K reunioes, 92K com deal linkado</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-impl">SAPRON</span></td><td style="padding:0.4rem;">sapron_public_account_owner (bronze)</td><td style="padding:0.4rem;">4.1K</td><td style="padding:0.4rem;">user_id, email_for_operation, properties_owned, properties_to_rent, income</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-impl">SAPRON</span></td><td style="padding:0.4rem;">sapron_public_property_property</td><td style="padding:0.4rem;">6.2K</td><td style="padding:0.4rem;">Faturamento e ocupacao por imovel</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-dev">RESERVAS</span></td><td style="padding:0.4rem;">reservations</td><td style="padding:0.4rem;">50K</td><td style="padding:0.4rem;">check_in_date, check_out_date, user_id, property_id, status, total_price</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.4rem;"><span class="tag tag-dev">RESERVAS</span></td><td style="padding:0.4rem;">users</td><td style="padding:0.4rem;">31K</td><td style="padding:0.4rem;">email, phone_number, birthdate — 91% com phone, 59% com birthdate</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Segmentacao por Vertical — Status dos Dados</h3>
+
+        <h4 style="color:var(--accent);margin:1rem 0 0.5rem;">SZI — Investimentos (12 comunicacoes)</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-bottom:1rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Comunicacao</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Criterio</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Status</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">OPP da semana</td><td style="padding:0.35rem;">is_ganho + empreendimento diferente</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Parabens pos-compra</td><td style="padding:0.35rem;">is_ganho + won_at recente</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Update de obra (quente)</td><td style="padding:0.35rem;">is_ganho + marco concluido no empreendimento</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — SpotSIS primario / Smartsheet fallback (43% cobertura)</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Marco como gatilho de reengajamento (morno/frio)</td><td style="padding:0.35rem;">is_perda + meeting_at + empreendimento com marco atingido → direciona pra agenda da closer</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — mesmo fallback SpotSIS/Smartsheet · 11 marcos (6 disponiveis: 3 pre-obra + 3 obra · 5 entrega pendentes PMO)</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Pedido de indicacao</td><td style="padding:0.35rem;">is_ganho + won_at &lt;= 3 meses</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Repescagem SZI</td><td style="padding:0.35rem;">is_perda + meeting_at NOT NULL</td><td style="padding:0.35rem;color:var(--green);">OK — 9 templates Morada</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">OPP Imperdivel</td><td style="padding:0.35rem;">is_perda + meeting_at NOT NULL</td><td style="padding:0.35rem;color:var(--green);">OK — 2 templates Morada</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Email fechamento</td><td style="padding:0.35rem;">is_perda + meeting_at NOT NULL</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Case investidor</td><td style="padding:0.35rem;">Morno SZI + faturamento Sapron</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Nurturing rentabilidade</td><td style="padding:0.35rem;">Morno SZI + ocupacao Sapron</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Repescagem fora SLA</td><td style="padding:0.35rem;">is_perda + meeting_at NULL + lost_at &lt;= 21d</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Conteudo educativo</td><td style="padding:0.35rem;">Frio SZI (email only)</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Trigger comportamental</td><td style="padding:0.35rem;">Clique em newsletter</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — open ok, click falta</td></tr>
+            </tbody>
+        </table>
+
+        <h4 style="color:var(--green);margin:1rem 0 0.5rem;">SZS — Administracao (10 comunicacoes)</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-bottom:1rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Comunicacao</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Criterio</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Status</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Call coletiva (Quente)</td><td style="padding:0.35rem;">Won SZI + sem deal SZS ativo</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Resultado imovel mensal</td><td style="padding:0.35rem;">Sapron owner + property faturamento</td><td style="padding:0.35rem;color:var(--amber);">JOIN — Sapron owner x property</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Pesquisa pos-checkout</td><td style="padding:0.35rem;">Reservas.external_property_id &rarr; Sapron owner</td><td style="padding:0.35rem;color:var(--green);">OK — via Sapron JOIN</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Call coletiva (Morno)</td><td style="padding:0.35rem;">Lead pipeline SZS + sem spot SZI</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Comparativo gestao</td><td style="padding:0.35rem;">Morno SZS + benchmark Sapron</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Depoimento proprietario</td><td style="padding:0.35rem;">Morno SZS + conteudo manual</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Newsletter resultados</td><td style="padding:0.35rem;">Morno SZS + Sapron ocupacao</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Exclusao poligono</td><td style="padding:0.35rem;">motivo_da_perda = "Regiao Inativa"</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Newsletter aluguel anual</td><td style="padding:0.35rem;">motivo_da_perda ~ "anual"</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Reativacao timing</td><td style="padding:0.35rem;">motivo_da_perda = "Timing"</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+            </tbody>
+        </table>
+
+        <h4 style="color:var(--purple);margin:1rem 0 0.5rem;">MKP — Marketplace (11 comunicacoes)</h4>
+        <p style="color:var(--amber);font-size:0.82rem;margin-bottom:0.5rem;"><strong>Atencao:</strong> Nos dados Pipedrive a vertical aparece como "MKT" (nao "MKP"). Confirmar nomenclatura.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-bottom:1rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Comunicacao</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Criterio</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Status</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">OPP da semana</td><td style="padding:0.35rem;">open + atividades recentes</td><td style="padding:0.35rem;color:var(--green);">OK — templates Morada</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Template inicial</td><td style="padding:0.35rem;">Deal novo + empreendimento</td><td style="padding:0.35rem;color:var(--green);">OK — 6 templates Morada</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Alerta opp personalizada</td><td style="padding:0.35rem;">Historico interesse + nova opp</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — opp e input manual</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Email fechamento</td><td style="padding:0.35rem;">open/lost recente + atividades</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Serie educativa cotas</td><td style="padding:0.35rem;">Morno MKP</td><td style="padding:0.35rem;color:var(--green);">OK — template a criar</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Simulacao retorno</td><td style="padding:0.35rem;">Morno MKP + Sapron rentabilidade</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Case investidor</td><td style="padding:0.35rem;">Morno MKP + conteudo manual</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Repescagem existente</td><td style="padding:0.35rem;">is_perda + 60d sem atividade</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — MKP sem template Meta</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Radar do mercado</td><td style="padding:0.35rem;">Frio MKP (newsletter)</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Repescagem MKP empreendimento</td><td style="padding:0.35rem;">is_perda + empreendimento</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — template Meta a criar</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Trigger comportamental</td><td style="padding:0.35rem;">Clique em newsletter</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL — open ok, click falta</td></tr>
+            </tbody>
+        </table>
+
+        <h4 style="color:var(--pink);margin:1rem 0 0.5rem;">Hospedes — HSP (6 comunicacoes)</h4>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" style="color:var(--pink);font-size:1.4rem;">31K</div><div class="stat-label">Users</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--green);font-size:1.4rem;">2.197</div><div class="stat-label">Repeat (2+)</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--amber);font-size:1.4rem;">14.570</div><div class="stat-label">Unico</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--red);font-size:1.4rem;">11.463</div><div class="stat-label">Inativos 6m+</div></div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-bottom:1rem;">
+            <thead><tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Comunicacao</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Dados + Volume</th>
+                <th style="text-align:left;padding:0.35rem;color:var(--text-muted);font-size:0.7rem;">Status</th>
+            </tr></thead>
+            <tbody>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Pre-checkin</td><td style="padding:0.35rem;">check_in_date + property_id — 452 futuras</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Pos-estadia NPS</td><td style="padding:0.35rem;">check_out_date recente — 971/mes</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Early access + PIX</td><td style="padding:0.35rem;">COUNT(reservas) >= 2 — 2.197 repeat</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Cupom aniversario</td><td style="padding:0.35rem;">birthdate — 18.359 (59%), gap 41%</td><td style="padding:0.35rem;color:var(--amber);">PARCIAL</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Sugestao sazonal</td><td style="padding:0.35rem;">1 reserva + destino — 14.570</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+                <tr style="border-bottom:1px solid var(--border);"><td style="padding:0.35rem;">Reativacao hospede</td><td style="padding:0.35rem;">6m+ sem checkout — 11.463</td><td style="padding:0.35rem;color:var(--green);">OK</td></tr>
+            </tbody>
+        </table>
+
+        <h3 style="color:var(--green);margin-top:1.5rem;">Gaps Resolvidos (investigacao 10/06)</h3>
+        <div class="card-grid">
+            <div class="pending-card" style="border-left:3px solid var(--green);">
+                <h3 style="color:var(--green);">&#10003; Owner de propriedade — RESOLVIDO</h3>
+                <p>Caminho completo encontrado no Sapron:</p>
+                <p style="font-family:monospace;font-size:0.78rem;background:var(--surface2);padding:0.5rem;border-radius:4px;margin:0.5rem 0;">
+                    Reservas.properties.external_property_id<br>
+                    &rarr; Sapron.property_property.id (owner_id)<br>
+                    &rarr; Sapron.account_owner.id (user_id)<br>
+                    &rarr; Sapron.account_user.id (email, telefone, CPF, pipedrive_person_id)
+                </p>
+                <p style="color:var(--green);font-size:0.82rem;">Desbloqueia: Pesquisa pos-checkout + Hospede&rarr;SZS Morno</p>
+            </div>
+            <div class="pending-card" style="border-left:3px solid var(--green);">
+                <h3 style="color:var(--green);">&#10003; Interacoes MIA/Blip/SIA — RESOLVIDO</h3>
+                <p>Tabelas SIA chat no Nekt:</p>
+                <ul style="font-size:0.82rem;padding-left:1rem;">
+                    <li><code>chat_session</code> — sessoes WA com customer_phone, status, campaign_id</li>
+                    <li><code>chat_message</code> — mensagens individuais com role, content, delivery_status</li>
+                    <li><code>chat_feedback</code>, <code>chat_error</code>, <code>chat_media</code></li>
+                </ul>
+                <p style="margin-top:0.4rem;font-size:0.82rem;">Blip: metricas agregadas diarias (ticket_metrics, agent_metrics). MIA: cache + disparos linkados a deals.</p>
+            </div>
+            <div class="pending-card" style="border-left:3px solid var(--amber);">
+                <h3 style="color:var(--amber);">&#9675; Email open rate — PARCIAL</h3>
+                <p>Tabela <code>sup_prd_sia_public_campaign_email_events</code> encontrada com:</p>
+                <ul style="font-size:0.82rem;padding-left:1rem;">
+                    <li><strong>sent</strong> (468 eventos), <strong>opened</strong> (286), <strong>bounced</strong> (7)</li>
+                    <li>Campos: campaign_id, resend_id, recipient_email, event_type, created_at</li>
+                </ul>
+                <p style="color:var(--amber);margin-top:0.4rem;font-size:0.82rem;"><strong>Falta:</strong> evento de <strong>click</strong> — nao aparece nos dados. Limitacao do Resend ou da integracao.</p>
+                <p style="color:var(--cyan);font-size:0.82rem;">Trigger comportamental pode usar <strong>open</strong> no lugar de click como proxy. Ou pedir pra SIA habilitar click tracking no Resend.</p>
+            </div>
+            <div class="pending-card" style="border-left:3px solid var(--amber);">
+                <h3 style="color:var(--amber);">&#9675; Templates MKP no Meta</h3>
+                <p>SZI tem 9 templates repescagem, MKP tem ZERO. Precisam ser criados e aprovados.</p>
+                <p style="margin-top:0.5rem;"><strong>Afeta:</strong> Repescagem MKP por empreendimento</p>
+                <p style="color:var(--cyan);margin-top:0.5rem;"><strong>Solucao:</strong> Roberto criar no Morada/Meta (~48h aprovacao).</p>
+            </div>
+        </div>
+
+        <h3 style="margin-top:1.5rem;">Prerequisitos Tecnicos (nao bloqueiam)</h3>
+        <div class="card-grid">
+            <div class="pending-card" style="border-left:3px solid var(--cyan);">
+                <h3>JOIN deals &rarr; contato</h3>
+                <p><code>deals_kpi_base</code> nao tem telefone/email. JOIN obrigatorio com <code>persons_expanded</code> (169K, 100% cobertura) via person_id.</p>
+            </div>
+        </div>
+
+        <h3 style="margin-top:1.5rem;">Alertas Operacionais</h3>
+        <ul style="font-size:0.85rem;padding-left:1.2rem;">
+            <li><strong>Activities em Bronze:</strong> <code>nekt_operacional_bronze.pipedrive_activities</code> (nao silver). Dados nao curados.</li>
+            <li><strong>Sapron owner em Bronze:</strong> <code>nekt_operacional_bronze.sapron_public_account_owner</code>. Sem equivalente silver.</li>
+            <li><strong>Nomenclatura MKT vs MKP:</strong> Dados usam "MKT", spec usa "MKP". Confirmar com Roberto.</li>
+            <li><strong>Colunas Reservas:</strong> <code>check_in_date</code> / <code>check_out_date</code> (tipo date), nao check_in/check_out.</li>
+            <li><strong>deal_owner_name quase vazio:</strong> Apenas 29 de 222K preenchidos. Owner do deal precisa de outra fonte.</li>
+        </ul>
+
+        <div style="background:var(--green-soft);border-radius:8px;padding:1rem;margin-top:1.5rem;border-left:3px solid var(--green);">
+            <strong>Conclusao:</strong> 89% das comunicacoes (31/35) tem dados completos. Gaps originais de owner e interacoes MIA foram resolvidos via Sapron e SIA chat tables. Restam 3 parciais (input manual ou template Meta) e 1 limitacao (click rate do Resend). <strong>O MVP pode comecar com todas as 35 comunicacoes.</strong> Relatorio completo em <code>mockup/relatorio-cobertura-dados.html</code>.
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // Nav
+    document.querySelectorAll('.nav-bar a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'});});});
+    const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.nav-bar a').forEach(a=>a.classList.remove('active'));document.querySelector(`.nav-bar a[href="#${e.target.id}"]`)?.classList.add('active');}});},{threshold:0.3});
+    document.querySelectorAll('.section').forEach(s=>obs.observe(s));
+    // Tabs
+    function showTab(el,id){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const parent=el.parentElement.parentElement;parent.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');document.getElementById(id).style.display='block';}
+</script>
+</body>
+</html>

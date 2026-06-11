@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor de Disparos — Apresentação do Projeto</title>
+    <style>
+        :root {
+            --bg:#0f1117;--surface:#1a1d27;--surface2:#232735;--border:#2d3244;
+            --text:#e4e6ed;--text-muted:#8b90a0;
+            --accent:#6c8cff;--accent-soft:rgba(108,140,255,0.12);
+            --green:#4ade80;--green-soft:rgba(74,222,128,0.12);
+            --amber:#fbbf24;--amber-soft:rgba(251,191,36,0.12);
+            --red:#f87171;--red-soft:rgba(248,113,113,0.12);
+            --purple:#a78bfa;--purple-soft:rgba(167,139,250,0.12);
+            --cyan:#22d3ee;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;line-height:1.6;}
+        .container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+        h1{font-size:1.8rem;font-weight:700;text-align:center;margin-bottom:0.3rem;}
+        .subtitle{text-align:center;color:var(--text-muted);font-size:0.9rem;margin-bottom:0.3rem;}
+        .meta{text-align:center;color:var(--text-muted);font-size:0.78rem;margin-bottom:2rem;}
+
+        /* Tabs */
+        .tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:1.5rem;overflow-x:auto;}
+        .tab{padding:0.7rem 1.2rem;font-size:0.82rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s;white-space:nowrap;user-select:none;}
+        .tab:hover{color:var(--text);background:var(--surface);}
+        .tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface);}
+        .tab .tab-status{font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:8px;margin-left:0.4rem;font-weight:700;}
+        .tab .tab-status.done{background:var(--green-soft);color:var(--green);}
+        .tab .tab-status.wip{background:var(--amber-soft);color:var(--amber);}
+        .tab .tab-status.next{background:var(--surface2);color:var(--text-muted);}
+        .panel{display:none;}
+        .panel.active{display:block;}
+
+        /* Phase header */
+        .phase-header{margin-bottom:1.5rem;}
+        .phase-header h2{font-size:1.3rem;font-weight:700;margin-bottom:0.5rem;}
+        .phase-header p{color:var(--text-muted);font-size:0.88rem;}
+        .phase-dates{display:inline-block;font-size:0.75rem;padding:0.2rem 0.7rem;background:var(--surface2);border-radius:6px;color:var(--text-muted);margin-top:0.5rem;}
+
+        /* Gain box */
+        .gain-box{background:var(--green-soft);border:1px solid rgba(74,222,128,0.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;}
+        .gain-box h3{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:0.5rem;}
+        .gain-box ul{list-style:none;padding:0;}
+        .gain-box li{font-size:0.88rem;padding:0.25rem 0;padding-left:1.2rem;position:relative;}
+        .gain-box li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700;}
+
+        /* Task list */
+        .task-list{margin-bottom:1.5rem;}
+        .task{display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:0.5rem;}
+        .task-tag{font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:5px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;margin-top:0.15rem;}
+        .task-tag.spec{background:var(--accent-soft);color:var(--accent);}
+        .task-tag.dev{background:var(--purple-soft);color:var(--purple);}
+        .task-tag.impl{background:var(--amber-soft);color:var(--amber);}
+        .task-body{flex:1;}
+        .task-title{font-size:0.88rem;font-weight:600;}
+        .task-desc{font-size:0.8rem;color:var(--text-muted);margin-top:0.15rem;}
+        .task-status{font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:5px;font-weight:700;white-space:nowrap;margin-top:0.15rem;}
+        .task-status.done{background:var(--green-soft);color:var(--green);}
+        .task-status.wip{background:var(--amber-soft);color:var(--amber);}
+        .task-status.next{background:var(--surface2);color:var(--text-muted);}
+
+        /* Context/problem box */
+        .context-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;}
+        .context-box h3{font-size:0.85rem;font-weight:700;margin-bottom:0.75rem;}
+        .pain-item{display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:0.6rem;font-size:0.85rem;}
+        .pain-icon{font-size:1rem;margin-top:0.1rem;}
+        .pain-text strong{color:var(--red);}
+
+        /* Summary bar */
+        .summary-bar{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+        .summary-card{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;text-align:center;}
+        .summary-card .num{font-size:1.5rem;font-weight:700;}
+        .summary-card .label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;}
+        .summary-card.green .num{color:var(--green);}
+        .summary-card.amber .num{color:var(--amber);}
+        .summary-card.muted .num{color:var(--text-muted);}
+
+        /* Stakeholders */
+        .stakeholders{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;}
+        .stake{padding:0.4rem 0.8rem;background:var(--surface2);border-radius:8px;font-size:0.78rem;}
+        .stake strong{color:var(--accent);}
+
+        /* Progress bar */
+        .progress-wrap{margin:1rem 0;}
+        .progress-label{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:0.3rem;}
+        .progress-bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+        .progress-fill{height:100%;border-radius:4px;transition:width 0.3s;}
+        .progress-fill.green{background:var(--green);}
+        .progress-fill.amber{background:var(--amber);}
+
+        /* Separator */
+        .section-sep{border:none;border-top:1px solid var(--border);margin:1.5rem 0;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Motor de Disparos de Marketing</h1>
+    <div class="subtitle">Comunicação automatizada, segmentada e rastreável por vertical</div>
+    <div class="meta">Karen Ubial | Gestora: Mariane Costa Resende | Junho 2026</div>
+
+    <!-- Summary -->
+    <div class="summary-bar">
+        <div class="summary-card green"><div class="num">5</div><div class="label">Fases do projeto</div></div>
+        <div class="summary-card amber"><div class="num">33</div><div class="label">Entregas mapeadas</div></div>
+        <div class="summary-card muted"><div class="num">30 jul</div><div class="label">Entrega final</div></div>
+        <div class="summary-card"><div class="num" style="color:var(--accent);">3</div><div class="label">Verticais cobertas</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab(0)">Contexto</div>
+        <div class="tab" onclick="showTab(1)">1. Segmentação <span class="tab-status wip">em andamento</span></div>
+        <div class="tab" onclick="showTab(2)">2. Base Unificada <span class="tab-status next">próxima</span></div>
+        <div class="tab" onclick="showTab(3)">3. Motor <span class="tab-status next">próxima</span></div>
+        <div class="tab" onclick="showTab(4)">4. Rastreio <span class="tab-status next">próxima</span></div>
+        <div class="tab" onclick="showTab(5)">5. Piloto <span class="tab-status next">próxima</span></div>
+    </div>
+
+    <!-- ==================== CONTEXTO ==================== -->
+    <div class="panel active" id="panel-0">
+        <div class="phase-header">
+            <h2>Por que estamos fazendo isso?</h2>
+            <p>O marketing da Seazone opera 3 verticais (SZI, SZS, Marketplace) com processos manuais, ferramentas fragmentadas e zero rastreabilidade de resultado.</p>
+        </div>
+
+        <div class="context-box">
+            <h3>Dores operacionais que o projeto resolve</h3>
+            <div class="pain-item"><span class="pain-icon">⏱</span><div class="pain-text"><strong>Atraso de 2-3 semanas</strong> entre um marco de obra acontecer e o marketing comunicar. Hoje depende de a Cris lembrar de avisar no Slack.</div></div>
+            <div class="pain-item"><span class="pain-icon">🔀</span><div class="pain-text"><strong>Ferramentas fragmentadas:</strong> MIA (com bugs), Morada, SAI, CIA — cada vertical usa uma coisa diferente. Ninguém sabe o que o outro dispara.</div></div>
+            <div class="pain-item"><span class="pain-icon">🎯</span><div class="pain-text"><strong>Sem segmentação:</strong> mesma mensagem pra quem já comprou 3 spots e pra quem nunca respondeu. Leads frios recebem WA que falha em 60% (erro 131049).</div></div>
+            <div class="pain-item"><span class="pain-icon">📊</span><div class="pain-text"><strong>Zero rastreabilidade:</strong> não sabemos se um disparo gerou reunião, deal ou venda. Impossível otimizar o que não se mede.</div></div>
+            <div class="pain-item"><span class="pain-icon">⚠️</span><div class="pain-text"><strong>Riscos reais:</strong> multa por disparar pra lead de parceiro (exclusividade contratual), pisar no vendedor com deal aberto, saturar lead quente com lixo.</div></div>
+        </div>
+
+        <div class="context-box">
+            <h3>O que o Motor de Disparos entrega</h3>
+            <div class="pain-item"><span class="pain-icon">1.</span><div class="pain-text"><strong>Segmentação dinâmica</strong> — cada lead classificado por temperatura (quente/morno/frio) e subtipo, atualizado diariamente</div></div>
+            <div class="pain-item"><span class="pain-icon">2.</span><div class="pain-text"><strong>Base unificada</strong> — visão única do cliente cruzando Pipedrive + Sapron, sem duplicatas</div></div>
+            <div class="pain-item"><span class="pain-icon">3.</span><div class="pain-text"><strong>Disparo automatizado</strong> — mensagem certa, pra pessoa certa, no momento certo, com regras de exclusão e cooldown</div></div>
+            <div class="pain-item"><span class="pain-icon">4.</span><div class="pain-text"><strong>Rastreio de funil</strong> — saber exatamente qual disparo gerou qual resultado</div></div>
+        </div>
+
+        <div class="context-box">
+            <h3>Quem participa</h3>
+            <div class="stakeholders">
+                <div class="stake"><strong>Mari</strong> — gestora, SZI</div>
+                <div class="stake"><strong>Karen</strong> — execução</div>
+                <div class="stake"><strong>Leo</strong> — SZS</div>
+                <div class="stake"><strong>Roberto</strong> — MKP + CIA/SIA</div>
+                <div class="stake"><strong>Gabi</strong> — operação disparos</div>
+                <div class="stake"><strong>Cris</strong> — PMO, marcos de obra</div>
+                <div class="stake"><strong>Fernando</strong> — sponsor, aceite final</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FASE 1: SEGMENTAÇÃO ==================== -->
+    <div class="panel" id="panel-1">
+        <div class="phase-header">
+            <h2>Fase 1 — Segmentação Dinâmica</h2>
+            <p>Definir quem é cada lead: por vertical, temperatura e subtipo. Base pra tudo que vem depois.</p>
+            <span class="phase-dates">Sem 1–2 · 05–18 jun</span>
+        </div>
+
+        <div class="gain-box">
+            <h3>Ganho operacional</h3>
+            <ul>
+                <li>Lead quente de SZI recebe OPP de empreendimento novo; lead frio recebe conteúdo educativo — sem misturar</li>
+                <li>Leads com deal aberto, de parceiro ou "não qualificado" são excluídos automaticamente — zero risco</li>
+                <li>Gestores de cada vertical validam e controlam suas próprias regras</li>
+            </ul>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-label"><span>Progresso</span><span>5 de 8 entregas</span></div>
+            <div class="progress-bar"><div class="progress-fill amber" style="width:62%"></div></div>
+        </div>
+
+        <div class="task-list">
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Estratégia de temperatura SZI</div>
+                    <div class="task-desc">Reuniões com Mari e time SZI. 3 temperaturas, 11 subtipos, critérios de identificação, exclusões.</div>
+                </div>
+                <span class="task-status done">concluído</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Estratégia de temperatura SZS</div>
+                    <div class="task-desc">Reuniões com Leo. Temperatura por posse de imóvel, não por funil. CIA substituindo MIA.</div>
+                </div>
+                <span class="task-status done">concluído</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Estratégia de temperatura MKP</div>
+                    <div class="task-desc">Reuniões com Roberto. Capital como critério, ICP ainda em definição, ciclo longo (15-120d).</div>
+                </div>
+                <span class="task-status done">concluído</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Matriz unificada de temperatura</div>
+                    <div class="task-desc">Consolidar as 3 verticais numa visão única: subtipos, comunicações, exclusões, cross-vertical.</div>
+                </div>
+                <span class="task-status wip">em andamento</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Segmentos adicionais com time comercial</div>
+                    <div class="task-desc">Mapear marcos de obra como gatilho, reunião com Ana/Laura/Gabi pra novas comunicações.</div>
+                </div>
+                <span class="task-status wip">em andamento</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Traduzir segmentos em filtros lógicos</div>
+                    <div class="task-desc">Cada subtipo vira query: campos Pipedrive/Sapron + regras de exclusão.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Catálogo de segmentos documentado</div>
+                    <div class="task-desc">Nome, descrição, critério, tamanho estimado de cada segmento. Referência pro time.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Atualização diária automática de segmentos</div>
+                    <div class="task-desc">Leads reclassificados automaticamente quando mudam de status (won, lost, nova reserva).</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FASE 2: BASE UNIFICADA ==================== -->
+    <div class="panel" id="panel-2">
+        <div class="phase-header">
+            <h2>Fase 2 — Base Unificada de Clientes</h2>
+            <p>Visão única do cliente: cruzar Pipedrive (comercial) com Sapron (imóveis/contratos). Sem duplicatas, sem dados perdidos.</p>
+            <span class="phase-dates">Sem 3–4 · 19 jun–02 jul</span>
+        </div>
+
+        <div class="gain-box">
+            <h3>Ganho operacional</h3>
+            <ul>
+                <li>Saber que o "João do Pipedrive" é o mesmo "João do Sapron" — e que ele já tem 2 spots e gestão ativa</li>
+                <li>Nunca mais oferecer o mesmo empreendimento que a pessoa já tem</li>
+                <li>Base limpa: sem duplicatas, sem leads de teste, sem dados inconsistentes</li>
+            </ul>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-label"><span>Progresso</span><span>0 de 6 entregas</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        </div>
+
+        <div class="task-list">
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Mapear campos Sapron</div>
+                    <div class="task-desc">Proprietário, imóvel, contrato, histórico. Dados de 6.2K imóveis gerenciados.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Mapear campos Pipedrive</div>
+                    <div class="task-desc">Deal, contato, organização, campos custom por vertical. 50K+ deals históricos.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Definir chave de junção e deduplicação</div>
+                    <div class="task-desc">CPF, email ou telefone como chave primária. Regras pra resolver conflitos.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Schema unificado de clientes</div>
+                    <div class="task-desc">Tabela única com dados das duas fontes. Pronta pra receber segmentos.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Carga inicial: Sapron + Pipedrive → staging</div>
+                    <div class="task-desc">Primeira importação e cruzamento dos dados. Via Nekt (dados já disponíveis).</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Validar qualidade: match rate, duplicatas, nulos</div>
+                    <div class="task-desc">Garantir que os dados cruzados estão corretos antes de usar pra disparos.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FASE 3: MOTOR ==================== -->
+    <div class="panel" id="panel-3">
+        <div class="phase-header">
+            <h2>Fase 3 — Motor de Disparos</h2>
+            <p>O coração do projeto: disparar a mensagem certa, pra pessoa certa, no momento certo, pelo canal certo.</p>
+            <span class="phase-dates">Sem 4–6 · 25 jun–11 jul</span>
+        </div>
+
+        <div class="gain-box">
+            <h3>Ganho operacional</h3>
+            <ul>
+                <li>Escalar disparos sem aumentar headcount — 1000/dia por número WA, com controle de saúde</li>
+                <li>Regras de exclusão automáticas: deal aberto, parceiro, cooldown, desinscritos</li>
+                <li>Marcos de obra disparam comunicação no mesmo dia — sem atraso de semanas</li>
+                <li>Filtros parametrizáveis: gestores ajustam critérios sem depender de dev</li>
+            </ul>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-label"><span>Progresso</span><span>0 de 6 entregas</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        </div>
+
+        <div class="task-list">
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Mapear canais de disparo disponíveis</div>
+                    <div class="task-desc">WhatsApp (Morada/CIA), Email (SIA/Resend), limites e custos de cada canal.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Regras de eligibilidade e opt-out (LGPD)</div>
+                    <div class="task-desc">Quem pode receber o quê, por qual canal. Exclusões globais + por vertical.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Templates de mensagem pras jornadas piloto</div>
+                    <div class="task-desc">Pelo menos 2 jornadas completas (ex: repescagem SZI + nurturing MKP).</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Integração base → plataforma de disparo</div>
+                    <div class="task-desc">Conectar base unificada com CIA (quando pronta) e Morada (fallback).</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Throttling e janela de envio (09h–20h)</div>
+                    <div class="task-desc">Controle de volume diário e horário pra proteger saúde do número WA.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Validar deliverability: taxa ≥95%</div>
+                    <div class="task-desc">Teste interno pra garantir que mensagens chegam antes de escalar.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FASE 4: RASTREIO ==================== -->
+    <div class="panel" id="panel-4">
+        <div class="phase-header">
+            <h2>Fase 4 — Rastreio de Funil</h2>
+            <p>Saber exatamente qual disparo gerou qual resultado. Fechar o loop entre marketing e vendas.</p>
+            <span class="phase-dates">Sem 6–7 · 14–23 jul</span>
+        </div>
+
+        <div class="gain-box">
+            <h3>Ganho operacional</h3>
+            <ul>
+                <li>Ver em tempo real: "esse disparo de repescagem gerou 12 reuniões e 3 vendas"</li>
+                <li>Saber qual canal e qual mensagem performa melhor por segmento</li>
+                <li>Dados concretos pra apresentar ROI do marketing pro board</li>
+            </ul>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-label"><span>Progresso</span><span>0 de 5 entregas</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        </div>
+
+        <div class="task-list">
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Mapear stages relevantes do funil por jornada</div>
+                    <div class="task-desc">Quais etapas do Pipedrive importam pra cada tipo de disparo.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Definir eventos de conversão</div>
+                    <div class="task-desc">Deal criado, mudança de stage, won, lost — o que conta como resultado.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Campo de origem no deal: "Motor de Disparos"</div>
+                    <div class="task-desc">Marcar automaticamente no Pipedrive que o deal veio de um disparo.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag dev">Dev</span>
+                <div class="task-body">
+                    <div class="task-title">Dashboard de funil: enviado → respondeu → deal → venda</div>
+                    <div class="task-desc">Visão clara do funil completo por vertical e por campanha.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Teste end-to-end: disparo → resposta → deal com origem</div>
+                    <div class="task-desc">Validar que o loop completo funciona antes do piloto.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FASE 5: PILOTO ==================== -->
+    <div class="panel" id="panel-5">
+        <div class="phase-header">
+            <h2>Fase 5 — Piloto e Aceite</h2>
+            <p>Teste controlado com segmento real. Coleta de métricas. Apresentação de resultados e plano de escala.</p>
+            <span class="phase-dates">Sem 7–8 · 16–30 jul</span>
+        </div>
+
+        <div class="gain-box">
+            <h3>Ganho operacional</h3>
+            <ul>
+                <li>Validar com dados reais antes de escalar — sem risco de queimar base</li>
+                <li>Métricas concretas pra aprovação do Fernando: delivery, resposta, deals, vendas</li>
+                <li>Documentação de aprendizados pra fase 2 do projeto</li>
+            </ul>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-label"><span>Progresso</span><span>0 de 5 entregas</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        </div>
+
+        <div class="task-list">
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Selecionar segmento piloto</div>
+                    <div class="task-desc">Critérios, tamanho (50-200), cidade, vertical. Baixo risco, alto aprendizado.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Executar disparo piloto com monitoramento</div>
+                    <div class="task-desc">Acompanhamento em tempo real: entrega, falhas, respostas.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag impl">Impl</span>
+                <div class="task-body">
+                    <div class="task-title">Coletar métricas do piloto</div>
+                    <div class="task-desc">Delivery rate, resposta, deals gerados, stage alcançado.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Apresentar resultados e plano de escala</div>
+                    <div class="task-desc">Relatório pra Fernando/Ambrosio com métricas reais e próximos passos.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+            <div class="task">
+                <span class="task-tag spec">Spec</span>
+                <div class="task-body">
+                    <div class="task-title">Ajustes pós-piloto e documentação</div>
+                    <div class="task-desc">O que funcionou, o que ajustar, aprendizados pra escalar.</div>
+                </div>
+                <span class="task-status next">próxima</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(idx) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+    document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
