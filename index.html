@@ -64,6 +64,12 @@
         .freq{font-size:0.82rem;color:var(--text);background:var(--surface2);padding:0.4rem 0.75rem;border-radius:6px;display:inline-block;margin-top:0.3rem;}
         .comms-section{margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);}
         .comms-section h4{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;}
+        .comms-toggle{display:flex;align-items:center;gap:0.5rem;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.75rem;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);cursor:pointer;text-align:left;transition:background 0.15s,color 0.15s;font-family:inherit;}
+        .comms-toggle:hover{background:var(--surface);color:var(--text);}
+        .comms-toggle .comms-count{font-size:0.65rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.55;}
+        .comms-toggle .comms-arrow{margin-left:auto;font-size:0.6rem;}
+        .comms-body{display:none;margin-top:0.75rem;}
+        .comms-body.comms-open{display:block;}
         .comm-item{display:flex;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:8px;margin-bottom:0.5rem;align-items:flex-start;}
         .comm-item.existing{background:var(--surface2);}
         .comm-item.new{background:var(--lime-soft);border:1px solid rgba(163,230,53,0.15);}
@@ -648,6 +654,36 @@
     });
   });
 })();
+</script>
+<script>
+// Colapsavel de comunicacoes — transforma cada bloco de Comunicacoes num toggle
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.temp-block').forEach(function(block) {
+    var h4 = block.querySelector('h4');
+    if (!h4 || h4.textContent.trim() !== 'Comunicacoes') return;
+    var items = block.querySelectorAll('.comm-item');
+    if (!items.length) return;
+    // cria wrapper oculto
+    var body = document.createElement('div');
+    body.className = 'comms-body';
+    items.forEach(function(item) { body.appendChild(item); });
+    // cria botao toggle
+    var btn = document.createElement('button');
+    btn.className = 'comms-toggle';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML =
+      '<span class="comms-toggle-label">Comunicacoes</span>' +
+      '<span class="comms-count">' + items.length + ' mensagens</span>' +
+      '<span class="comms-arrow">&#9654;</span>';
+    btn.addEventListener('click', function() {
+      var open = body.classList.toggle('comms-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.querySelector('.comms-arrow').innerHTML = open ? '&#9660;' : '&#9654;';
+    });
+    h4.replaceWith(btn);
+    block.appendChild(body);
+  });
+});
 </script>
 </body>
 </html>
