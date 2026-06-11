@@ -163,7 +163,7 @@
             <div class="temp-grid">
                 <div class="temp-block">
                     <h4>Quem e (definicao fixa)</h4>
-                    <ul><li>Confia no modelo, tem capital, renda passiva</li><li>Top investidores com multiplos spots</li></ul>
+                    <ul><li>Confia no modelo, tem capital, renda passiva</li><li>Top investidores com multiplos spots</li><li>Indicacao de cliente existente</li></ul>
                     <h4 style="margin-top:0.75rem;">Como identificar</h4>
                     <p>Deal <strong>won</strong> em pipeline Vendas Spot</p>
                     <h4 style="margin-top:0.75rem;">Frequencia</h4>
@@ -184,13 +184,14 @@
 
         <!-- MORNO SZI -->
         <div class="temp-card warm">
-            <div class="temp-header"><span class="temp-badge warm">MORNO</span><span class="temp-title">Fez reuniao (OP) e deu lost — COM OP</span></div>
+            <div class="temp-header"><span class="temp-badge warm">MORNO</span><span class="temp-title">Fez reuniao (OP) e deu lost — COM OP — motivo recuperavel</span></div>
             <div class="temp-grid">
                 <div class="temp-block">
                     <h4>Quem e (definicao fixa)</h4>
-                    <ul><li>Sabe como funciona o modelo</li><li>Entende taxas e rentabilidade</li><li>Nao comprou por timing ou dinheiro</li></ul>
+                    <ul><li>Sabe como funciona o modelo</li><li>Entende taxas e rentabilidade</li><li>Lost por motivo recuperavel: <strong>"Timing"</strong> (10.470), <strong>"Concorrencia"</strong> (1.614), <strong>"Timing contato posterior"</strong> (994)</li></ul>
+                    <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--red);font-style:italic;">⚠️ Motivos desqualificantes NAO sao morno — excluir da cadencia de reativacao:<br>• "Perfil proprietario" (2.735), "Perfil - Valor Total" (1.477), "Perfil - Prazo" (981), "Nao qualificado" (1.024)<br>Esses indicam fit ruim, nao timing ruim.</div>
                     <h4 style="margin-top:0.75rem;">Como identificar</h4>
-                    <p>Deal <strong>lost</strong> + teve atividade de reuniao</p>
+                    <p>Deal <strong>lost</strong> + teve atividade de reuniao + <code>motivo_da_perda</code> IN ("Timing", "Concorrencia", "Timing contato posterior")</p>
                     <h4 style="margin-top:0.75rem;">Frequencia</h4>
                     <div class="freq">1 WA/semana + 1 newsletter semanal</div>
                 </div>
@@ -208,23 +209,43 @@
 
         <!-- FRIO SZI -->
         <div class="temp-card cold">
-            <div class="temp-header"><span class="temp-badge cold">FRIO</span><span class="temp-title">Travou antes da OP — SEM OP</span></div>
+            <div class="temp-header"><span class="temp-badge cold">FRIO</span><span class="temp-title">Travou antes da OP — SEM OP — 2 niveis de frio</span></div>
+
+            <!-- FRIO 1 -->
+            <div style="margin:0.75rem 0 0.25rem;font-size:0.82rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Frio 1 — Nunca respondeu</div>
             <div class="temp-grid">
                 <div class="temp-block">
-                    <h4>Quem e (definicao fixa)</h4>
-                    <ul><li>Lost sem reuniao, travado em SQL</li><li>No-show, nunca respondeu</li><li>NAO sabe como funciona o modelo</li></ul>
+                    <h4>Quem e</h4>
+                    <ul><li>Nunca interagiu (nunca respondeu, nunca abriu email)</li><li>Lost direto do SQL, nao chegou na qualificacao</li><li>NAO sabe como funciona o modelo</li></ul>
                     <h4 style="margin-top:0.75rem;">Como identificar</h4>
-                    <p>Deal <strong>lost</strong> sem atividade de reuniao</p>
+                    <p>Deal <strong>lost</strong> sem atividade de reuniao + zero interacao registrada</p>
                     <h4 style="margin-top:0.75rem;">Frequencia</h4>
-                    <div class="freq">Max 1x/mes — newsletter ou quinzenal</div>
+                    <div class="freq">Max 1x/mes — somente email</div>
                     <h4 style="margin-top:0.75rem;">Regra critica</h4>
-                    <p style="color:var(--red);">NAO disparar WA pra numeros sem historico de interacao — 60% de falha observado (erro 131049). Usar apenas email.</p>
+                    <p style="color:var(--red);">NAO disparar WA — 60% de falha em numeros sem historico (erro 131049). Somente email ate ter interacao.</p>
                 </div>
                 <div class="temp-block">
                     <h4>Comunicacoes</h4>
-                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Repescagem fora do SLA</div><div class="comm-desc">Leads que a MIA/SIA nao conseguiu converter nas ultimas 3 semanas. <span class="channel-tag channel-wa">WA</span></div></div></div>
-                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Conteudo educativo mercado</div><div class="comm-desc">"Curta temporada em Floripa cresceu 12% no trimestre" — valor sem pedir nada. <span class="channel-tag channel-email">Email</span></div></div></div>
-                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Trigger comportamental</div><div class="comm-desc">Clicou na newsletter → WA personalizado sobre o empreendimento que clicou. <span class="channel-tag channel-wa">WA auto</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Conteudo educativo institucional</div><div class="comm-desc">"Curta temporada em Floripa cresceu 12%" — valor sem pedir nada. Aquece antes de qualquer CTA comercial. <span class="channel-tag channel-email">Email</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Trigger comportamental: clicou</div><div class="comm-desc">Clicou no CTA do email → WA personalizado sobre o empreendimento. <span class="channel-tag channel-wa">WA auto</span></div><div class="data-insight">⚠️ GAP: SIA nao tem evento "clicked" — so sent/opened/bounced. Verificar Resend click tracking.</div></div></div>
+                </div>
+            </div>
+
+            <!-- FRIO 2 -->
+            <div style="margin:1rem 0 0.25rem;font-size:0.82rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Frio 2 — Quase chegou (no-show / pre-OP)</div>
+            <div class="temp-grid">
+                <div class="temp-block">
+                    <h4>Quem e</h4>
+                    <ul><li>Passou pela qualificacao mas nao fechou reuniao</li><li>Marcou reuniao e nao compareceu (no-show)</li><li>Estava proximo de agendar — distancia grande de quem nunca respondeu</li></ul>
+                    <h4 style="margin-top:0.75rem;">Como identificar</h4>
+                    <p>Deal <strong>lost</strong> + passou por stage de qualificacao + sem reuniao realizada</p>
+                    <h4 style="margin-top:0.75rem;">Frequencia</h4>
+                    <div class="freq">Quinzenal — abordagem mais direta que Frio 1</div>
+                </div>
+                <div class="temp-block">
+                    <h4>Comunicacoes</h4>
+                    <div class="comm-item existing"><span class="comm-status exists">EXISTE</span><div class="comm-content"><div class="comm-name">Repescagem fora do SLA</div><div class="comm-desc">Leads que a MIA/SIA nao converteu. <span class="channel-tag channel-wa">WA</span></div></div></div>
+                    <div class="comm-item new"><span class="comm-status novo">NOVO</span><div class="comm-content"><div class="comm-name">Tom "voce chegou muito perto"</div><div class="comm-desc">Reconhece que estava perto de tomar uma decisao. Reacende sem ser insistente. <span class="channel-tag channel-wa">WA</span><span class="channel-tag channel-email">Email</span></div></div></div>
                 </div>
             </div>
         </div>
@@ -282,7 +303,7 @@
                     <ul><li>Comprou spot Seazone mas nao aderiu a gestao</li><li>Optou por autogestao ou outra administradora</li><li>Pode migrar pra gestao Seazone</li></ul>
                     <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--amber);font-style:italic;">Nota: a Seazone nao tem acesso a dados de quem tem imovel com outra administradora fora do ecossistema</div>
                     <h4 style="margin-top:0.75rem;">Como identificar</h4>
-                    <p>Lead em Comercial SZS, sem spot Seazone</p>
+                    <p>Lead com <strong>spot Seazone</strong> (Won SZI) mas <strong>sem contrato de gestao ativo</strong> — optou por nao aderir ou cancelou</p>
                     <h4 style="margin-top:0.75rem;">Frequencia</h4>
                     <div class="freq">1 WA/semana + newsletter quinzenal</div>
                 </div>
@@ -300,10 +321,13 @@
         <!-- FRIO SZS -->
         <div class="temp-card cold">
             <div class="temp-header"><span class="temp-badge cold">FRIO</span><span class="temp-title">Fora do poligono OU aluguel anual</span></div>
+            <div style="margin:0.5rem 0.75rem;padding:0.5rem 0.75rem;background:var(--amber-soft,#fff8e1);border-left:3px solid var(--amber,#f59e0b);border-radius:4px;font-size:0.8rem;">
+                <strong>Override Gaby:</strong> proprietario com <strong>5+ imoveis de temporada</strong> → subir para <strong>Morno</strong>, independente de aluguel anual ou outro motivo. "Conseguimos convencer quem tem muitos imoveis a migrar." Validar com Leo.
+            </div>
             <div class="temp-grid">
                 <div class="temp-block">
                     <h4>Quem e (definicao fixa — posse)</h4>
-                    <ul><li>Regiao inativa / fora do poligono</li><li>OU contrato anual ativo</li><li>OU timing: imovel nao pronto</li></ul>
+                    <ul><li>Regiao inativa / fora do poligono</li><li>OU contrato anual ativo (e menos de 5 imoveis)</li><li>OU timing: imovel nao pronto</li></ul>
                     <h4 style="margin-top:0.75rem;">Como identificar</h4>
                     <p>Motivo de perda = "Regiao Inativa" ou "Aluguel anual"</p>
                     <h4 style="margin-top:0.75rem;">Motivos de perda (Leo, por prioridade)</h4>
@@ -385,7 +409,8 @@
             <div class="temp-grid">
                 <div class="temp-block">
                     <h4>Quem e (definicao fixa)</h4>
-                    <ul><li>Investidor senior, entende ROI/SPE</li><li>Pergunta proativamente</li><li>Capital 150k+ disponivel</li></ul>
+                    <ul><li>Investidor senior, entende ROI/SPE</li><li>Pergunta proativamente</li><li>Capital 150k+ disponivel <span style="font-size:0.75em;color:var(--amber,#f59e0b);">⚠️ dado pode estar desatualizado — usar como norte, nao criterio primario</span></li></ul>
+                    <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);font-style:italic;">Priorizar criterios comportamentais objetivos: spots comprados, engagement, historico OPs.</div>
                     <h4 style="margin-top:0.75rem;">Como identificar</h4>
                     <p>Deal <strong>open</strong> + atividades recentes + historico OPs</p>
                     <h4 style="margin-top:0.75rem;">Frequencia</h4>
