@@ -163,7 +163,7 @@
     <a href="../index.html" class="back-link">&larr; Hub do Projeto</a>
     <h1>Perfis & Comunicações</h1>
     <div class="subtitle">Mapeamento completo: quem, o que recebe hoje, e o que deveria receber</div>
-    <div class="meta">Consolidado em 11/06/2026 | Fontes: reuniões com Ana, Gabi, Laura, Cris (PMO), Mari + canal #entrega_disparos</div>
+    <div class="meta">Consolidado em 11/06/2026 | Fontes: reuniões com Ana, Gabi, Laura, Cris (PMO), Mari + canal #entrega_disparos + Motivos de Lost (Lívia Cunha)</div>
 
     <!-- Summary -->
     <div class="summary-bar">
@@ -221,23 +221,23 @@
                 <tr>
                     <td class="td-subtipo">Lost com OPP — SZI</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost, pipeline SZI. Excluir "Não qualificado"</td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost, pipeline SZI. Excluir "Não qualificado".<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos acionáveis: Timing, Valor de entrada, Valor total, Concorrência, Prazo de entrega → MKP, Forma de pagamento, SPE, Garagem, Tamanho</span></td>
                     <td class="td-recv">Repescagem por empreendimento, OPP Imperdível, Top OPPs da semana (WA+Email), Email nutrição Losts 3 OPPs, Clique em email → follow-up personalizado</td>
-                    <td class="td-novo">Quebra objeção por motivo de Lost (cases), Case investidor similar, Nurturing rentabilidade</td>
+                    <td class="td-novo">Quebra objeção por motivo de Lost (cases por motivo específico), Case investidor similar, Nurturing rentabilidade</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Lost com OPP — MKP</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost, pipeline MKP</td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost, pipeline MKP.<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos acionáveis: Valor de entrada, Valor total, Prazo de entrega, Localização, Cota indisponível, Cedente recusou proposta, Seguiu com outra cota</span></td>
                     <td class="td-recv">Repescagem, OPP Imperdível, Top OPPs da semana, Gatilho urgência parcelamento (teste A/B 26/05)</td>
                     <td class="td-novo">Oferta do spot mais barato como alternativa (PdC, Itacaré, JD em ordem de ticket), Comparativo de rentabilidade: CDB vs Spot</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Lost com OPP — Proprietário SZS</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost SZS</td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost SZS.<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos acionáveis: Taxa de administração, Enxoval, Concorrência, Timing. Excluir: Imóvel fora do perfil, Vendeu imóvel</span></td>
                     <td class="td-recv">Repescagem</td>
-                    <td class="td-novo">Case investidor, Nurturing rentabilidade quinzenal</td>
+                    <td class="td-novo">Quebra objeção por motivo (ex: case ROI p/ taxa admin), Nurturing rentabilidade quinzenal</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Hóspede em Spot Seazone</td>
@@ -256,7 +256,7 @@
                 <tr>
                     <td class="td-subtipo">Lead com Timing</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td>Lost por timing/capital, inativo 30+ dias</td>
+                    <td>Lost por timing/capital, inativo 30+ dias.<br><span style="font-size:0.72rem;color:var(--text-muted);">Obrigatório ter retomada agendada (regra Pipedrive). Reabordar quando condição mudar</span></td>
                     <td class="td-recv">Disparo de reativação (plano 10 dias): "A condição especial ainda existe, mas o estoque diminui"</td>
                     <td class="td-novo">Sequência automatizada de nutrição por timing, Oferta de spot mais barato como porta de entrada</td>
                 </tr>
@@ -264,14 +264,14 @@
                 <tr>
                     <td class="td-subtipo">Lost sem OPP — Nunca respondeu</td>
                     <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
-                    <td>Zero interação. <span style="color:var(--red);font-size:0.72rem;">SOMENTE email (erro 131049)</span></td>
+                    <td>Zero interação. <span style="color:var(--red);font-size:0.72rem;">SOMENTE email (erro 131049)</span>.<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos comuns: Não atende, Não tem interesse, Não reconhece campanha. Excluir: LGPD, Contato inválido, Duplicado/Erro</span></td>
                     <td class="td-recv">Email nutrição educativa (RD Station)</td>
                     <td class="td-novo">Email educativo sobre mercado de temporada, WA automático quando clicar em link do email</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Lost sem OPP — Quase chegou</td>
                     <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
-                    <td>Passou qualificação, sem reunião</td>
+                    <td>Passou qualificação, sem reunião.<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos comuns: Não atende pós-qualificação (auditar motivo real), Interesse em moradia, FGTS/Financiamento</span></td>
                     <td class="td-recv">Repescagem fora do SLA</td>
                     <td class="td-novo">Tom "você chegou muito perto" (WA+Email)</td>
                 </tr>
@@ -332,9 +332,9 @@
                 <tr>
                     <td class="td-subtipo">Lost com OPP — Proprietário</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost SZS</td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost SZS.<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos acionáveis: Taxa de administração, Enxoval, Concorrência, Timing. Excluir: Imóvel fora do perfil, Vendeu imóvel, Condomínio não aceita</span></td>
                     <td class="td-recv">—</td>
-                    <td class="td-novo">Reabordagem com proposta de gestão, Comparativo de resultado (gestão própria vs Seazone), Depoimento de proprietário que migrou</td>
+                    <td class="td-novo">Reabordagem com proposta de gestão (quebra objeção por motivo), Comparativo de resultado (gestão própria vs Seazone), Depoimento de proprietário que migrou</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Hóspede em Spot Seazone</td>
@@ -415,14 +415,14 @@
                 <tr>
                     <td class="td-subtipo">Lost recente engajado</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td>Deal lost recente + múltiplas atividades</td>
+                    <td>Deal lost recente + múltiplas atividades.<br><span style="font-size:0.72rem;color:var(--text-muted);">Motivos acionáveis: Valor de entrada, Valor total, Cota indisponível, Cedente recusou, Seguiu com outra cota, Localização</span></td>
                     <td class="td-recv">Email fechamento, Gatilho urgência parcelamento (teste A/B 26/05), Lista de espera por empreendimento, Clique em email → follow-up</td>
                     <td class="td-novo">Sequência educativa "como investir em cota" (4 emails: SPE, ROI, processo), Simulação de retorno personalizada, Case de investidor similar</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Timing: sem capital agora</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td>Deal open/lost, ciclo 4-6 meses</td>
+                    <td>Deal open/lost, ciclo 4-6 meses.<br><span style="font-size:0.72rem;color:var(--text-muted);">Obrigatório ter retomada agendada. Reabordar quando condição mudar ou novo lançamento</span></td>
                     <td class="td-recv" style="color:var(--red);">— (Roberto: "nunca tivemos nurturing")</td>
                     <td class="td-novo">Sequência educativa sobre cotas, Simulação de retorno personalizada, Newsletter quinzenal com oportunidades</td>
                 </tr>
@@ -444,7 +444,7 @@
                 <tr>
                     <td class="td-subtipo">Desengajado total</td>
                     <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
-                    <td>Zero interação. <span style="color:var(--red);font-size:0.72rem;">Desinscritos = fora pra sempre</span></td>
+                    <td>Zero interação. <span style="color:var(--red);font-size:0.72rem;">Desinscritos = fora pra sempre</span>.<br><span style="font-size:0.72rem;color:var(--text-muted);">Excluir: LGPD, Contato inválido, Duplicado/Erro — nunca disparar</span></td>
                     <td class="td-recv">Repescagem MKP por empreendimento</td>
                     <td class="td-novo">Newsletter quinzenal (Email)</td>
                 </tr>
@@ -539,6 +539,7 @@
                     <tr><td>E-mail Nutrição 3 OPPs</td><td>Google Docs</td><td>PdC R$261k + Campeche R$350k + JD3 R$395k</td></tr>
                     <tr><td>Disparos Relançamento Marista</td><td>Google Docs</td><td>WA + Email com imagem para relançamento</td></tr>
                     <tr><td>Matriz Estratégica (planilha)</td><td>XLSX local</td><td>Definições parametrizáveis por vertical</td></tr>
+                    <tr><td>Mapeamento Motivos de Lost</td><td>Google Sheets (Lívia Cunha)</td><td>44 motivos padronizados, regras por etapa/funil, warnings de qualidade, merges realizados</td></tr>
                 </tbody>
             </table>
 
