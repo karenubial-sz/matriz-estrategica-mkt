@@ -167,8 +167,8 @@
 
     <!-- Summary -->
     <div class="summary-bar">
-        <div class="summary-card green"><div class="num">4</div><div class="label">Verticais</div></div>
-        <div class="summary-card amber"><div class="num">35</div><div class="label">Perfis mapeados</div></div>
+        <div class="summary-card green"><div class="num">3</div><div class="label">Verticais</div></div>
+        <div class="summary-card amber"><div class="num">30</div><div class="label">Perfis mapeados</div></div>
         <div class="summary-card purple"><div class="num">26</div><div class="label">Comunicações existentes</div></div>
         <div class="summary-card cyan"><div class="num">45</div><div class="label">Comunicações novas/planejadas</div></div>
     </div>
@@ -178,9 +178,8 @@
         <div class="tab active" onclick="showTab(0)">SZI — Investimentos</div>
         <div class="tab" onclick="showTab(1)">SZS — Gestão</div>
         <div class="tab" onclick="showTab(2)">MKP — Marketplace</div>
-        <div class="tab" onclick="showTab(3)">SZO — Hóspedes</div>
-        <div class="tab" onclick="showTab(4)">Plano de Ação 10 dias</div>
-        <div class="tab" onclick="showTab(5)">Fontes & Referências</div>
+        <div class="tab" onclick="showTab(3)">Plano de Ação 10 dias</div>
+        <div class="tab" onclick="showTab(4)">Fontes & Referências</div>
     </div>
 
     <!-- ==================== SZI ==================== -->
@@ -453,122 +452,8 @@
         </table>
     </div>
 
-    <!-- ==================== SZO ==================== -->
-    <div class="panel" id="panel-3">
-        <div class="vertical-header szo">
-            <div>
-                <h2>SZO — Hospitalidade (Hóspedes como Leads)</h2>
-                <p>Hóspedes não são vertical separada no Motor — são leads que alimentam SZI (investimento) e SZS (gestão). Esta aba detalha a segmentação por ticket de diária e as comunicações planejadas no plano de 10 dias.</p>
-            </div>
-        </div>
-
-        <div class="note"><strong>Importante:</strong> Hóspedes não são uma vertical independente no Motor de Disparos. Este painel detalha a segmentação de entrada por ticket de diária, que determina a temperatura e o destino do lead (SZI ou SZS).</div>
-
-        <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
-            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">31K</div><div class="label">usuários</div></div>
-            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">28K</div><div class="label">com telefone</div></div>
-            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">36%</div><div class="label">repeat guests</div></div>
-            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">R$1.600</div><div class="label">ticket médio</div></div>
-        </div>
-
-        <div class="note" style="background:var(--red-soft);border-color:rgba(248,113,113,0.2);"><strong style="color:var(--red);">Atenção:</strong> Todas as comunicações devem ser orientadas a vender spot (SZI) ou gestão (SZS), não hospedagem.</div>
-
-        <div class="temp-section">Quente — 1 perfil</div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> 1. Hóspede Diária R$1.000+ (Florianópolis)</h4>
-            <div class="desc">Alto poder aquisitivo comprovado. Viveu a experiência. Target para spots premium JD3/JD2. Base estimada: ~25/mês.</div>
-            <div class="criteria"><strong>Critérios:</strong> Reserva com diária ≥ R$1.000 | Destino = Florianópolis | Últimos 6 meses</div>
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Oferta spot premium por destino</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Target: JD3 ou JD2 (maior ticket). "Você pagou R$X/noite para ficar. Agora você pode ser pago por quem fica." Base estimada: ~25/mês.</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="note"><strong>Bloqueio:</strong> Base depende de extração por Andy (TEC) com duplo check de dados sensíveis. Aguardando retorno.</div>
-        </div>
-
-        <div class="temp-section">Morno — 2 perfis</div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> 2. Hóspede Diária R$700+ (por destino)</h4>
-            <div class="desc">Ticket relevante. Segmentar por destino para máxima personalização. Base: 7.525 telefones únicos.</div>
-            <div class="criteria"><strong>Critérios:</strong> Reserva com diária ≥ R$700 | Últimos 6 meses</div>
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>WA segmentado por destino</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Bahia → Itacaré | Floripa → PdC ou JD2. Base: 7.525 telefones únicos (R$700+). Plano 10 dias: dia 2 e dia 5.</td>
-                    </tr>
-                    <tr>
-                        <td>Follow-up sem resposta</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Plano 10 dias dia 7: "Você viu minha mensagem? Já pensou em investir em imóvel de temporada?"</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> 3. Hóspede Diária R$500–699</h4>
-            <div class="desc">Ticket médio-alto. Volume maior mas conversão menor. Base: 6.277 telefones. Abordagem menos personalizada que R$700+.</div>
-            <div class="criteria"><strong>Critérios:</strong> Reserva com diária R$500–699 | Últimos 6 meses</div>
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>WA disparo (menos personalizado)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Base: 6.277 telefones. Tom mais genérico que R$700+. Cobre todos os destinos.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="temp-section">Frio — 1 perfil</div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge cold">frio</span> 4. Hóspede com E-mail (todos os destinos)</h4>
-            <div class="desc">Base ampla com e-mail. Nutrição educativa por sequência de 3 emails. 15-20k contatos. Encaminha para SZI ou SZS conforme engajamento.</div>
-            <div class="criteria"><strong>Critérios:</strong> E-mail coletado | Histórico de reserva | 15-20k contatos</div>
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Email 1: Emocional</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>"Você ficou em um Spot Seazone. Já pensou em ter o seu?" Mostrar modelo, link para site.</td>
-                    </tr>
-                    <tr>
-                        <td>Email 2: Educação</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>"Como funciona ser dono de um Spot Seazone." Case + faturamento comparado com diária paga. Enviar para quem abriu Email 1.</td>
-                    </tr>
-                    <tr>
-                        <td>Email 3: Urgência</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>"Últimas unidades em Florianópolis, o que muda se você esperar." Base nova de Floripa.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- ==================== PLANO 10 DIAS ==================== -->
-    <div class="panel" id="panel-4">
+    <div class="panel" id="panel-3">
         <div class="vertical-header szi">
             <div>
                 <h2>Plano de Ação — 10 Dias Úteis (11-24/06)</h2>
@@ -597,7 +482,7 @@
             <thead><tr><th>Base</th><th>Volume</th><th>Canal</th></tr></thead>
             <tbody>
                 <tr><td>Investidores com 2+ spots</td><td>30-40 contatos</td><td><span class="channel-tag wa">WA pessoal</span> (closer)</td></tr>
-                <tr><td>Proprietários SZS Premium + Plus</td><td>86 únicos</td><td><span class="channel-tag wa">WA pessoal</span> (closer)</td></tr>
+                <tr><td>Proprietários SZS Premium + Plus</td><td>30-40 contatos</td><td><span class="channel-tag wa">WA pessoal</span> (closer)</td></tr>
                 <tr><td>Proprietários SZS Safe</td><td>86 únicos</td><td><span class="channel-tag wa">WA template</span> <span class="channel-tag email">Email</span></td></tr>
                 <tr><td>Hóspedes R$700+/noite</td><td>7.525 telefones</td><td><span class="channel-tag wa">WA</span> segmentado por destino</td></tr>
                 <tr><td>Hóspedes R$500-699/noite</td><td>6.277 telefones</td><td><span class="channel-tag wa">WA</span></td></tr>
@@ -610,7 +495,7 @@
     </div>
 
     <!-- ==================== FONTES ==================== -->
-    <div class="panel" id="panel-5">
+    <div class="panel" id="panel-4">
         <div class="section">
             <h2>Fontes & Referências</h2>
             <p>Todas as informações deste documento foram extraídas de reuniões, Slack e documentos internos.</p>
@@ -632,10 +517,10 @@
             <table class="comm-table">
                 <thead><tr><th>Tipo</th><th>Frequência</th><th>Owner</th><th>Exemplo</th></tr></thead>
                 <tbody>
-                    <tr><td>OPP da semana</td><td>Semanal</td><td>Anna → Gabi</td><td>Top OPP + empreendimento foco (WA + story)</td></tr>
+                    <tr><td>OPP da semana</td><td>Semanal</td><td>Anna → Gabi</td><td>Top OPP + empreendimento foco (WA + Email)</td></tr>
                     <tr><td>OPP Imperdível</td><td>2-3x/semana</td><td>Anna/Rodrigo → Gabi</td><td>Urgência por empreendimento (WA)</td></tr>
                     <tr><td>Repescagem</td><td>Quinzenal</td><td>Laura → Gabi</td><td>Textos segmentados por empreendimento (WA)</td></tr>
-                    <tr><td>Top OPPs (email)</td><td>Semanal</td><td>Laura → Gabi</td><td>2 oportunidades destaque (Email)</td></tr>
+                    <tr><td>Top OPPs da semana</td><td>Semanal</td><td>Laura → Gabi</td><td>2 oportunidades destaque (WA + Email)</td></tr>
                     <tr><td>E-mail nutrição Losts</td><td>Pontual</td><td>Laura → Gabi</td><td>3 OPPs Floripa com dados financeiros (Email)</td></tr>
                     <tr><td>Gatilho urgência MKP</td><td>Pontual</td><td>Laura → Gabi</td><td>Teste A/B parcelamento 10x (WA)</td></tr>
                     <tr><td>Relançamento</td><td>Por evento</td><td>Anna/Mari → Gabi</td><td>Marista: alvará + obras (WA + Email)</td></tr>
