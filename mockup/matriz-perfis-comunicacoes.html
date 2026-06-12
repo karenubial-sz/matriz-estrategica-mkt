@@ -109,6 +109,53 @@
         /* Note */
         .note{background:var(--amber-soft);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:0.75rem 1rem;font-size:0.82rem;margin:1rem 0;}
         .note strong{color:var(--amber);}
+
+        /* Temp section divider */
+        .temp-section{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:1.5rem 0 0.75rem 0;padding-bottom:0.3rem;border-bottom:1px solid var(--border);}
+
+        /* temp-card layout (from matriz-estrategica) */
+        .temp-card{border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;border-left:4px solid;}
+        .temp-card.hot{background:var(--surface);border-left-color:var(--red);}
+        .temp-card.warm{background:var(--surface);border-left-color:var(--amber);}
+        .temp-card.cold{background:var(--surface);border-left-color:var(--accent);}
+        .temp-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;}
+        .temp-title{font-size:0.95rem;font-weight:600;}
+        .temp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+        @media(max-width:768px){.temp-grid{grid-template-columns:1fr;}}
+        .temp-block h4{font-size:0.82rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;}
+        .temp-block ul{list-style:none;padding:0;font-size:0.85rem;}
+        .temp-block li{padding:0.25rem 0;padding-left:0.8rem;position:relative;}
+        .temp-block li::before{content:"›";position:absolute;left:0;color:var(--text-muted);}
+        .temp-block p{font-size:0.85rem;color:var(--text-muted);}
+        .freq{font-size:0.82rem;padding:0.3rem 0.6rem;background:var(--surface2);border-radius:6px;display:inline-block;}
+
+        /* comm items */
+        .comm-item{display:flex;gap:0.6rem;padding:0.6rem 0.75rem;border-radius:8px;margin-bottom:0.5rem;background:var(--surface2);}
+        .comm-item.existing{border-left:3px solid var(--green);}
+        .comm-item.new{border-left:3px solid var(--cyan);}
+        .comm-item.teste{border-left:3px solid var(--amber);}
+        .comm-status{font-size:0.6rem;font-weight:700;padding:0.15rem 0.4rem;border-radius:4px;text-transform:uppercase;white-space:nowrap;align-self:flex-start;margin-top:0.1rem;}
+        .comm-status.exists{background:var(--green-soft);color:var(--green);}
+        .comm-status.novo{background:var(--cyan-soft);color:var(--cyan);}
+        .comm-status.teste{background:var(--amber-soft);color:var(--amber);}
+        .comm-status.planejado{background:var(--amber-soft);color:var(--amber);}
+        .comm-content{flex:1;}
+        .comm-name{font-size:0.85rem;font-weight:600;}
+        .comm-desc{font-size:0.78rem;color:var(--text-muted);margin-top:0.15rem;}
+        .data-insight{font-size:0.72rem;color:var(--text-muted);font-style:italic;margin-top:0.25rem;padding:0.25rem 0.5rem;background:rgba(108,140,255,0.06);border-radius:4px;}
+        .channel-tag.channel-wa{background:var(--green-soft);color:var(--green);font-size:0.65rem;padding:0.1rem 0.35rem;border-radius:3px;margin-left:0.25rem;font-weight:600;}
+        .channel-tag.channel-email{background:var(--purple-soft);color:var(--purple);font-size:0.65rem;padding:0.1rem 0.35rem;border-radius:3px;margin-left:0.25rem;font-weight:600;}
+        .channel-tag.channel-call{background:var(--amber-soft);color:var(--amber);font-size:0.65rem;padding:0.1rem 0.35rem;border-radius:3px;margin-left:0.25rem;font-weight:600;}
+
+        /* subtipo table */
+        .subtipo-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:0 0 1.5rem;}
+        .subtipo-table th{text-align:left;padding:0.5rem 0.7rem;border-bottom:2px solid var(--border);color:var(--text-muted);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;}
+        .subtipo-table td{padding:0.55rem 0.7rem;border-bottom:1px solid var(--border);vertical-align:top;}
+        .subtipo-table tr:hover td{background:var(--surface2);}
+        .subtipo-table .td-subtipo{font-weight:600;font-size:0.85rem;}
+        .subtipo-table .td-recv{font-size:0.78rem;color:var(--text-muted);}
+        .subtipo-table .td-novo{font-size:0.78rem;color:var(--cyan);}
+        .st-sep td{background:var(--surface2);font-weight:700;font-size:0.78rem;border-bottom:none;padding:0.6rem 0.7rem;}
     </style>
 </head>
 <body>
@@ -121,9 +168,9 @@
     <!-- Summary -->
     <div class="summary-bar">
         <div class="summary-card green"><div class="num">4</div><div class="label">Verticais</div></div>
-        <div class="summary-card amber"><div class="num">12</div><div class="label">Perfis mapeados</div></div>
-        <div class="summary-card purple"><div class="num">15</div><div class="label">Comunicações existentes</div></div>
-        <div class="summary-card cyan"><div class="num">22</div><div class="label">Comunicações sugeridas</div></div>
+        <div class="summary-card amber"><div class="num">35</div><div class="label">Perfis mapeados</div></div>
+        <div class="summary-card purple"><div class="num">26</div><div class="label">Comunicações existentes</div></div>
+        <div class="summary-card cyan"><div class="num">45</div><div class="label">Comunicações novas/planejadas</div></div>
     </div>
 
     <!-- Legend -->
@@ -151,242 +198,110 @@
         <div class="vertical-header szi">
             <div>
                 <h2>SZI — Investimentos</h2>
-                <p>Verticais: Lançamento + Marketplace de cotas. Subtipos: comprador spot lançamento, comprador spot marketplace, proprietário com gestão SZS.</p>
+                <p>Lançamentos + Marketplace de cotas. 13 subtipos: compradores, proprietários SZS, Losts com/sem OPP, hóspedes, no-shows e timing.</p>
             </div>
         </div>
 
-        <!-- QUENTE -->
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> Comprador de Spot em Lançamento</h4>
-            <div class="desc">Investidor que acabou de comprar um spot em empreendimento novo. Já confia no modelo, já investiu.</div>
-            <div class="criteria"><strong>Critérios:</strong> Deal Won em pipeline de lançamento | Possui spot ativo</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>OPP da semana</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Disparo semanal com oportunidade destaque. Ana monta texto, Gabi dispara via MIA/Morada.</td>
-                    </tr>
-                    <tr>
-                        <td>OPP Imperdível</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Urgência por empreendimento específico. Foco: últimas unidades.</td>
-                    </tr>
-                    <tr>
-                        <td>Relançamento (ex: Marista)</td>
-                        <td><span class="channel-tag wa">WA</span> <span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Alvará + início de obras como gatilho. Base: investidores + Lost do empreendimento.</td>
-                    </tr>
-                    <tr>
-                        <td>Parabéns pela compra (pós-venda)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Mensagem automática pós-Won. Reforça decisão, abre porta para cross-sell futuro.</td>
-                    </tr>
-                    <tr>
-                        <td>Oferta gestão SZS</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Timing a validar com Leo (SZS). Pode não fazer sentido logo após compra.</td>
-                    </tr>
-                    <tr>
-                        <td>Oferta Decor</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>~6 meses antes da entrega. Validar com time de pré-vendas/Amanda (Decor).</td>
-                    </tr>
-                    <tr>
-                        <td>Update de marcos de obra</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Gatilho automático do Smartsheet quando marco é concluído. Marcos: alvará, projeto exec., orçamento exec., início mobilização, estrutura, entrega.</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="source-ref">Fontes: #entrega_disparos (OPP semanal, Relançamento Marista), reunião Perfil de Leads 11/06, reunião Obras GM 09:18</div>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> Comprador de Spot em Marketplace</h4>
-            <div class="desc">Investidor que comprou cota de revenda (spot já existente). Perfil: já conhece modelo, pode ter capital mais imediato.</div>
-            <div class="criteria"><strong>Critérios:</strong> Deal Won em pipeline MKP | Capital registrado > R$200k</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>OPP da semana (cross com lançamento)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Hoje mesclado com base geral. Gap: sem comunicação específica MKP→lançamento.</td>
-                    </tr>
-                    <tr>
-                        <td>Planilha de preços mensal</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Cíntia preenche até dia 10/mês. Junho QUEBRADO — Roberto/Júlia não preencheram.</td>
-                    </tr>
-                    <tr>
-                        <td>Cross-sell lançamento para comprador MKP</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Gap identificado: nunca fizeram comunicação específica MKP→lançamento. Questão aberta: "faz sentido?" (Gabi).</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> Proprietário com Gestão SZS</h4>
-            <div class="desc">Já tem imóvel na Seazone. Capacidade financeira confirmada. Potencial de cross-sell para spot.</div>
-            <div class="criteria"><strong>Critérios:</strong> Contrato ativo SZS | Imóvel gerenciado</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Comunicação de gestão (Anna está desenvolvendo)</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Em construção pela Anna. Conteúdo de valor para proprietários SZS.</td>
-                    </tr>
-                    <tr>
-                        <td>Oferta VIP de spot (closers)</td>
-                        <td><span class="channel-tag wa">WA pessoal</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Plano 10 dias: msg personalizada pelo closer com 2 opções (JD3+Itacaré ou PdC+Itacaré). Sem template — tom pessoal.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- MORNO -->
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> Lost com Oportunidade (tinha OPP)</h4>
-            <div class="desc">Chegou a ter deal aberta mas não fechou. Motivos variados: timing, capital, objeção.</div>
-            <div class="criteria"><strong>Critérios:</strong> Deal Lost | Tinha OPP criada | Motivo de perda registrado</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Repescagem por empreendimento</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Laura monta textos segmentados. Frequência quinzenal. Artefato: seazone-marketplace-hub.vercel.app/repescagem</td>
-                    </tr>
-                    <tr>
-                        <td>E-mail nutrição de Losts (3 OPPs)</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>3 oportunidades abertas em Florianópolis: PdC (R$261k), Campeche (R$350k), JD3 (R$395k). Foco: "quem demorou pagou mais caro".</td>
-                    </tr>
-                    <tr>
-                        <td>Gatilho urgência MKP (parcelamento)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Teste A/B feito. Base: Lost na etapa FUP+. Gatilho: "parcelamento 10x só até fim do mês".</td>
-                    </tr>
-                    <tr>
-                        <td>Quebra de objeção por motivo de Lost</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Segmentar por motivo: garagem (case Manhattan Flats), tamanho (case 20m² vs 40m²), decoração (case +50% faturamento).</td>
-                    </tr>
-                    <tr>
-                        <td>Prova social com cases</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Depoimentos reais de investidores. Cases identificados: garagem, decoração, compacto vs. maior.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> No-Show (não compareceu à reunião)</h4>
-            <div class="desc">Agendou reunião mas não apareceu. Hoje: 30 negócios na etapa NO-SHOW no funil SZI.</div>
-            <div class="criteria"><strong>Critérios:</strong> Etapa = No-Show no pipeline | Sem atividade recente</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Template No-Show</td>
-                        <td><span class="channel-tag wa">WA</span> <span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>"Percebi que você não conseguiu participar da reunião sobre [SPOT]. Oportunidades acabando." Template aprovado por Mari.</td>
-                    </tr>
-                    <tr>
-                        <td>No-show 15+ dias (não abordado por closer)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Plano 10 dias: focar nos que closers não cobriram. Recentes já são trabalhados por pré-vendas.</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="note"><strong>Atenção:</strong> Gabi levantou conflito com processo de pré-vendas — MIA tenta reagendamento logo em seguida. Definir cadência para não sobrepor.</div>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> Lead com Timing (vai investir no futuro)</h4>
-            <div class="desc">Disse "vou investir em 60 dias" ou similar. Hoje: ZERO nutrição para esse perfil — gap crítico.</div>
-            <div class="criteria"><strong>Critérios:</strong> Motivo de Lost = timing | Capital insuficiente agora | Inativo 30+ dias</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Sequência de reativação por timing</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>"Você falou que ia investir mais pra frente. A condição especial ainda existe e o estoque diminui." Urgência real com dados de estoque.</td>
-                    </tr>
-                    <tr>
-                        <td>Spot mais barato como porta de entrada</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Para quem perdeu por capital: PdC R$254k → Itacaré R$324k → JD R$394k. Escada de tickets.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- FRIO -->
-        <div class="profile-card">
-            <h4><span class="temp-badge cold">frio</span> Lost sem OPP / Impactado por Mídia / Desengajado</h4>
-            <div class="desc">Nunca chegou a ter oportunidade concreta. Pode ser lead de mídia paga, formulário, ou que esfriou totalmente.</div>
-            <div class="criteria"><strong>Critérios:</strong> Sem OPP no pipeline | Inativo 60+ dias | Origem = mídia paga</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>E-mail nutrição educativa</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Via RD Station. Conteúdo genérico sobre modelo Seazone.</td>
-                    </tr>
-                    <tr>
-                        <td>ROI comparativo (CDB vs. Spot)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Plano 10 dias: "CDB 10,5% ao ano vs Natal Spot 19,8% + valorização 72%". Perfil analítico.</td>
-                    </tr>
-                    <tr>
-                        <td>Timing de mercado (comparativo regional)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>"Ponta das Canas hoje = o que Jurerê era 3 anos atrás. 24 unidades disponíveis."</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Subtipo table SZI -->
+        <table class="subtipo-table">
+            <thead><tr><th>Subtipo</th><th>Temp</th><th>Como identificar</th><th>O que recebe hoje</th><th>O que poderia receber (novo)</th></tr></thead>
+            <tbody>
+                <tr class="st-sep"><td colspan="5">🔴 Quente — Já comprou / já tem gestão</td></tr>
+                <tr>
+                    <td class="td-subtipo">Comprador Spot — Lançamento</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Deal won SZI, lançamento</td>
+                    <td class="td-recv">OPP semana, OPP Imperdível, Relançamento por marco</td>
+                    <td class="td-novo">Oferta gestão SZS (validar Leo), Update automático marcos de obra (API Smartsheet)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Comprador Spot — Marketplace</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Deal won MKP</td>
+                    <td class="td-recv">OPP semana (mesclado c/ base geral)</td>
+                    <td class="td-novo">Cross-sell lançamento para comprador MKP (gap: nunca fizeram)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Proprietário com gestão SZS</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td><code style="font-size:0.72rem;">is_gestao=true</code>, sem deal spot</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Cross-sell spot Premium (closer, 30-40 c/ 2+ imóveis), Cross-sell spot Safe (template, 86 únicos)</td>
+                </tr>
+                <tr class="st-sep"><td colspan="5">🟡 Morno — Fez reunião mas não comprou</td></tr>
+                <tr>
+                    <td class="td-subtipo">Lost com OPP — SZI</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost, pipeline SZI. Excluir "Não qualificado"</td>
+                    <td class="td-recv">Repescagem por empreendimento, OPP Imperdível, Top OPPs da semana (WA+Email), Email nutrição Losts 3 OPPs, Clique em email → follow-up personalizado</td>
+                    <td class="td-novo">Quebra objeção por motivo de Lost (cases), Case investidor similar, Nurturing rentabilidade</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Lost com OPP — MKP</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost, pipeline MKP</td>
+                    <td class="td-recv">Repescagem, OPP Imperdível, Top OPPs da semana, Gatilho urgência parcelamento (teste A/B 26/05)</td>
+                    <td class="td-novo">Escada de tickets (PdC R$254k→Itacaré→JD), ROI comparativo CDB vs Spot</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Lost com OPP — Proprietário SZS</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost SZS</td>
+                    <td class="td-recv">Repescagem</td>
+                    <td class="td-novo">Case investidor, Nurturing rentabilidade quinzenal</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Hóspede em Spot Seazone</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Reserva em spot próprio Seazone</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Cadência educacional SZI (4 emails em 4 semanas)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">No-Show</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Etapa No-Show no pipeline, 30 negócios hoje</td>
+                    <td class="td-recv">Template No-Show (WA+Email)</td>
+                    <td class="td-novo">No-show 15+ dias não abordado por closer (plano 10 dias, dia 3 e 9)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Lead com Timing</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Lost por timing/capital, inativo 30+ dias</td>
+                    <td class="td-recv" style="color:var(--red);">— (gap crítico: zero nutrição)</td>
+                    <td class="td-novo">Sequência reativação ("condição ainda existe, estoque diminui"), Spot mais barato como porta de entrada</td>
+                </tr>
+                <tr class="st-sep"><td colspan="5">🔵 Frio — Sem reunião, nunca comprou</td></tr>
+                <tr>
+                    <td class="td-subtipo">Lost sem OPP — Nunca respondeu</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Zero interação. <span style="color:var(--red);font-size:0.72rem;">SOMENTE email (erro 131049)</span></td>
+                    <td class="td-recv">Email nutrição educativa (RD Station)</td>
+                    <td class="td-novo">Conteúdo educativo institucional, Trigger comportamental (clicou→WA)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Lost sem OPP — Quase chegou</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Passou qualificação, sem reunião</td>
+                    <td class="td-recv">Repescagem fora do SLA</td>
+                    <td class="td-novo">Tom "você chegou muito perto" (WA+Email)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Hóspede imóvel gerenciado</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Reserva em prop gerenciada, não spot</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Cadência educativa leve (Email)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Lead offline (mídia off)</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>source/utm = mídia offline</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Entrada funil educativo (Email), ROI comparativo (plano 10 dias)</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- ==================== SZS ==================== -->
@@ -394,93 +309,82 @@
         <div class="vertical-header szs">
             <div>
                 <h2>SZS — Gestão de Propriedades</h2>
-                <p>Proprietários de imóveis de temporada. Subtipos: com gestão Seazone (ativo), Lost, potencial (aluguel anual).</p>
+                <p>Proprietários de imóveis de temporada. 9 subtipos: com/sem spot, Lost com OPP, hóspedes de spot, aluguel anual e regiões inativas.</p>
             </div>
         </div>
 
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> Proprietário com Gestão Ativa</h4>
-            <div class="desc">Já é cliente SZS. Contrato ativo. Pode ser convertido para investidor (cross-sell spot).</div>
-            <div class="criteria"><strong>Critérios:</strong> Contrato SZS ativo | 1+ imóvel gerenciado</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Conteúdo de valor para proprietários</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Anna está desenvolvendo. Sem template padronizado ainda.</td>
-                    </tr>
-                    <tr>
-                        <td>Cross-sell spot (Premium: 2+ imóveis)</td>
-                        <td><span class="channel-tag wa">WA pessoal</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Base: ~30-40 proprietários premium. Abordagem VIP pelo closer, sem template. "Você já tem o modelo funcionando, aqui está o próximo."</td>
-                    </tr>
-                    <tr>
-                        <td>Cross-sell spot (Safe: demais proprietários)</td>
-                        <td><span class="channel-tag wa">WA template</span> <span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Base: 86 únicos. Menos personalizado que Premium. "Você já tem imóvel gerando renda com a Seazone, agora tem opção sem gestão própria."</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> Lost SZS (tinha OP) / Aluguel Anual</h4>
-            <div class="desc">Desistiu da gestão ou tem imóvel em aluguel anual (potencial de conversão quando contrato vencer).</div>
-            <div class="criteria"><strong>Critérios:</strong> Deal Lost SZS | Ou proprietário com contrato anual ativo</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Apresentação do modelo Seazone</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Conteúdo educativo: como funciona a gestão por temporada vs. anual.</td>
-                    </tr>
-                    <tr>
-                        <td>Convite para coletiva</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Evento periódico para apresentar o modelo. Baixa pressão.</td>
-                    </tr>
-                    <tr>
-                        <td>Depoimento de proprietário</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Case real: comparativo gestão terceirizada/autogestão vs. Seazone.</td>
-                    </tr>
-                    <tr>
-                        <td>Nutrição por vencimento de contrato anual</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Trigger: X dias antes do vencimento do aluguel anual. "Já pensou em quanto poderia ganhar por temporada?"</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge cold">frio</span> Região Inativa / Cidade Não Atendida</h4>
-            <div class="desc">Proprietário de imóvel em cidade onde Seazone não opera. Potencial futuro quando abrir franquia.</div>
-            <div class="criteria"><strong>Critérios:</strong> Cidade fora do polígono de atendimento</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Nutrição até abertura de franquia</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Conteúdo informativo sobre o modelo. Manter relacionamento quente para quando cidade for atendida.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Subtipo table SZS -->
+        <table class="subtipo-table">
+            <thead><tr><th>Subtipo</th><th>Temp</th><th>Como identificar</th><th>O que recebe hoje</th><th>O que poderia receber (novo)</th></tr></thead>
+            <tbody>
+                <tr class="st-sep"><td colspan="5">🔴 Quente — Já tem imóvel / gestão ativa</td></tr>
+                <tr>
+                    <td class="td-subtipo">Proprietário gestão SZS (sem spot)</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td><code style="font-size:0.72rem;">is_gestao=true</code>, sem deal spot</td>
+                    <td class="td-recv">Convite call coletiva SIA</td>
+                    <td class="td-novo">Resultado imóvel mensal (dados Sapron)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Proprietário com spot + gestão</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Deal won + <code style="font-size:0.72rem;">is_gestao=true</code></td>
+                    <td class="td-recv">Convite call coletiva SIA</td>
+                    <td class="td-novo">Cross-sell spot Premium (closer, 30-40 c/ 2+ imóveis), Cross-sell spot Safe (template, 86 únicos)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Proprietário com spot sem gestão</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Deal won, <code style="font-size:0.72rem;">is_gestao=false</code></td>
+                    <td class="td-recv">Convite call coletiva (frequência menor)</td>
+                    <td class="td-novo">Nurturing gestão, Comparativo gestão própria vs Seazone</td>
+                </tr>
+                <tr class="st-sep"><td colspan="5">🟡 Morno — Fez reunião sem fechar / tem spot sem gestão</td></tr>
+                <tr>
+                    <td class="td-subtipo">Lost com OPP — Proprietário</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td><code style="font-size:0.72rem;">teve_reuniao=true</code>, lost SZS</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Reengajamento gestão, Comparativo, Depoimento proprietário</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Hóspede em Spot Seazone</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Reserva em spot próprio Seazone</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Apresentação SZS, Convite call coletiva</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Aluguel anual</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>source = aluguel anual</td>
+                    <td class="td-recv">Newsletter leve</td>
+                    <td class="td-novo">Reativação por vencimento contrato anual (trigger X dias antes)</td>
+                </tr>
+                <tr class="st-sep"><td colspan="5">🔵 Frio — Fora do polígono / sem cobertura</td></tr>
+                <tr>
+                    <td class="td-subtipo">Região inativa — cidade atendida</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Sem franquia, Seazone opera na região</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Nutrir até abertura de franquia (Email)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Região inativa — cidade não atendida</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Sem cobertura Seazone</td>
+                    <td class="td-recv" style="color:var(--red);">EXCLUSÃO (fora do polígono = nunca dispara)</td>
+                    <td class="td-novo">—</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Hóspede imóvel gerenciado</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Reserva prop gerenciada por Seazone, não spot</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Apresentação leve SZS (Email)</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- ==================== MKP ==================== -->
@@ -488,109 +392,103 @@
         <div class="vertical-header mkp">
             <div>
                 <h2>MKP — Marketplace</h2>
-                <p>Revenda de cotas existentes. ICP diferente de SZI (Roberto): ciclo mais longo, nunca teve nurturing.</p>
+                <p>Revenda de cotas existentes. ICP diferente de SZI (Roberto): ciclo mais longo, ticket mais alto, nunca teve nurturing estruturado. 8 subtipos.</p>
             </div>
         </div>
 
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> Investidor Sênior Ativo (com spot + capital alto)</h4>
-            <div class="desc">Já tem spot(s), capital disponível alto. Alvo para novas cotas de revenda.</div>
-            <div class="criteria"><strong>Critérios:</strong> 1+ spot ativo | Capital registrado > R$200k | Engajado nos últimos 30 dias</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>OPP da semana (compartilhada com SZI)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Hoje mesclado. Sem diferenciação MKP vs. lançamento no texto.</td>
-                    </tr>
-                    <tr>
-                        <td>Comunicação específica MKP</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Gap: nunca fizeram comunicação exclusiva para perfil 100% MKP.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> Lost Recente / Lost por Timing / Sem Capital</h4>
-            <div class="desc">Teve interesse mas não fechou. Motivos: timing, capital, objeção.</div>
-            <div class="criteria"><strong>Critérios:</strong> Lost MKP | Etapa FUP+ | Últimos 90 dias</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>Gatilho urgência (parcelamento)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Teste A/B realizado (26/05). "Última oportunidade: parcelamento 10x até fim do mês". Base: Lost etapa FUP+. Resultados pendentes.</td>
-                    </tr>
-                    <tr>
-                        <td>Lista de espera (ex: Barra Grande)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Oferta de cotas MKP para base de lista de espera de empreendimentos.</td>
-                    </tr>
-                    <tr>
-                        <td>Clique em e-mail → follow-up personalizado</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag existe">existe</span></td>
-                        <td>Quem clicou no e-mail de Ilha do Campeche II recebeu follow-up com dados completos e CTA para closer (Will/Nevine).</td>
-                    </tr>
-                    <tr>
-                        <td>Escada de tickets (spot mais barato)</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Para lost por capital: PdC R$254k → Itacaré R$324k → JD R$394–430k.</td>
-                    </tr>
-                    <tr>
-                        <td>ROI comparativo financeiro</td>
-                        <td><span class="channel-tag wa">WA</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>CDB 10,5% vs. Spot 17-19% ROI líquido. Para perfil analítico. Dados: Itacaré 18,89%, PdC 16,8%, JD2 15,21%.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="profile-card">
-            <h4><span class="temp-badge cold">frio</span> Impactado por Mídia / Desengajado</h4>
-            <div class="desc">Formulário preenchido, mídia paga, mas sem engajamento real.</div>
-            <div class="criteria"><strong>Critérios:</strong> Origem = mídia paga | Sem atividade 60+ dias | Sem OPP</div>
-
-            <table class="comm-table">
-                <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
-                <tbody>
-                    <tr>
-                        <td>E-mail educativo sobre modelo</td>
-                        <td><span class="channel-tag email">Email</span></td>
-                        <td><span class="status-tag sugerida">nova</span></td>
-                        <td>Roberto nunca teve nurturing estruturado para MKP (confirmado reunião 08/06). Este é o gap mais crítico.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Subtipo table MKP -->
+        <table class="subtipo-table">
+            <thead><tr><th>Subtipo</th><th>Temp</th><th>Como identificar</th><th>O que recebe hoje</th><th>O que poderia receber (novo)</th></tr></thead>
+            <tbody>
+                <tr class="st-sep"><td colspan="5">🔴 Quente — Investidor ativo / comprador existente</td></tr>
+                <tr>
+                    <td class="td-subtipo">Investidor sênior ativo</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Deal open + atividades recentes + histórico OPs</td>
+                    <td class="td-recv">OPP semana</td>
+                    <td class="td-novo">Alerta opp personalizada (match por empreendimento de interesse)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Lost com OPP + capital alto</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Lost com OPP, entrada 150k+. "Quem declara mais, tem"</td>
+                    <td class="td-recv">OPP semana, Repescagem</td>
+                    <td class="td-novo">Alerta opp personalizada</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Comprador existente (cross-sell)</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Won SZI/MKP anterior, cooldown 3 meses</td>
+                    <td class="td-recv">OPP semana</td>
+                    <td class="td-novo">Newsletter lançamentos (Email)</td>
+                </tr>
+                <tr class="st-sep"><td colspan="5">🟡 Morno — Lost recente / timing / hóspede</td></tr>
+                <tr>
+                    <td class="td-subtipo">Lost recente engajado</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Deal lost recente + múltiplas atividades</td>
+                    <td class="td-recv">Email fechamento, Gatilho urgência parcelamento (teste A/B 26/05), Lista de espera por empreendimento, Clique em email → follow-up</td>
+                    <td class="td-novo">Série educativa "como investir em cota" (4 emails), Simulação retorno, Case investidor</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Timing: sem capital agora</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Deal open/lost, ciclo 4-6 meses</td>
+                    <td class="td-recv" style="color:var(--red);">— (Roberto: "nunca tivemos nurturing")</td>
+                    <td class="td-novo">Série educativa cotas, Simulação retorno, Newsletter quinzenal</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Hóspede em Spot Seazone</td>
+                    <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
+                    <td>Reserva em spot próprio Seazone</td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Cadência educacional (4 emails) + OPP se interagir</td>
+                </tr>
+                <tr class="st-sep"><td colspan="5">🔵 Frio — Mídia paga / desengajado</td></tr>
+                <tr>
+                    <td class="td-subtipo">Impactado por mídia paga</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>60+ dias sem atividade. <span style="color:var(--red);font-size:0.72rem;">ICP indefinido (Roberto)</span></td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Radar do mercado (Email), Trigger comportamental (clicou→WA)</td>
+                </tr>
+                <tr>
+                    <td class="td-subtipo">Desengajado total</td>
+                    <td><span class="temp-badge cold" style="font-size:0.72rem;">Frio</span></td>
+                    <td>Zero interação. <span style="color:var(--red);font-size:0.72rem;">Desinscritos = fora pra sempre</span></td>
+                    <td class="td-recv">Repescagem MKP por empreendimento</td>
+                    <td class="td-novo">Newsletter quinzenal (Email)</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- ==================== SZO ==================== -->
     <div class="panel" id="panel-3">
         <div class="vertical-header szo">
             <div>
-                <h2>SZO — Hospitalidade (Hóspedes como Investidores)</h2>
-                <p>Hóspedes de imóveis Seazone como potenciais investidores. Segmentação por ticket de diária.</p>
+                <h2>SZO — Hospitalidade (Hóspedes como Leads)</h2>
+                <p>Hóspedes não são vertical separada no Motor — são leads que alimentam SZI (investimento) e SZS (gestão). Esta aba detalha a segmentação por ticket de diária e as comunicações planejadas no plano de 10 dias.</p>
             </div>
         </div>
 
-        <div class="profile-card">
-            <h4><span class="temp-badge hot">quente</span> Hóspede Diária R$1.000+ (Florianópolis)</h4>
-            <div class="desc">Alto poder aquisitivo comprovado. Viveu a experiência. Target para spots premium.</div>
-            <div class="criteria"><strong>Critérios:</strong> Reserva com diária ≥ R$1.000 | Destino = Florianópolis | Últimos 6 meses</div>
+        <div class="note"><strong>Importante:</strong> Hóspedes não são uma vertical independente no Motor de Disparos. Este painel detalha a segmentação de entrada por ticket de diária, que determina a temperatura e o destino do lead (SZI ou SZS).</div>
 
+        <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">31K</div><div class="label">usuários</div></div>
+            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">28K</div><div class="label">com telefone</div></div>
+            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">36%</div><div class="label">repeat guests</div></div>
+            <div class="summary-card cyan" style="min-width:120px;"><div class="num" style="font-size:1.2rem;">R$1.600</div><div class="label">ticket médio</div></div>
+        </div>
+
+        <div class="note" style="background:var(--red-soft);border-color:rgba(248,113,113,0.2);"><strong style="color:var(--red);">Atenção:</strong> Todas as comunicações devem ser orientadas a vender spot (SZI) ou gestão (SZS), não hospedagem.</div>
+
+        <div class="temp-section">Quente — 1 perfil</div>
+
+        <div class="profile-card">
+            <h4><span class="temp-badge hot">quente</span> 1. Hóspede Diária R$1.000+ (Florianópolis)</h4>
+            <div class="desc">Alto poder aquisitivo comprovado. Viveu a experiência. Target para spots premium JD3/JD2. Base estimada: ~25/mês.</div>
+            <div class="criteria"><strong>Critérios:</strong> Reserva com diária ≥ R$1.000 | Destino = Florianópolis | Últimos 6 meses</div>
             <table class="comm-table">
                 <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
                 <tbody>
@@ -598,18 +496,19 @@
                         <td>Oferta spot premium por destino</td>
                         <td><span class="channel-tag wa">WA</span></td>
                         <td><span class="status-tag planejada">planejada</span></td>
-                        <td>JD3 ou JD2 (maior ticket). "Você pagou R$X/noite para ficar. Agora você pode ser pago por quem fica." Base estimada: ~25/mês.</td>
+                        <td>Target: JD3 ou JD2 (maior ticket). "Você pagou R$X/noite para ficar. Agora você pode ser pago por quem fica." Base estimada: ~25/mês.</td>
                     </tr>
                 </tbody>
             </table>
             <div class="note"><strong>Bloqueio:</strong> Base depende de extração por Andy (TEC) com duplo check de dados sensíveis. Aguardando retorno.</div>
         </div>
 
-        <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> Hóspede Diária R$700+ (por destino)</h4>
-            <div class="desc">Ticket relevante. Segmentar por destino para máxima personalização.</div>
-            <div class="criteria"><strong>Critérios:</strong> Reserva com diária ≥ R$700 | Últimos 6 meses</div>
+        <div class="temp-section">Morno — 2 perfis</div>
 
+        <div class="profile-card">
+            <h4><span class="temp-badge warm">morno</span> 2. Hóspede Diária R$700+ (por destino)</h4>
+            <div class="desc">Ticket relevante. Segmentar por destino para máxima personalização. Base: 7.525 telefones únicos.</div>
+            <div class="criteria"><strong>Critérios:</strong> Reserva com diária ≥ R$700 | Últimos 6 meses</div>
             <table class="comm-table">
                 <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
                 <tbody>
@@ -630,10 +529,9 @@
         </div>
 
         <div class="profile-card">
-            <h4><span class="temp-badge warm">morno</span> Hóspede Diária R$500-699</h4>
-            <div class="desc">Ticket médio-alto. Volume maior mas conversão menor.</div>
-            <div class="criteria"><strong>Critérios:</strong> Reserva com diária R$500-699 | Últimos 6 meses</div>
-
+            <h4><span class="temp-badge warm">morno</span> 3. Hóspede Diária R$500–699</h4>
+            <div class="desc">Ticket médio-alto. Volume maior mas conversão menor. Base: 6.277 telefones. Abordagem menos personalizada que R$700+.</div>
+            <div class="criteria"><strong>Critérios:</strong> Reserva com diária R$500–699 | Últimos 6 meses</div>
             <table class="comm-table">
                 <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
                 <tbody>
@@ -641,17 +539,18 @@
                         <td>WA disparo (menos personalizado)</td>
                         <td><span class="channel-tag wa">WA</span></td>
                         <td><span class="status-tag planejada">planejada</span></td>
-                        <td>Base: 6.277 telefones. Tom mais genérico que R$700+.</td>
+                        <td>Base: 6.277 telefones. Tom mais genérico que R$700+. Cobre todos os destinos.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="profile-card">
-            <h4><span class="temp-badge cold">frio</span> Hóspede com E-mail (todos os destinos)</h4>
-            <div class="desc">Base ampla de hóspedes com e-mail. Nutrição educativa por sequência.</div>
-            <div class="criteria"><strong>Critérios:</strong> E-mail coletado | Histórico de reserva | 15-20k contatos</div>
+        <div class="temp-section">Frio — 1 perfil</div>
 
+        <div class="profile-card">
+            <h4><span class="temp-badge cold">frio</span> 4. Hóspede com E-mail (todos os destinos)</h4>
+            <div class="desc">Base ampla com e-mail. Nutrição educativa por sequência de 3 emails. 15-20k contatos. Encaminha para SZI ou SZS conforme engajamento.</div>
+            <div class="criteria"><strong>Critérios:</strong> E-mail coletado | Histórico de reserva | 15-20k contatos</div>
             <table class="comm-table">
                 <thead><tr><th>Comunicação</th><th>Canal</th><th>Status</th><th>Detalhes</th></tr></thead>
                 <tbody>
