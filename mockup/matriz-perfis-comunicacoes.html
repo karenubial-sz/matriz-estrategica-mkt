@@ -197,12 +197,15 @@
     <div class="subtitle">Mapeamento completo: quem, o que recebe hoje, e o que deveria receber</div>
     <div class="meta">Consolidado em 11/06/2026 | Fontes: reuniões com Ana, Gabi, Laura, Cris (PMO), Mari + canal #entrega_disparos + Motivos de Lost (Lívia Cunha)</div>
 
+    <!-- Lead scoring note -->
+    <div class="note"><strong>Lead Scoring (aprovado Mari 12/06):</strong> Temperatura não é mais estática — interações (abriu email, clicou link, respondeu WA) reclassificam o lead ao longo do tempo. Ex: frio que abre 3 emails → sobe pra morno. Engajamento como 2ª camada de segmentação (Ambrósio).</div>
+
     <!-- Summary -->
     <div class="summary-bar">
         <div class="summary-card green"><div class="num">3</div><div class="label">Verticais</div></div>
-        <div class="summary-card amber"><div class="num">30</div><div class="label">Perfis mapeados</div></div>
+        <div class="summary-card amber"><div class="num">31</div><div class="label">Perfis mapeados</div></div>
         <div class="summary-card purple"><div class="num">26</div><div class="label">Comunicações existentes</div></div>
-        <div class="summary-card cyan"><div class="num">45</div><div class="label">Comunicações novas/planejadas</div></div>
+        <div class="summary-card cyan"><div class="num">47</div><div class="label">Comunicações novas/planejadas</div></div>
     </div>
 
     <!-- Tabs -->
@@ -233,7 +236,7 @@
                     <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
                     <td>Deal won SZI, lançamento</td>
                     <td class="td-recv">OPP semana, OPP Imperdível, Relançamento por marco</td>
-                    <td class="td-novo">Oferta gestão SZS (validar Leo), Update automático marcos de obra (API Smartsheet)</td>
+                    <td class="td-novo">Update automático marcos de obra (API Smartsheet). <span style="font-size:0.72rem;color:var(--text-muted);">Oferta gestão → ver aba SZS (obra ≤ 1 ano da entrega)</span></td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Comprador Spot — Marketplace</td>
@@ -394,6 +397,13 @@
                     <td class="td-novo">Resultado imóvel mensal (dados Sapron)</td>
                 </tr>
                 <tr>
+                    <td class="td-subtipo">Comprador Spot SZI — obra ≤ 1 ano da entrega</td>
+                    <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
+                    <td>Deal won SZI, entrega ≤ 1 ano (API Smartsheet). <span style="font-size:0.72rem;color:var(--green);">Validado por Leo (SZS)</span></td>
+                    <td class="td-recv">—</td>
+                    <td class="td-novo">Oferta gestão SZS: "Seu spot está a [N] meses da entrega — hora de pensar na gestão". Sequência educativa sobre vantagens da gestão profissional</td>
+                </tr>
+                <tr>
                     <td class="td-subtipo">Proprietário com spot + gestão</td>
                     <td><span class="temp-badge hot" style="font-size:0.72rem;">Quente</span></td>
                     <td>Deal won + <code style="font-size:0.72rem;">is_gestao=true</code></td>
@@ -436,9 +446,9 @@
                 <tr>
                     <td class="td-subtipo">Hóspede em Spot Seazone</td>
                     <td><span class="temp-badge warm" style="font-size:0.72rem;">Morno</span></td>
-                    <td>Reserva em spot próprio Seazone</td>
+                    <td>Reserva em spot próprio Seazone. <span style="font-size:0.72rem;color:var(--green);">Conversão ~0.1% mas custo mínimo (validado Mari)</span></td>
                     <td class="td-recv">—</td>
-                    <td class="td-novo">Apresentação SZS, Convite call coletiva</td>
+                    <td class="td-novo">Apresentação SZS, Convite call coletiva, Sequência "você pode ser dono de um imóvel como esse — e a gente cuida pra você"</td>
                 </tr>
                 <tr>
                     <td class="td-subtipo">Aluguel anual</td>
@@ -720,7 +730,7 @@
             <table class="comm-table">
                 <thead><tr><th>Pendência</th><th>Responsável</th><th>Status</th></tr></thead>
                 <tbody>
-                    <tr><td>Validar timing oferta SZS pós-compra</td><td>Karen → Leo (SZS)</td><td><span class="status-tag planejada">pendente</span></td></tr>
+                    <tr><td>Validar timing oferta SZS pós-compra</td><td>Karen → Leo (SZS)</td><td><span class="status-tag existe">resolvido — ≤ 1 ano da entrega</span></td></tr>
                     <tr><td>Extração base hóspedes por diária (dados sensíveis)</td><td>Gabi → Andy (TEC)</td><td><span class="status-tag planejada">pendente</span></td></tr>
                     <tr><td>Planilha preços MKP junho</td><td>Laura → Roberto/Júlia</td><td><span class="status-tag planejada">pendente</span></td></tr>
                     <tr><td>Matriz de objeção comercial</td><td>Laura → Ambrosi</td><td><span class="status-tag planejada">pendente</span></td></tr>
